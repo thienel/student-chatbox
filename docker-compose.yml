@@ -36,7 +36,7 @@ services:
 
   api:
     build:
-      context: ./server
+      context: ./backend
       dockerfile: Dockerfile
     container_name: educhat_api
     restart: unless-stopped
@@ -72,7 +72,7 @@ services:
 
   client:
     build:
-      context: ./client
+      context: ./frontend
       dockerfile: Dockerfile
       args:
         VITE_API_URL: ${VITE_API_URL:-/api/v1}
