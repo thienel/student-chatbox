@@ -29,10 +29,11 @@ services:
     environment:
       QDRANT__SERVICE__HTTP_PORT: 6333
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:6333/readyz || exit 1"]
+      test: ["CMD-SHELL", "wget -qO- http://localhost:6333/readyz >/dev/null 2>&1 || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 5
+      start_period: 10s
 
   api:
     build:
