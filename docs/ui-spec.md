@@ -292,49 +292,271 @@ border-b border-zinc-800        ← divider ngang
 
 ## 7. Navigation
 
-### Hướng đề xuất: **Thin icon rail + command bar**
+### Pattern: **Floating dock (bottom-center) + Topbar context**
 
-> *Vì chưa quyết định, spec này đề xuất pattern phù hợp nhất với vibe Clean/Dark/Minimal. Review và confirm trước khi implement.*
+Dock là điểm navigation duy nhất — không có sidebar. Topbar hiện breadcrumb và context của trang hiện tại. Khi đi sâu vào subject, sub-tabs xuất hiện ngay dưới topbar.
+
+---
+
+### 7.1 Shell layout
 
 ```
-┌────┬──────────────────────────────────────────┐
-│    │  Breadcrumb                    [⌘K] [👤] │  ← topbar h-12, border-b
-├────┼──────────────────────────────────────────┤
-│ 🏠 │                                          │
-│ 📚 │           Page content                   │
-│ 💬 │           max-w-5xl mx-auto              │
-│    │                                          │
-│ ⚙️ │                                          │
-└────┴──────────────────────────────────────────┘
-  ↑
-  w-12 icon rail
-  icons only, tooltip on hover
-  active = bg-zinc-800 rounded-md
+┌──────────────────────────────────────────────────────────┐
+│  Breadcrumb / Page title              [⌘K]  [avatar]     │  ← topbar h-12
+├──────────────────────────────────────────────────────────┤
+│                                                          │
+│                                                          │
+│                    Page content                          │
+│                    max-w-5xl mx-auto px-6                │
+│                                                          │
+│                                                          │
+│              ┌───────────────────────────┐              │
+│              │  🏠    📚    💬    ⚙️      │  ← dock      │
+│              └───────────────────────────┘              │
+└──────────────────────────────────────────────────────────┘
+                         pb-20 để content không bị dock che
 ```
 
-**Icon rail (w-12):**
-- Chỉ icon, không label
-- `Tooltip` khi hover — label hiện bên phải
-- Active item: `bg-zinc-800 rounded-md`
-- Bottom: Settings, Profile tách ra bằng `mt-auto`
+**Khi vào trong một subject — sub-tabs xuất hiện:**
 
-**Topbar (h-12):**
-- Breadcrumb bên trái: `Home > Subjects > CS101`
-- `[⌘K]` button bên phải — mở command palette
-- Avatar/user menu cạnh `[⌘K]`
-
-**Command palette (⌘K):**
 ```
-┌─────────────────────────────────┐
-│ > Search anything...            │  ← input
-├─────────────────────────────────┤
-│ SUBJECTS                        │
-│   📚 Introduction to CS         │
-│   📚 Data Structures            │
-├─────────────────────────────────┤
-│ RECENT CHATS                    │
-│   💬 Chat about algorithms      │
-└─────────────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│  Subjects > CS101 — Intro to CS       [⌘K]  [avatar]     │  ← topbar
+├──────────────────────────────────────────────────────────┤
+│  Documents    Chat    Members                             │  ← sub-tabs (h-10)
+├──────────────────────────────────────────────────────────┤
+│                                                          │
+│                    Page content                          │
+│                                                          │
+│              ┌───────────────────────────┐              │
+│              │  🏠    📚    💬    ⚙️      │              │
+│              └───────────────────────────┘              │
+└──────────────────────────────────────────────────────────┘
+```
+
+---
+
+### 7.2 Dock component
+
+```tsx
+// Dock — fixed, bottom-center, floating
+<nav className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50
+                flex items-center gap-1 px-3 h-12
+                bg-zinc-900/90 backdrop-blur-md
+                border border-zinc-800 rounded-2xl
+                shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+
+  <DockItem href="/home"     icon={Home}      label="Home"     />
+  <DockItem href="/subjects" icon={BookOpen}   label="Subjects" />
+  <DockItem href="/chats"    icon={MessageSquare} label="My Chats" />
+
+  {/* Admin only */}
+  {isAdmin && (
+    <>
+      <div className="w-px h-5 bg-zinc-800 mx-1" />  {/* divider */}
+      <DockItem href="/admin" icon={ShieldCheck} label="Admin" />
+    </>
+  )}
+
+  <div className="w-px h-5 bg-zinc-800 mx-1" />
+  <DockItem href="/settings" icon={Settings} label="Settings" />
+</nav>
+```
+
+**DockItem:**
+```tsx
+function DockItem({ href, icon: Icon, label }: DockItemProps) {
+  const isActive = usePathname().startsWith(href)
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Link
+          href={href}
+          className={cn(
+            "relative flex items-center justify-center h-8 w-8 rounded-xl",
+            "transition-colors duration-150",
+            isActive
+              ? "bg-zinc-800 text-zinc-50"
+              : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50"
+          )}
+        >
+          <Icon className="h-[18px] w-[18px]" />
+          {/* Active dot */}
+          {isActive && (
+            <span className="absolute -bottom-[3px] left-1/2 -translate-x-1/2
+                             h-0.5 w-3 rounded-full bg-zinc-50" />
+          )}
+        </Link>
+      </TooltipTrigger>
+      <TooltipContent side="top" className="bg-zinc-800 border-zinc-700 text-zinc-200 text-xs">
+        {label}
+      </TooltipContent>
+    </Tooltip>
+  )
+}
+```
+
+**Visual spec của dock:**
+| Property | Value |
+|----------|-------|
+| Position | `fixed bottom-4`, horizontally centered |
+| Height | `h-12` (48px) |
+| Background | `bg-zinc-900/90 backdrop-blur-md` |
+| Border | `border border-zinc-800` |
+| Radius | `rounded-2xl` (exception — dock là floating element, không phải card) |
+| Shadow | `shadow-[0_8px_32px_rgba(0,0,0,0.4)]` |
+| Icon size | `h-[18px] w-[18px]` |
+| Item size | `h-8 w-8 rounded-xl` |
+| Active bg | `bg-zinc-800` |
+| Active dot | `h-0.5 w-3 bg-zinc-50` dưới icon |
+| Inactive | `text-zinc-500 hover:text-zinc-300` |
+
+---
+
+### 7.3 Topbar
+
+```tsx
+<header className="fixed top-0 left-0 right-0 z-40 h-12
+                   flex items-center justify-between px-5
+                   bg-zinc-950/90 backdrop-blur-md
+                   border-b border-zinc-900">
+
+  {/* Left: breadcrumb */}
+  <Breadcrumb />
+
+  {/* Right: command bar trigger + avatar */}
+  <div className="flex items-center gap-2">
+    <button
+      onClick={() => setCommandOpen(true)}
+      className="flex items-center gap-2 h-7 px-2.5 rounded-md
+                 bg-zinc-900 border border-zinc-800 text-zinc-500
+                 hover:text-zinc-300 hover:border-zinc-700
+                 transition-colors duration-150 text-xs"
+    >
+      <Search className="h-3 w-3" />
+      <span>Search</span>
+      <kbd className="ml-1 text-[10px] text-zinc-600 font-mono">⌘K</kbd>
+    </button>
+    <UserMenu />
+  </div>
+</header>
+```
+
+**Breadcrumb pattern:**
+```tsx
+// Top level — chỉ hiện section name
+<span className="text-sm font-medium text-zinc-50">Subjects</span>
+
+// Inside subject — clickable path
+<nav className="flex items-center gap-1.5 text-sm">
+  <Link href="/subjects" className="text-zinc-500 hover:text-zinc-300 transition-colors duration-150">
+    Subjects
+  </Link>
+  <ChevronRight className="h-3 w-3 text-zinc-700" />
+  <span className="text-zinc-50 font-medium truncate max-w-[200px]">
+    CS101 — Intro to CS
+  </span>
+</nav>
+```
+
+---
+
+### 7.4 Sub-tabs (chỉ xuất hiện khi ở trong một subject)
+
+```tsx
+<div className="flex items-center gap-0 border-b border-zinc-900 px-5 bg-zinc-950">
+  {tabs.map(tab => (
+    <Link
+      key={tab.href}
+      href={tab.href}
+      className={cn(
+        "flex items-center gap-1.5 h-10 px-3 text-sm border-b-2 -mb-px",
+        "transition-colors duration-150",
+        isActive(tab.href)
+          ? "border-zinc-50 text-zinc-50"
+          : "border-transparent text-zinc-500 hover:text-zinc-300"
+      )}
+    >
+      <tab.icon className="h-3.5 w-3.5" />
+      {tab.label}
+    </Link>
+  ))}
+</div>
+
+// Tabs cho subject:
+const subjectTabs = [
+  { label: 'Documents', href: `/subjects/${id}/documents`, icon: FileText },
+  { label: 'Chat',      href: `/subjects/${id}/chat`,      icon: MessageSquare },
+  { label: 'Members',   href: `/subjects/${id}/members`,   icon: Users },
+]
+```
+
+---
+
+### 7.5 Command palette (⌘K)
+
+```tsx
+<CommandDialog open={open} onOpenChange={setOpen}>
+  <CommandInput
+    placeholder="Search subjects, chats..."
+    className="border-0 focus:ring-0 text-sm text-zinc-50 placeholder:text-zinc-600"
+  />
+  <CommandList className="max-h-80">
+    <CommandEmpty className="text-sm text-zinc-500 text-center py-6">
+      No results found.
+    </CommandEmpty>
+
+    <CommandGroup heading="Subjects">
+      {subjects.map(s => (
+        <CommandItem key={s.id} onSelect={() => navigate(`/subjects/${s.id}`)}>
+          <BookOpen className="h-3.5 w-3.5 mr-2 text-zinc-500" />
+          <span className="text-zinc-300">{s.code}</span>
+          <span className="ml-1.5 text-zinc-500">— {s.name}</span>
+        </CommandItem>
+      ))}
+    </CommandGroup>
+
+    <CommandSeparator />
+
+    <CommandGroup heading="Recent Chats">
+      {recentChats.map(c => (
+        <CommandItem key={c.id} onSelect={() => navigate(`/chats/${c.id}`)}>
+          <MessageSquare className="h-3.5 w-3.5 mr-2 text-zinc-500" />
+          <span className="text-zinc-300">{c.title}</span>
+        </CommandItem>
+      ))}
+    </CommandGroup>
+  </CommandList>
+</CommandDialog>
+```
+
+**Style cho CommandDialog:**
+```tsx
+// Trong globals.css hoặc component override
+// Dialog content: bg-zinc-900 border border-zinc-800 rounded-lg shadow-[0_24px_48px_rgba(0,0,0,0.6)]
+// CommandItem hover: bg-zinc-800
+// CommandGroup heading: text-[11px] uppercase tracking-wider text-zinc-600
+// Shortcut: text-[11px] text-zinc-600 font-mono
+```
+
+---
+
+### 7.6 Responsive behavior
+
+| Breakpoint | Dock behavior | Sub-tabs |
+|------------|---------------|----------|
+| Mobile < 768px | Dock vẫn bottom-center, rộng ~90% viewport | Scroll ngang nếu > 3 tabs |
+| Tablet 768–1024px | Dock giữ nguyên | Hiện đủ |
+| Desktop > 1024px | Dock giữ nguyên | Hiện đủ |
+
+**Content area padding để tránh bị dock che:**
+```tsx
+// Layout wrapper — luôn có padding bottom bằng dock height + offset
+<main className="pt-12 pb-24 min-h-screen">
+  {/* pt-12 = topbar, pb-24 = dock 48px + bottom-4 (16px) + buffer (16px) */}
+  {children}
+</main>
 ```
 
 ---
