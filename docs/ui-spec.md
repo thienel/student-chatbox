@@ -1,0 +1,634 @@
+# EduChat — UI Specification
+
+> **Source of truth** cho toàn bộ UI/UX. Mọi component mới phải tuân thủ spec này.  
+> Stack: React 18 + TypeScript · Tailwind CSS v3 · shadcn/ui · Lucide React · Geist font
+
+---
+
+## 1. Design philosophy
+
+**Clean. Dark. Monochrome. Sharp.**
+
+- Whitespace là design element, không phải khoảng trống thừa
+- Không có màu accent — hierarchy được tạo bởi contrast và weight
+- Border và background phân tầng, không phải shadow
+- Interactive element phải rõ ràng qua hover state, không qua màu sắc
+- Mọi thứ phải cảm giác *intentional* — không trang trí thừa
+
+---
+
+## 2. Color tokens
+
+### Dark palette (dark only — không có light mode)
+
+| Token | Value | Tailwind class | Dùng cho |
+|-------|-------|----------------|----------|
+| `bg-base` | `#09090B` | `bg-zinc-950` | Background toàn trang |
+| `bg-surface` | `#18181B` | `bg-zinc-900` | Card, sidebar, panel |
+| `bg-elevated` | `#27272A` | `bg-zinc-800` | Dropdown, hover state, input |
+| `bg-overlay` | `#3F3F46` | `bg-zinc-700` | Selected state, active nav item |
+| `border-default` | `#27272A` | `border-zinc-800` | Border mặc định |
+| `border-strong` | `#3F3F46` | `border-zinc-700` | Border nhấn mạnh, divider |
+| `text-primary` | `#FAFAFA` | `text-zinc-50` | Heading, nội dung chính |
+| `text-secondary` | `#A1A1AA` | `text-zinc-400` | Subtext, metadata, placeholder |
+| `text-muted` | `#71717A` | `text-zinc-500` | Caption, disabled text |
+| `text-inverted` | `#09090B` | `text-zinc-950` | Text trên nền sáng (badge) |
+
+### Semantic colors (chỉ dùng cho trạng thái, không trang trí)
+
+| Token | Value | Tailwind | Dùng cho |
+|-------|-------|----------|----------|
+| `status-success` | `#22C55E` | `text-green-500` | Success state text/icon |
+| `status-warning` | `#EAB308` | `text-yellow-500` | Warning state text/icon |
+| `status-error` | `#EF4444` | `text-red-500` | Error state text/icon |
+| `status-info` | `#A1A1AA` | `text-zinc-400` | Neutral info |
+| `bg-success-subtle` | `#14532D/20%` | `bg-green-950` | Background badge success |
+| `bg-error-subtle` | `#450A0A/20%` | `bg-red-950` | Background badge error |
+
+> **Rule:** Màu semantic chỉ xuất hiện tại trạng thái — upload processing, document error, user suspended. Không dùng để highlight hay decoration.
+
+---
+
+## 3. Typography
+
+**Font:** [Geist](https://vercel.com/font) — import từ `next/font` hoặc Google Fonts  
+**Mono font:** Geist Mono — chỉ dùng cho code, ID, timestamp
+
+```css
+/* globals.css */
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap');
+
+body {
+  font-family: 'Geist', system-ui, sans-serif;
+}
+```
+
+### Type scale
+
+| Role | Size | Weight | Line height | Tailwind |
+|------|------|--------|-------------|---------|
+| Display | 28px | 600 | 1.2 | `text-2xl font-semibold leading-tight` |
+| Heading | 20px | 600 | 1.3 | `text-xl font-semibold` |
+| Subheading | 16px | 500 | 1.4 | `text-base font-medium` |
+| Body | 14px | 400 | 1.5 | `text-sm` |
+| Small | 13px | 400 | 1.5 | `text-[13px]` |
+| Caption | 12px | 400 | 1.4 | `text-xs` |
+| Mono | 13px | 400 | 1.4 | `text-[13px] font-mono` |
+
+### Typography rules
+
+- **Heading**: luôn `text-zinc-50`, weight 600
+- **Body**: `text-zinc-300` cho nội dung dài, `text-zinc-50` cho label ngắn
+- **Secondary**: `text-zinc-400` — metadata, timestamp, description
+- **Muted**: `text-zinc-500` — placeholder, disabled, empty state
+- Không dùng `font-bold` (700) trong UI — max là `font-semibold` (600)
+- Không tự ý thêm letter-spacing trừ khi spec ghi rõ
+
+---
+
+## 4. Spacing system
+
+Base unit: **4px**. Chỉ dùng bội số của 4.
+
+| Scale | px | Tailwind | Dùng cho |
+|-------|----|----------|----------|
+| 1 | 4px | `p-1` | Icon padding nhỏ nhất |
+| 2 | 8px | `p-2` | Badge, icon button |
+| 3 | 12px | `p-3` | Button default |
+| 4 | 16px | `p-4` | Card padding nhỏ |
+| 5 | 20px | `p-5` | — |
+| 6 | 24px | `p-6` | Card padding chuẩn |
+| 8 | 32px | `p-8` | Section padding |
+
+**Gap giữa components:** `gap-2` (8px) cho elements liên quan, `gap-4` (16px) cho sections.
+
+> Không dùng giá trị lẻ như `px-[14px]`, `mt-[7px]`. Nếu cần giá trị đặc biệt, confirm trước.
+
+---
+
+## 5. Border & radius
+
+### Border radius
+
+| Component | Value | Tailwind |
+|-----------|-------|---------|
+| Card, panel, dialog | 8px | `rounded-lg` |
+| Button, input, select | 6px | `rounded-md` |
+| Badge, tag | 4px | `rounded` |
+| Avatar | 50% | `rounded-full` |
+| Tooltip | 4px | `rounded` |
+
+> Sharp & Precise: không dùng `rounded-xl` (12px) hay `rounded-2xl` trừ avatar.
+
+### Border
+
+```
+border border-zinc-800          ← mặc định cho card/panel
+border border-zinc-700          ← focus state, strong divider
+border-b border-zinc-800        ← divider ngang
+```
+
+- Không dùng `divide-*` utility — dùng `border-b` explicit trên từng item
+- Card không có shadow — dùng `bg-zinc-900 border border-zinc-800` thay thế
+
+---
+
+## 6. Components
+
+### Button
+
+```tsx
+// Primary action — white on dark
+<Button className="bg-zinc-50 text-zinc-950 hover:bg-zinc-200 h-8 px-3 text-sm font-medium rounded-md">
+  Action
+</Button>
+
+// Secondary — outline
+<Button variant="outline" className="border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50 h-8 px-3 text-sm rounded-md">
+  Secondary
+</Button>
+
+// Ghost — sidebar/nav item
+<Button variant="ghost" className="text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800 h-8 px-2 text-sm justify-start w-full rounded-md">
+  Ghost item
+</Button>
+
+// Destructive
+<Button className="bg-red-950 text-red-400 border border-red-900 hover:bg-red-900 hover:text-red-300 h-8 px-3 text-sm rounded-md">
+  Delete
+</Button>
+
+// Icon button
+<Button variant="ghost" size="icon" className="h-7 w-7 rounded-md text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800">
+  <MoreHorizontal className="h-4 w-4" />
+</Button>
+```
+
+**Rules:**
+- Height chuẩn: `h-8` (32px). Chỉ dùng `h-9` (36px) cho form context.
+- Không tự tạo button từ `<div>` hay `<span>` — luôn dùng `<Button>`
+- Không dùng `shadow-*` trên button
+
+### Input & Form
+
+```tsx
+<div className="space-y-1.5">
+  <Label className="text-xs font-medium text-zinc-400 uppercase tracking-wide">
+    Email
+  </Label>
+  <Input
+    className="bg-zinc-900 border-zinc-800 text-zinc-50 placeholder:text-zinc-600
+               focus-visible:ring-1 focus-visible:ring-zinc-600 focus-visible:border-zinc-600
+               h-9 text-sm rounded-md"
+    placeholder="name@example.com"
+  />
+  {error && (
+    <p className="text-xs text-red-400">{error}</p>
+  )}
+</div>
+```
+
+**Rules:**
+- Label: `text-xs uppercase tracking-wide text-zinc-400` — không dùng label thường
+- Error: `text-xs text-red-400` dưới input, không dùng icon
+- Required field: không dùng `*` đỏ — dùng `(required)` nếu cần thiết
+- Textarea: `min-h-[80px] resize-none`
+
+### Card
+
+```tsx
+<div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
+  {/* content */}
+</div>
+
+// Card với header
+<div className="bg-zinc-900 border border-zinc-800 rounded-lg">
+  <div className="px-4 py-3 border-b border-zinc-800 flex items-center justify-between">
+    <h3 className="text-sm font-medium text-zinc-50">Title</h3>
+    <Button variant="ghost" size="icon" ...>...</Button>
+  </div>
+  <div className="p-4">
+    {/* content */}
+  </div>
+</div>
+```
+
+### Badge / Status
+
+```tsx
+// Default
+<span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs rounded bg-zinc-800 text-zinc-400">
+  Label
+</span>
+
+// Active / Success
+<span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs rounded bg-green-950 text-green-400">
+  <span className="h-1.5 w-1.5 rounded-full bg-green-400" />
+  Active
+</span>
+
+// Error
+<span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs rounded bg-red-950 text-red-400">
+  Error
+</span>
+```
+
+### Table (Comfortable density)
+
+```tsx
+<table className="w-full text-sm">
+  <thead>
+    <tr className="border-b border-zinc-800">
+      <th className="text-left py-3 px-4 text-xs font-medium text-zinc-500 uppercase tracking-wide">
+        Column
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr className="border-b border-zinc-800/50 hover:bg-zinc-900/50 transition-colors duration-150">
+      <td className="py-3 px-4 text-zinc-300">Value</td>
+    </tr>
+  </tbody>
+</table>
+```
+
+- Row height: `py-3` (comfortable ~48px tổng)
+- Header: `text-xs uppercase tracking-wide text-zinc-500`
+- Hover: `hover:bg-zinc-900/50` — nhẹ nhàng, không flash
+
+### Dialog / Modal
+
+```tsx
+<DialogContent className="bg-zinc-900 border border-zinc-800 rounded-lg shadow-none p-0 max-w-md">
+  <div className="px-5 py-4 border-b border-zinc-800">
+    <DialogTitle className="text-base font-semibold text-zinc-50">Title</DialogTitle>
+    <DialogDescription className="text-sm text-zinc-400 mt-0.5">Description</DialogDescription>
+  </div>
+  <div className="p-5 space-y-4">
+    {/* body */}
+  </div>
+  <div className="px-5 py-4 border-t border-zinc-800 flex justify-end gap-2">
+    <Button variant="outline" ...>Cancel</Button>
+    <Button ...>Confirm</Button>
+  </div>
+</DialogContent>
+```
+
+### Empty state
+
+```tsx
+<div className="flex flex-col items-center justify-center py-16 text-center">
+  <div className="h-10 w-10 rounded-md bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-4">
+    <IconName className="h-5 w-5 text-zinc-500" />
+  </div>
+  <p className="text-sm font-medium text-zinc-300">No items yet</p>
+  <p className="text-xs text-zinc-500 mt-1 max-w-xs">Description of what this section is for.</p>
+  {/* CTA nếu có action */}
+  <Button className="mt-4 ...">Create first item</Button>
+</div>
+```
+
+---
+
+## 7. Navigation
+
+### Hướng đề xuất: **Thin icon rail + command bar**
+
+> *Vì chưa quyết định, spec này đề xuất pattern phù hợp nhất với vibe Clean/Dark/Minimal. Review và confirm trước khi implement.*
+
+```
+┌────┬──────────────────────────────────────────┐
+│    │  Breadcrumb                    [⌘K] [👤] │  ← topbar h-12, border-b
+├────┼──────────────────────────────────────────┤
+│ 🏠 │                                          │
+│ 📚 │           Page content                   │
+│ 💬 │           max-w-5xl mx-auto              │
+│    │                                          │
+│ ⚙️ │                                          │
+└────┴──────────────────────────────────────────┘
+  ↑
+  w-12 icon rail
+  icons only, tooltip on hover
+  active = bg-zinc-800 rounded-md
+```
+
+**Icon rail (w-12):**
+- Chỉ icon, không label
+- `Tooltip` khi hover — label hiện bên phải
+- Active item: `bg-zinc-800 rounded-md`
+- Bottom: Settings, Profile tách ra bằng `mt-auto`
+
+**Topbar (h-12):**
+- Breadcrumb bên trái: `Home > Subjects > CS101`
+- `[⌘K]` button bên phải — mở command palette
+- Avatar/user menu cạnh `[⌘K]`
+
+**Command palette (⌘K):**
+```
+┌─────────────────────────────────┐
+│ > Search anything...            │  ← input
+├─────────────────────────────────┤
+│ SUBJECTS                        │
+│   📚 Introduction to CS         │
+│   📚 Data Structures            │
+├─────────────────────────────────┤
+│ RECENT CHATS                    │
+│   💬 Chat about algorithms      │
+└─────────────────────────────────┘
+```
+
+---
+
+## 8. Chat UI — Split panel
+
+```
+┌────────────────────────────┬──────────────────────────┐
+│  Chat messages             │  Sources                 │
+│  (flex-1)                  │  (w-72, border-l)        │
+│                            │                          │
+│  ┌──────────────────────┐  │  ┌──────────────────┐   │
+│  │ You          14:32   │  │  │ 📄 lecture-01.pdf│   │
+│  │ câu hỏi ở đây        │  │  │ > excerpt text...│   │
+│  └──────────────────────┘  │  └──────────────────┘   │
+│                            │                          │
+│  ┌──────────────────────┐  │  ┌──────────────────┐   │
+│  │ AI           14:32   │  │  │ 📄 lecture-03.pdf│   │
+│  │ trả lời streaming... │  │  │ > excerpt text...│   │
+│  └──────────────────────┘  │  └──────────────────┘   │
+│                            │                          │
+├────────────────────────────┴──────────────────────────┤
+│  [  Type a message...                          Send ] │
+└───────────────────────────────────────────────────────┘
+```
+
+### Message styles
+
+```tsx
+// User message
+<div className="flex justify-end mb-4">
+  <div className="max-w-[72%] bg-zinc-800 rounded-lg px-3 py-2">
+    <p className="text-sm text-zinc-50">{content}</p>
+    <span className="text-[11px] text-zinc-500 mt-1 block text-right">{time}</span>
+  </div>
+</div>
+
+// AI message (full width, no bubble)
+<div className="mb-6">
+  <div className="flex items-center gap-2 mb-2">
+    <div className="h-5 w-5 rounded bg-zinc-800 border border-zinc-700 flex items-center justify-center">
+      <Bot className="h-3 w-3 text-zinc-400" />
+    </div>
+    <span className="text-xs text-zinc-500">EduChat · {time}</span>
+  </div>
+  <div className="text-sm text-zinc-300 leading-relaxed prose prose-invert prose-sm">
+    {/* markdown rendered content */}
+  </div>
+</div>
+
+// Typing indicator (streaming)
+<div className="flex gap-1 py-2">
+  <span className="h-1 w-1 rounded-full bg-zinc-500 animate-bounce [animation-delay:0ms]" />
+  <span className="h-1 w-1 rounded-full bg-zinc-500 animate-bounce [animation-delay:150ms]" />
+  <span className="h-1 w-1 rounded-full bg-zinc-500 animate-bounce [animation-delay:300ms]" />
+</div>
+```
+
+### Source panel
+
+```tsx
+// Source card (right panel)
+<div className="bg-zinc-900 border border-zinc-800 rounded-md p-3 mb-2 cursor-pointer hover:border-zinc-700 transition-colors duration-150">
+  <div className="flex items-center gap-2 mb-1.5">
+    <FileText className="h-3.5 w-3.5 text-zinc-500 shrink-0" />
+    <span className="text-xs font-medium text-zinc-300 truncate">{filename}</span>
+    <span className="text-[11px] text-zinc-600 ml-auto shrink-0">p.{page}</span>
+  </div>
+  <p className="text-[12px] text-zinc-500 leading-relaxed line-clamp-3">
+    {excerpt}
+  </p>
+</div>
+```
+
+### Input area
+
+```tsx
+<div className="border-t border-zinc-800 p-3">
+  <div className="flex items-end gap-2 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2
+                  focus-within:border-zinc-700 transition-colors duration-150">
+    <Textarea
+      className="flex-1 bg-transparent border-0 text-sm text-zinc-50 placeholder:text-zinc-600
+                 resize-none focus-visible:ring-0 min-h-[20px] max-h-[120px] p-0"
+      placeholder="Ask anything about this subject..."
+      rows={1}
+    />
+    <Button size="icon" className="h-7 w-7 rounded-md bg-zinc-50 text-zinc-950 hover:bg-zinc-200 shrink-0">
+      <SendHorizonal className="h-3.5 w-3.5" />
+    </Button>
+  </div>
+</div>
+```
+
+---
+
+## 9. Animation & transition
+
+**Principle:** Subtle — chỉ báo hiệu state change, không gây distraction.
+
+| Transition | Duration | Easing | Dùng cho |
+|-----------|----------|--------|----------|
+| Hover state | 150ms | ease-out | button, row, nav item |
+| Color change | 150ms | ease-out | border focus, icon color |
+| Modal open | 200ms | ease-out | scale 0.95→1 + opacity |
+| Modal close | 150ms | ease-in | scale 1→0.95 + opacity |
+| Dropdown | 150ms | ease-out | fade + translate-y -4px→0 |
+| Toast | 200ms | ease-out | slide in từ bottom-right |
+
+```tsx
+// Tailwind transition class chuẩn cho hover
+className="transition-colors duration-150"
+
+// Cho transform + opacity (modal/dropdown)
+className="transition-all duration-200 ease-out"
+```
+
+**Không dùng:** `animate-pulse` (trừ skeleton), `animate-spin` (trừ loading spinner), spring/bounce animation.
+
+**Skeleton loading:**
+```tsx
+<div className="h-4 w-3/4 rounded bg-zinc-800 animate-pulse" />
+```
+
+---
+
+## 10. Icon usage
+
+- **Library:** Lucide React duy nhất — không mix với heroicons, react-icons
+- **Size chuẩn:** `h-4 w-4` (16px) — tất cả trường hợp thông thường
+- **Size nhỏ:** `h-3.5 w-3.5` (14px) — trong badge, caption, metadata
+- **Size lớn:** `h-5 w-5` (20px) — empty state, feature icon standalone
+- **Color:** Kế thừa `currentColor` — không set màu trực tiếp trên icon
+- **Stroke width:** Mặc định (1.5) — không override
+
+```tsx
+// ✓ Đúng
+<Upload className="h-4 w-4" />
+
+// ✗ Sai — màu hardcode
+<Upload className="h-4 w-4 text-blue-500" />
+
+// ✗ Sai — size không chuẩn
+<Upload className="h-[18px] w-[18px]" />
+```
+
+---
+
+## 11. Loading & async states
+
+### Button loading
+
+```tsx
+<Button disabled={loading} className="...">
+  {loading && <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />}
+  {loading ? 'Saving...' : 'Save changes'}
+</Button>
+```
+
+### Page / list skeleton
+
+```tsx
+// Dùng khi load danh sách
+{isLoading ? (
+  <div className="space-y-2">
+    {Array.from({ length: 5 }).map((_, i) => (
+      <div key={i} className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800">
+        <div className="h-4 w-4 rounded bg-zinc-800 animate-pulse" />
+        <div className="h-4 flex-1 rounded bg-zinc-800 animate-pulse" />
+        <div className="h-4 w-16 rounded bg-zinc-800 animate-pulse" />
+      </div>
+    ))}
+  </div>
+) : (
+  <DataList />
+)}
+```
+
+### Refetch (data đã có, đang refresh)
+
+```tsx
+<div className="relative">
+  <DataContent />
+  {isRefetching && (
+    <div className="absolute top-2 right-2">
+      <Loader2 className="h-3.5 w-3.5 animate-spin text-zinc-500" />
+    </div>
+  )}
+</div>
+```
+
+---
+
+## 12. Feedback & notifications
+
+### Toast
+
+```tsx
+// Success
+toast({ description: 'Document uploaded successfully.' })
+
+// Error
+toast({ variant: 'destructive', description: 'Upload failed. Try again.' })
+```
+
+- Không dùng title cho toast — chỉ description
+- Không dùng icon trong toast
+- Max 1 toast cùng lúc, duration 3s
+- Position: bottom-right
+
+### Confirm destructive
+
+```tsx
+// Luôn dùng AlertDialog — không dùng window.confirm
+<AlertDialog>
+  <AlertDialogTrigger asChild>
+    <Button ...>Delete</Button>
+  </AlertDialogTrigger>
+  <AlertDialogContent className="bg-zinc-900 border border-zinc-800 ...">
+    <AlertDialogHeader>
+      <AlertDialogTitle className="text-zinc-50">Delete document?</AlertDialogTitle>
+      <AlertDialogDescription className="text-zinc-400">
+        This action cannot be undone.
+      </AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogCancel className="...">Cancel</AlertDialogCancel>
+      <AlertDialogAction className="bg-red-950 text-red-400 ...">Delete</AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
+```
+
+---
+
+## 13. Responsive
+
+| Breakpoint | Width | Behavior |
+|------------|-------|----------|
+| Mobile | < 768px | Icon rail ẩn, bottom nav 4 items hoặc hamburger |
+| Tablet | 768–1024px | Icon rail hiện (w-12), sources panel ẩn |
+| Desktop | > 1024px | Full layout — rail + main + sources panel |
+
+```tsx
+// Sources panel responsive
+<div className="hidden lg:block w-72 border-l border-zinc-800 ...">
+  {/* sources */}
+</div>
+```
+
+---
+
+## 14. Things Claude must NOT do
+
+1. **Không dùng màu accent** — không thêm blue, indigo, cyan hay bất kỳ màu nào ngoài zinc/green/red/yellow semantic
+2. **Không dùng shadow** — `shadow-*` bị cấm; dùng border thay thế
+3. **Không dùng `rounded-xl`, `rounded-2xl`** cho card/button — chỉ `rounded-lg` và `rounded-md`
+4. **Không dùng `font-bold` (700)** — max là `font-semibold` (600)
+5. **Không hardcode giá trị lẻ** — không `px-[14px]`, `h-[37px]`, `mt-[7px]`
+6. **Không dùng inline style** `style={{...}}` trừ dynamic value không thể tránh
+7. **Không import thêm UI library** ngoài shadcn/ui và Lucide React
+8. **Không tạo light mode class** — app là dark only, không cần `dark:` prefix
+9. **Không dùng `window.confirm`** — luôn dùng AlertDialog
+10. **Không tự thêm animation** ngoài những gì đã liệt kê trong section 9
+11. **Khi thiếu spec cho component mới** — hỏi trước, không tự phát minh pattern mới
+
+---
+
+## 15. Quick reference
+
+```
+Background layers:
+  zinc-950  →  page bg
+  zinc-900  →  card / sidebar / panel
+  zinc-800  →  hover / elevated / input
+  zinc-700  →  selected / active / strong border
+
+Text layers:
+  zinc-50   →  primary content
+  zinc-300  →  body text
+  zinc-400  →  secondary / metadata
+  zinc-500  →  muted / placeholder
+  zinc-600  →  very muted / inactive
+
+Border:
+  zinc-800  →  default
+  zinc-700  →  focus / strong
+
+Radius:
+  rounded-lg  (8px)  →  card, dialog
+  rounded-md  (6px)  →  button, input
+  rounded     (4px)  →  badge, tooltip
+  rounded-full       →  avatar
+
+Transition:
+  duration-150  →  color/border hover
+  duration-200  →  modal/dropdown open
+```
