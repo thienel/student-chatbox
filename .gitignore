@@ -4,15 +4,13 @@
 
 # Dependencies
 node_modules/
-server/node_modules/
-client/node_modules/
 
 # Build outputs
-server/dist/
-client/dist/
+dist/
+*.tsbuildinfo
 
 # Uploads
-server/uploads/
+uploads/
 
 # Nginx SSL certs
 nginx/ssl/*.pem
