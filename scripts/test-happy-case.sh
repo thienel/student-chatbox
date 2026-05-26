@@ -135,7 +135,7 @@ check "PATCH /subjects/:id" 200 \
   PATCH "/subjects/$SUBJ_ID" -H "$H_AUTH" -H "Content-Type: application/json" \
   -d '{"description":"Updated desc"}'
 
-check "POST /subjects/:id/lecturers" 200 \
+check "POST /subjects/:id/lecturers" 201 \
   POST "/subjects/$SUBJ_ID/lecturers" -H "$H_AUTH" -H "Content-Type: application/json" \
   -d "{\"lecturerId\":\"$LECT_ID\"}"
 
