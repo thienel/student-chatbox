@@ -1,7 +1,322 @@
 # EduChat — UI Specification
 
 > **Source of truth** cho toàn bộ UI/UX. Mọi component mới phải tuân thủ spec này.  
-> Stack: React 18 + TypeScript · Tailwind CSS v3 · shadcn/ui · Lucide React · Geist font
+> Xem **Section 0** để biết full tech stack, setup commands, và cấu hình.
+
+---
+
+## 0. Tech Stack
+
+### 0.1 Overview
+
+| Layer | Package | Version | Status |
+|-------|---------|---------|--------|
+| Build | `vite` | ^5.3 | ✅ installed |
+| Framework | `react` + `react-dom` | ^18.3 | ✅ installed |
+| Language | `typescript` | ^5.4, strict mode | ✅ installed |
+| Routing | `react-router-dom` | ^6.24 | ✅ installed |
+| Styling | `tailwindcss` | ^3.4 | ✅ installed |
+| Components | `shadcn/ui` | latest CLI | ⬜ needs setup |
+| Icons | `lucide-react` | ^0.400 | ✅ installed |
+| Class util | `tailwind-merge` | ^2.x | ⬜ needs install |
+| Class util | `clsx` | ^2.x | ✅ installed |
+| CVA | `class-variance-authority` | ^0.7 | ⬜ needs install |
+| Animation | `tailwindcss-animate` | ^1.x | ⬜ needs install |
+| Font | `Geist` | via CSS import | ⬜ needs config |
+| Server state | `@tanstack/react-query` | ^5.x | ⬜ needs install |
+| Client state | `zustand` | ^4.5 | ✅ installed |
+| HTTP | `axios` | ^1.7 | ✅ installed |
+| Forms | `react-hook-form` | ^7.x | ⬜ needs install |
+| Validation | `zod` | ^3.x | ⬜ needs install |
+| RHF + Zod | `@hookform/resolvers` | ^3.x | ⬜ needs install |
+| Markdown | `react-markdown` + `remark-gfm` | ^9/^4 | ✅ installed |
+| Command | `cmdk` | ^1.x | ⬜ (via shadcn) |
+
+---
+
+### 0.2 Lý do chọn từng package
+
+**Vite** thay vì Create React App hay Next.js:
+- App là pure SPA với NestJS backend riêng → không cần SSR
+- Vite build nhanh hơn CRA 10–20x, HMR gần như instant
+
+**shadcn/ui** thay vì MUI hay Chakra:
+- Không phải library — copy source code vào project, toàn quyền override style
+- Build trên Radix UI (accessible primitives) + Tailwind → khớp hoàn toàn với dark theme
+- Không cần fight với `!important` hay theme provider
+
+**TanStack Query** thay vì SWR hay tự fetch:
+- Cache, background refetch, loading/error state, pagination — built-in
+- Zustand giữ *client state* (auth token, UI state); TanStack Query giữ *server state* (API data)
+- Rule: không dùng Zustand để store data từ API
+
+**React Hook Form + Zod** thay vì Formik:
+- RHF không re-render toàn form khi type → performance tốt hơn nhiều
+- Zod infer TypeScript type từ schema → viết schema 1 lần, dùng làm cả validation lẫn type
+- `@hookform/resolvers` kết nối hai cái lại
+
+**Zustand** thay vì Redux hay Context:
+- Boilerplate gần bằng 0, không cần Provider wrap
+- Chỉ dùng cho: auth state, command palette open/close, UI preferences
+
+**class-variance-authority (CVA)**:
+- shadcn/ui dùng CVA để định nghĩa variant của component
+- Thay vì `cn(base, variant === 'primary' ? '...' : '...')` → `cva(base, { variants: {...} })`
+
+---
+
+### 0.3 Setup commands
+
+```bash
+# 1. Packages còn thiếu
+npm install @tanstack/react-query @tanstack/react-query-devtools
+npm install react-hook-form zod @hookform/resolvers
+npm install tailwind-merge class-variance-authority tailwindcss-animate
+npm install cmdk
+
+# 2. shadcn/ui init
+npx shadcn@latest init
+# Chọn: Dark theme · CSS variables · zinc base color · src/components/ui
+
+# 3. Thêm các shadcn components cần dùng
+npx shadcn@latest add button input label textarea
+npx shadcn@latest add dialog alert-dialog
+npx shadcn@latest add tooltip
+npx shadcn@latest add command
+npx shadcn@latest add toast
+npx shadcn@latest add badge separator skeleton
+npx shadcn@latest add dropdown-menu
+```
+
+---
+
+### 0.4 Cấu hình bắt buộc
+
+**`tailwind.config.ts` — màu zinc + animation plugin:**
+```ts
+import type { Config } from 'tailwindcss'
+import animate from 'tailwindcss-animate'
+
+export default {
+  darkMode: 'class',   // class-based, nhưng chỉ dùng dark
+  content: ['./index.html', './src/**/*.{ts,tsx}'],
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['Geist', 'system-ui', 'sans-serif'],
+        mono: ['Geist Mono', 'monospace'],
+      },
+      colors: {
+        // shadcn/ui CSS variable mapping — để shadcn components tự dùng đúng màu
+        border: 'hsl(var(--border))',
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
+        muted: { DEFAULT: 'hsl(var(--muted))', foreground: 'hsl(var(--muted-foreground))' },
+        card:  { DEFAULT: 'hsl(var(--card))',  foreground: 'hsl(var(--card-foreground))' },
+        // Giữ nguyên zinc scale để dùng trực tiếp trong className
+      },
+      borderRadius: {
+        lg: '0.5rem',   // 8px  — card, dialog
+        md: '0.375rem', // 6px  — button, input
+        sm: '0.25rem',  // 4px  — badge, tooltip
+      },
+    },
+  },
+  plugins: [animate],
+} satisfies Config
+```
+
+**`src/index.css` — CSS variables cho shadcn + Geist font:**
+```css
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* shadcn/ui dark tokens — mapped to zinc palette */
+    --background:    240 10% 3.9%;    /* zinc-950 */
+    --foreground:    0 0% 98%;         /* zinc-50  */
+    --card:          240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --muted:         240 3.7% 15.9%;  /* zinc-800 */
+    --muted-foreground: 240 5% 64.9%; /* zinc-400 */
+    --border:        240 3.7% 15.9%;  /* zinc-800 */
+    --input:         240 3.7% 15.9%;
+    --ring:          240 4.9% 83.9%;  /* zinc-300 */
+  }
+
+  * { @apply border-border; }
+
+  html {
+    /* Luôn dark, không toggle */
+    @apply bg-zinc-950 text-zinc-50;
+    font-family: 'Geist', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Scrollbar — dark style */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { @apply bg-zinc-950; }
+  ::-webkit-scrollbar-thumb { @apply bg-zinc-800 rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-zinc-700; }
+}
+```
+
+**`src/lib/utils.ts` — helper cn():**
+```ts
+import { clsx, type ClassValue } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+```
+
+**`src/main.tsx` — TanStack Query provider:**
+```tsx
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60_000,      // 1 phút
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+})
+
+createRoot(document.getElementById('root')!).render(
+  <QueryClientProvider client={queryClient}>
+    <App />
+    {import.meta.env.DEV && <ReactQueryDevtools />}
+  </QueryClientProvider>
+)
+```
+
+**`tsconfig.json` — strict mode + path alias:**
+```json
+{
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "baseUrl": ".",
+    "paths": { "@/*": ["./src/*"] }
+  }
+}
+```
+
+```ts
+// vite.config.ts — path alias
+import path from 'path'
+export default defineConfig({
+  plugins: [react()],
+  resolve: { alias: { '@': path.resolve(__dirname, './src') } },
+})
+```
+
+---
+
+### 0.5 Folder structure
+
+```
+src/
+├── api/
+│   ├── axiosInstance.ts      ← interceptors, auth header, refresh logic
+│   └── endpoints/
+│       ├── auth.ts
+│       ├── subjects.ts
+│       ├── documents.ts
+│       └── chats.ts
+├── components/
+│   ├── ui/                   ← shadcn/ui components (auto-generated, không edit trực tiếp)
+│   ├── layout/
+│   │   ├── AppShell.tsx      ← topbar + dock + main wrapper
+│   │   ├── Topbar.tsx
+│   │   ├── Dock.tsx
+│   │   └── SubjectTabs.tsx
+│   └── shared/               ← reusable UI: EmptyState, ConfirmDialog, ...
+├── features/
+│   ├── auth/
+│   ├── subjects/
+│   ├── documents/
+│   ├── chat/
+│   └── admin/
+├── hooks/
+│   ├── useAuth.ts
+│   ├── useChatStream.ts      ← SSE fetch stream
+│   └── useCommandPalette.ts
+├── lib/
+│   └── utils.ts              ← cn()
+├── store/
+│   └── useAuthStore.ts       ← Zustand: user, token, permissions
+├── types/
+│   └── index.ts
+└── main.tsx
+```
+
+> **Convention:** `features/` chứa page-level components + queries. `components/shared/` chứa reusable UI không phụ thuộc vào feature cụ thể. Không import chéo giữa các `features/`.
+
+---
+
+### 0.6 Pattern chuẩn: query + form
+
+```ts
+// features/subjects/queries.ts
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { subjectsApi } from '@/api/endpoints/subjects'
+
+export const subjectKeys = {
+  all:    () => ['subjects'] as const,
+  list:   (filters: ListFilter) => [...subjectKeys.all(), filters] as const,
+  detail: (id: string) => [...subjectKeys.all(), id] as const,
+}
+
+export function useSubjects(filters: ListFilter) {
+  return useQuery({
+    queryKey: subjectKeys.list(filters),
+    queryFn:  () => subjectsApi.list(filters),
+  })
+}
+
+export function useCreateSubject() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: subjectsApi.create,
+    onSuccess:  () => qc.invalidateQueries({ queryKey: subjectKeys.all() }),
+  })
+}
+```
+
+```tsx
+// features/subjects/CreateSubjectForm.tsx
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+
+const schema = z.object({
+  code: z.string().min(2).max(20),
+  name: z.string().min(3).max(255),
+  description: z.string().optional(),
+})
+type FormValues = z.infer<typeof schema>
+
+export function CreateSubjectForm({ onSuccess }: { onSuccess: () => void }) {
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormValues>({
+    resolver: zodResolver(schema),
+  })
+  const createSubject = useCreateSubject()
+
+  return (
+    <form onSubmit={handleSubmit(v => createSubject.mutateAsync(v).then(onSuccess))}>
+      {/* fields */}
+    </form>
+  )
+}
+```
 
 ---
 
