@@ -101,10 +101,10 @@ export class SubjectTypeOrmRepository implements ISubjectRepository {
     await this.repo.delete(id);
   }
 
-  async assignLecturer(subjectId: string, lecturerId: string, assignedBy: string): Promise<void> {
+  async assignLecturer(subjectId: string, lecturerId: string, _assignedBy: string): Promise<void> {
     await this.dataSource.query(
-      `INSERT INTO subject_lecturers (subject_id, lecturer_id, assigned_by) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING`,
-      [subjectId, lecturerId, assignedBy],
+      `INSERT INTO subject_lecturers (subject_id, lecturer_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+      [subjectId, lecturerId],
     );
   }
 
