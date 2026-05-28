@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Plus, Search, Trash2, Loader2 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Plus, Search, Trash2, Loader2, ExternalLink } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -25,6 +26,7 @@ export default function AdminSubjectsPage() {
   const [search, setSearch] = useState('')
   const [createOpen, setCreateOpen] = useState(false)
 
+  const navigate = useNavigate()
   const { data, isLoading } = useSubjects({ search: search || undefined, limit: 50 })
   const createSubject = useCreateSubject()
   const deleteSubject = useDeleteSubject()
@@ -88,7 +90,11 @@ export default function AdminSubjectsPage() {
             </thead>
             <tbody>
               {subjects.map(s => (
-                <tr key={s.id} className="border-b border-zinc-800/50 hover:bg-zinc-900/50 transition-colors duration-150">
+                <tr
+                  key={s.id}
+                  className="border-b border-zinc-800/50 hover:bg-zinc-900/50 transition-colors duration-150 cursor-pointer"
+                  onClick={() => navigate(`/subjects/${s.id}/documents`)}
+                >
                   <td className="py-3 px-4">
                     <p className="text-zinc-300">{s.name}</p>
                     {s.description && <p className="text-xs text-zinc-500 truncate max-w-[240px]">{s.description}</p>}
@@ -102,15 +108,26 @@ export default function AdminSubjectsPage() {
                       {s.status}
                     </Badge>
                   </td>
-                  <td className="py-3 px-4">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => deleteSubject.mutate(s.id)}
-                      className="h-7 w-7 rounded-md text-zinc-600 hover:text-red-400 hover:bg-zinc-800"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
+                  <td className="py-3 px-4" onClick={e => e.stopPropagation()}>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => navigate(`/subjects/${s.id}/documents`)}
+                        className="h-7 w-7 rounded-md text-zinc-500 hover:text-zinc-50 hover:bg-zinc-800"
+                        title="View subject"
+                      >
+                        <ExternalLink className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => deleteSubject.mutate(s.id)}
+                        className="h-7 w-7 rounded-md text-zinc-600 hover:text-red-400 hover:bg-zinc-800"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}
