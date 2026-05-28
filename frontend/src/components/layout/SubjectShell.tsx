@@ -27,7 +27,7 @@ export function SubjectShell() {
   return (
     <div className="min-h-screen bg-zinc-950">
       <Topbar />
-      <div className="fixed top-12 left-0 right-0 z-39">
+      <div className="fixed top-12 left-0 right-0 z-[39]">
         <SubjectTabs subjectId={id} />
       </div>
       <main className="pt-[5.5rem] pb-20 min-h-screen">

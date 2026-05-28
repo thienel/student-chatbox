@@ -20,7 +20,7 @@ export function AdminShell() {
   return (
     <div className="min-h-screen bg-zinc-950">
       <Topbar />
-      <div className="fixed top-12 left-0 right-0 z-39 flex items-center gap-0 border-b border-zinc-900 px-5 bg-zinc-950">
+      <div className="fixed top-12 left-0 right-0 z-[39] flex items-center gap-0 border-b border-zinc-900 px-5 bg-zinc-950">
         {adminTabs.map(tab => {
           const isActive = tab.exact ? pathname === tab.href : pathname.startsWith(tab.href)
           return (
