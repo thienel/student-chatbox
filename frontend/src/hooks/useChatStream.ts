@@ -49,7 +49,7 @@ export function useChatStream(): UseChatStreamReturn {
             Accept: 'text/event-stream',
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
-          body: JSON.stringify({ content }),
+          body: JSON.stringify({ message: content }),
         });
 
         if (!response.ok) {

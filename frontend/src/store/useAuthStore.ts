@@ -8,6 +8,7 @@ interface AuthState {
   refreshToken: string | null;
   setAuth: (user: User, token: string, refreshToken?: string) => void;
   clearAuth: () => void;
+  logout: () => void;
   hasPermission: (permission: string) => boolean;
 }
 
@@ -24,6 +25,11 @@ export const useAuthStore = create<AuthState>()(
 
       clearAuth: () => {
         set({ user: null, accessToken: null, refreshToken: null });
+      },
+
+      logout: () => {
+        set({ user: null, accessToken: null, refreshToken: null });
+        window.location.href = '/login';
       },
 
       hasPermission: (permission: string) => {
