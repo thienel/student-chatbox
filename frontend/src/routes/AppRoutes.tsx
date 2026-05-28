@@ -1,129 +1,73 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuthStore } from '../store/useAuthStore';
+import { Routes, Route, Navigate } from 'react-router-dom'
+import { useAuthStore } from '@/store/useAuthStore'
+import { AppShell } from '@/components/layout/AppShell'
+import { SubjectShell } from '@/components/layout/SubjectShell'
+import { AdminShell } from '@/components/layout/AdminShell'
 
-// Layouts
-import StudentLayout from '../layouts/StudentLayout';
-import LecturerLayout from '../layouts/LecturerLayout';
-import AdminLayout from '../layouts/AdminLayout';
+import LoginPage from '@/features/auth/LoginPage'
+import HomePage from '@/features/subjects/HomePage'
+import SubjectsPage from '@/features/subjects/SubjectsPage'
+import SubjectDocumentsPage from '@/features/subjects/SubjectDocumentsPage'
+import SubjectChatPage from '@/features/subjects/SubjectChatPage'
+import SubjectMembersPage from '@/features/subjects/SubjectMembersPage'
+import ChatsPage from '@/features/chat/ChatsPage'
+import AdminDashboardPage from '@/features/admin/AdminDashboardPage'
+import AdminUsersPage from '@/features/admin/AdminUsersPage'
+import AdminSubjectsPage from '@/features/admin/AdminSubjectsPage'
+import AdminSettingsPage from '@/features/admin/AdminSettingsPage'
+import AdminAuditLogsPage from '@/features/admin/AdminAuditLogsPage'
+import SettingsPage from '@/features/settings/SettingsPage'
 
-// Pages
-import Login from '../pages/Login';
-import NotFoundPage from '../pages/NotFoundPage';
-
-// Student
-import StudentDashboard from '../pages/student/StudentDashboard';
-import Subjects from '../pages/student/Subjects';
-import SubjectDetail from '../pages/student/SubjectDetail';
-import SubjectChat from '../pages/student/SubjectChat';
-
-// Lecturer
-import LecturerDashboard from '../pages/lecturer/LecturerDashboard';
-import LecturerDocuments from '../pages/lecturer/LecturerDocuments';
-
-// Admin
-import AdminDashboard from '../pages/admin/AdminDashboard';
-import AdminUsers from '../pages/admin/AdminUsers';
-import AdminUserDetail from '../pages/admin/AdminUserDetail';
-import AdminSubjects from '../pages/admin/AdminSubjects';
-import AdminSettings from '../pages/admin/AdminSettings';
-import AdminAuditLogs from '../pages/admin/AdminAuditLogs';
-
-interface ProtectedRouteProps {
-  children: React.ReactNode;
-  allowedRoles?: Array<'admin' | 'lecturer' | 'student'>;
+interface ProtectedProps {
+  children: React.ReactNode
+  roles?: Array<'admin' | 'lecturer' | 'student'>
 }
 
-const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
-  const { accessToken, user } = useAuthStore();
+function Protected({ children, roles }: ProtectedProps) {
+  const { accessToken, user } = useAuthStore()
+  if (!accessToken) return <Navigate to="/login" replace />
+  if (roles && user && !roles.includes(user.role)) return <Navigate to="/home" replace />
+  return <>{children}</>
+}
 
-  if (!accessToken) {
-    return <Navigate to="/login" replace />;
-  }
+function RootRedirect() {
+  const { accessToken } = useAuthStore()
+  return accessToken ? <Navigate to="/home" replace /> : <Navigate to="/login" replace />
+}
 
-  if (allowedRoles && user && !allowedRoles.includes(user.role)) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return <>{children}</>;
-};
-
-const RootRedirect = () => {
-  const { user } = useAuthStore();
-  if (!user) return <Navigate to="/login" replace />;
-  if (user.role === 'admin') return <Navigate to="/admin/dashboard" replace />;
-  if (user.role === 'lecturer') return <Navigate to="/lecturer/dashboard" replace />;
-  return <Navigate to="/student/dashboard" replace />;
-};
-
-const AppRoutes = () => {
+export default function AppRoutes() {
   return (
     <Routes>
-      {/* Public */}
-      <Route path="/login" element={<Login />} />
+      <Route path="/" element={<RootRedirect />} />
+      <Route path="/login" element={<LoginPage />} />
 
-      {/* Root Redirect */}
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <RootRedirect />
-          </ProtectedRoute>
-        }
-      />
-
-      {/* Student */}
-      <Route
-        path="/student"
-        element={
-          <ProtectedRoute allowedRoles={['student', 'lecturer']}>
-            <StudentLayout />
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<Navigate to="dashboard" replace />} />
-        <Route path="dashboard" element={<StudentDashboard />} />
-        <Route path="subjects" element={<Subjects />} />
-        <Route path="subjects/:id" element={<SubjectDetail />} />
-        <Route path="subjects/:id/chat/:chatId" element={<SubjectChat />} />
+      {/* Main shell — all authenticated routes */}
+      <Route element={<Protected><AppShell /></Protected>}>
+        <Route path="/home" element={<HomePage />} />
+        <Route path="/subjects" element={<SubjectsPage />} />
+        <Route path="/chats" element={<ChatsPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
       </Route>
 
-      {/* Lecturer */}
-      <Route
-        path="/lecturer"
-        element={
-          <ProtectedRoute allowedRoles={['lecturer', 'admin']}>
-            <LecturerLayout />
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<Navigate to="dashboard" replace />} />
-        <Route path="dashboard" element={<LecturerDashboard />} />
-        <Route path="subjects/:id/documents" element={<LecturerDocuments />} />
-        <Route path="subjects/:id/chat/:chatId" element={<SubjectChat />} />
+      {/* Subject shell — subject-scoped routes with sub-tabs */}
+      <Route element={<Protected><SubjectShell /></Protected>}>
+        <Route path="/subjects/:id" element={<Navigate to="documents" replace />} />
+        <Route path="/subjects/:id/documents" element={<SubjectDocumentsPage />} />
+        <Route path="/subjects/:id/chat" element={<SubjectChatPage />} />
+        <Route path="/subjects/:id/chat/:chatId" element={<SubjectChatPage />} />
+        <Route path="/subjects/:id/members" element={<SubjectMembersPage />} />
       </Route>
 
-      {/* Admin */}
-      <Route
-        path="/admin"
-        element={
-          <ProtectedRoute allowedRoles={['admin']}>
-            <AdminLayout />
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<Navigate to="dashboard" replace />} />
-        <Route path="dashboard" element={<AdminDashboard />} />
-        <Route path="users" element={<AdminUsers />} />
-        <Route path="users/:id" element={<AdminUserDetail />} />
-        <Route path="subjects" element={<AdminSubjects />} />
-        <Route path="settings" element={<AdminSettings />} />
-        <Route path="audit-logs" element={<AdminAuditLogs />} />
+      {/* Admin shell */}
+      <Route element={<Protected roles={['admin']}><AdminShell /></Protected>}>
+        <Route path="/admin" element={<AdminDashboardPage />} />
+        <Route path="/admin/users" element={<AdminUsersPage />} />
+        <Route path="/admin/subjects" element={<AdminSubjectsPage />} />
+        <Route path="/admin/settings" element={<AdminSettingsPage />} />
+        <Route path="/admin/audit-logs" element={<AdminAuditLogsPage />} />
       </Route>
 
-      {/* 404 */}
-      <Route path="*" element={<NotFoundPage />} />
+      <Route path="*" element={<Navigate to="/home" replace />} />
     </Routes>
-  );
-};
-
-export default AppRoutes;
+  )
+}
