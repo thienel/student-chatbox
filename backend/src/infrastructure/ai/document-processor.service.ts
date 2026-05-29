@@ -47,12 +47,14 @@ export class DocumentProcessorService {
       }
       this.logger.log(`Embedding ${nonEmptyChunks.length} chunks…`);
       const vectors = await this.ragService.embedDocuments(nonEmptyChunks);
-      this.logger.log(`Embedded ${vectors.length} vectors, upserting to Qdrant…`);
+      const vectorDim = vectors[0]?.length ?? 0;
+      this.logger.log(`Embedded ${vectors.length} vectors (dim=${vectorDim}), upserting to Qdrant…`);
 
       // 4. Get original filename from path
       const originalName = path.basename(filePath).replace(/^[^_]+_/, '');
 
-      // 5. Upsert to Qdrant
+      // 5. Ensure collection matches actual vector dimension, then upsert
+      await this.qdrant.ensureCollection(vectorDim);
       const points = nonEmptyChunks.map((chunk, i) => ({
         id: uuidv4(),
         vector: vectors[i],
