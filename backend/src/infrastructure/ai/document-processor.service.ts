@@ -40,14 +40,18 @@ export class DocumentProcessorService {
         throw new Error('Document produced no chunks');
       }
 
-      // 3. Embed all chunks
-      const vectors = await this.ragService.embedDocuments(chunks);
+      // 3. Embed all chunks (filter empty to avoid API 400)
+      const nonEmptyChunks = chunks.filter(c => c.trim().length > 0);
+      if (nonEmptyChunks.length === 0) {
+        throw new Error('All chunks were empty after splitting');
+      }
+      const vectors = await this.ragService.embedDocuments(nonEmptyChunks);
 
       // 4. Get original filename from path
       const originalName = path.basename(filePath).replace(/^[^_]+_/, '');
 
       // 5. Upsert to Qdrant
-      const points = chunks.map((chunk, i) => ({
+      const points = nonEmptyChunks.map((chunk, i) => ({
         id: uuidv4(),
         vector: vectors[i],
         payload: {
@@ -62,15 +66,16 @@ export class DocumentProcessorService {
       await this.qdrant.upsertPoints(points);
 
       // 6. Update status to ready
-      await this.documentRepo.updateStatus(documentId, DocumentStatus.READY, chunks.length);
+      await this.documentRepo.updateStatus(documentId, DocumentStatus.READY, nonEmptyChunks.length);
       this.logger.log(`Document ${documentId} processed: ${chunks.length} chunks`);
     } catch (error) {
-      this.logger.error(`Document ${documentId} processing failed: ${error}`);
+      const detail = (error as any)?.response?.data ?? (error as any)?.message ?? String(error);
+      this.logger.error(`Document ${documentId} processing failed`, JSON.stringify(detail));
       await this.documentRepo.updateStatus(
         documentId,
         DocumentStatus.FAILED,
         0,
-        String(error),
+        JSON.stringify(detail),
       );
     }
   }

@@ -17,6 +17,7 @@ export class LangchainRagService {
     this.embeddings = new OpenAIEmbeddings({
       openAIApiKey: this.config.get<string>('OPENAI_API_KEY'),
       modelName: this.config.get<string>('OPENAI_EMBEDDING_MODEL', 'text-embedding-3-small'),
+      batchSize: 100,
     });
 
     this.openai = new OpenAI({
