@@ -40,14 +40,22 @@ export class DocumentProcessorService {
         throw new Error('Document produced no chunks');
       }
 
-      // 3. Embed all chunks
-      const vectors = await this.ragService.embedDocuments(chunks);
+      // 3. Embed all chunks (filter empty to avoid API 400)
+      const nonEmptyChunks = chunks.filter(c => c.trim().length > 0);
+      if (nonEmptyChunks.length === 0) {
+        throw new Error('All chunks were empty after splitting');
+      }
+      this.logger.log(`Embedding ${nonEmptyChunks.length} chunks…`);
+      const vectors = await this.ragService.embedDocuments(nonEmptyChunks);
+      const vectorDim = vectors[0]?.length ?? 0;
+      this.logger.log(`Embedded ${vectors.length} vectors (dim=${vectorDim}), upserting to Qdrant…`);
 
       // 4. Get original filename from path
       const originalName = path.basename(filePath).replace(/^[^_]+_/, '');
 
-      // 5. Upsert to Qdrant
-      const points = chunks.map((chunk, i) => ({
+      // 5. Ensure collection matches actual vector dimension, then upsert
+      await this.qdrant.ensureCollection(vectorDim);
+      const points = nonEmptyChunks.map((chunk, i) => ({
         id: uuidv4(),
         vector: vectors[i],
         payload: {
@@ -62,15 +70,22 @@ export class DocumentProcessorService {
       await this.qdrant.upsertPoints(points);
 
       // 6. Update status to ready
-      await this.documentRepo.updateStatus(documentId, DocumentStatus.READY, chunks.length);
+      await this.documentRepo.updateStatus(documentId, DocumentStatus.READY, nonEmptyChunks.length);
       this.logger.log(`Document ${documentId} processed: ${chunks.length} chunks`);
     } catch (error) {
-      this.logger.error(`Document ${documentId} processing failed: ${error}`);
+      const e = error as any;
+      const detail = {
+        message: e?.message,
+        status: e?.status ?? e?.response?.status,
+        responseData: e?.response?.data ?? e?.error,
+        stack: e?.stack?.split('\n').slice(0, 5),
+      };
+      this.logger.error(`Document ${documentId} processing failed`, JSON.stringify(detail));
       await this.documentRepo.updateStatus(
         documentId,
         DocumentStatus.FAILED,
         0,
-        String(error),
+        JSON.stringify(detail.message ?? detail),
       );
     }
   }
