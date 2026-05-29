@@ -30,7 +30,7 @@ export const subjectsApi = {
     axiosInstance.delete(`/subjects/${subjectId}/lecturers/${lecturerId}`),
 
   getDocuments: (subjectId: string) =>
-    axiosInstance.get<ApiResponse<Document[]>>(`/subjects/${subjectId}/documents`).then(r => r.data.data),
+    axiosInstance.get<ApiResponse<{ items: Document[]; total: number }>>(`/subjects/${subjectId}/documents`).then(r => r.data.data.items),
 
   uploadDocument: (subjectId: string, file: File) => {
     const form = new FormData()
