@@ -14,14 +14,17 @@ export class LangchainRagService {
     private readonly qdrant: QdrantService,
     private readonly config: ConfigService,
   ) {
+    const baseURL = this.config.get<string>('OPENAI_BASE_URL');
     this.embeddings = new OpenAIEmbeddings({
       openAIApiKey: this.config.get<string>('OPENAI_API_KEY'),
       modelName: this.config.get<string>('OPENAI_EMBEDDING_MODEL', 'text-embedding-3-small'),
       batchSize: 100,
+      ...(baseURL && { configuration: { baseURL } }),
     });
 
     this.openai = new OpenAI({
       apiKey: this.config.get<string>('OPENAI_API_KEY'),
+      ...(baseURL && { baseURL }),
     });
   }
 

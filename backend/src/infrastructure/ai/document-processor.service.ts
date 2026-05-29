@@ -45,7 +45,9 @@ export class DocumentProcessorService {
       if (nonEmptyChunks.length === 0) {
         throw new Error('All chunks were empty after splitting');
       }
+      this.logger.log(`Embedding ${nonEmptyChunks.length} chunks…`);
       const vectors = await this.ragService.embedDocuments(nonEmptyChunks);
+      this.logger.log(`Embedded ${vectors.length} vectors, upserting to Qdrant…`);
 
       // 4. Get original filename from path
       const originalName = path.basename(filePath).replace(/^[^_]+_/, '');
@@ -69,13 +71,19 @@ export class DocumentProcessorService {
       await this.documentRepo.updateStatus(documentId, DocumentStatus.READY, nonEmptyChunks.length);
       this.logger.log(`Document ${documentId} processed: ${chunks.length} chunks`);
     } catch (error) {
-      const detail = (error as any)?.response?.data ?? (error as any)?.message ?? String(error);
+      const e = error as any;
+      const detail = {
+        message: e?.message,
+        status: e?.status ?? e?.response?.status,
+        responseData: e?.response?.data ?? e?.error,
+        stack: e?.stack?.split('\n').slice(0, 5),
+      };
       this.logger.error(`Document ${documentId} processing failed`, JSON.stringify(detail));
       await this.documentRepo.updateStatus(
         documentId,
         DocumentStatus.FAILED,
         0,
-        JSON.stringify(detail),
+        JSON.stringify(detail.message ?? detail),
       );
     }
   }
