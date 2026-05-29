@@ -72,15 +72,29 @@ export class QdrantService implements OnModuleInit {
     this.logger.log(`Created Qdrant collection: ${this.collection} (size=${vectorSize})`);
   }
 
-  async upsertPoints(points: QdrantPoint[]): Promise<void> {
-    await this.client.upsert(this.collection, {
-      wait: true,
-      points: points.map((p) => ({
-        id: p.id,
-        vector: p.vector,
-        payload: p.payload,
-      })),
-    });
+  async upsertPoints(points: QdrantPoint[], batchSize = 100): Promise<void> {
+    for (let i = 0; i < points.length; i += batchSize) {
+      const batch = points.slice(i, i + batchSize);
+      try {
+        await this.client.upsert(this.collection, {
+          wait: true,
+          points: batch.map((p) => ({
+            id: p.id,
+            vector: p.vector,
+            payload: p.payload,
+          })),
+        });
+      } catch (err: any) {
+        this.logger.error(
+          `Qdrant upsert failed (batch ${i}–${i + batch.length}, vectorDim=${batch[0]?.vector?.length}): ${err?.message}`,
+          JSON.stringify(err?.body ?? err?.response ?? ''),
+        );
+        throw err;
+      }
+      if (points.length > batchSize) {
+        this.logger.log(`Upserted ${Math.min(i + batchSize, points.length)}/${points.length} points`);
+      }
+    }
   }
 
   async searchSimilar(
