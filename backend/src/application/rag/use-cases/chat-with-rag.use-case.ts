@@ -40,7 +40,7 @@ export class ChatWithRagUseCase {
     const topKSetting = await this.settingRepo.findByKey('rag.top_k');
     const minScoreSetting = await this.settingRepo.findByKey('rag.min_score');
     const topK = Number(topKSetting?.value ?? 5);
-    const minScore = Number(minScoreSetting?.value ?? 0.7);
+    const minScore = Number(minScoreSetting?.value ?? 0.4);
 
     // Get chat history BEFORE saving current message (avoid duplicate)
     const existingMessages = await this.chatRepo.findMessages(chatId);
