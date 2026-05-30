@@ -124,7 +124,7 @@ async function seed() {
       { key: 'ai_daily_limit.lecturer.chat_rag', value: 100, description: 'Số lượt chat RAG / ngày cho giảng viên' },
       { key: 'ai_daily_limit.admin.chat_rag', value: -1, description: '-1 = unlimited' },
       { key: 'rag.top_k', value: 5, description: 'Số chunks lấy từ Qdrant' },
-      { key: 'rag.min_score', value: 0.7, description: 'Ngưỡng score tối thiểu của chunk' },
+      { key: 'rag.min_score', value: 0.4, description: 'Ngưỡng score tối thiểu của chunk (0.4 phù hợp với text-embedding-3-small)' },
     ];
 
     for (const s of settingsDefaults) {

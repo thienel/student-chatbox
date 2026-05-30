@@ -43,26 +43,31 @@ export class LangchainRagService {
     settings: { topK: number; minScore: number },
   ): Promise<{ stream: AsyncIterable<string>; sources: SearchResult[] }> {
     const queryVector = await this.embedText(query);
-    const searchResults = await this.qdrant.searchSimilar(
-      queryVector,
-      subjectId,
-      settings.topK,
-      settings.minScore,
-    );
+    this.logger.log(`RAG search: subjectId=${subjectId}, topK=${settings.topK}, minScore=${settings.minScore}, queryDim=${queryVector.length}`);
+    const allResults = await this.qdrant.searchSimilar(queryVector, subjectId, settings.topK, 0);
+    this.logger.log(`Qdrant returned ${allResults.length} results, scores: [${allResults.map(r => r.score.toFixed(3)).join(', ')}]`);
+    const searchResults = allResults.filter(r => r.score >= settings.minScore);
 
     const context = searchResults
       .map((r, i) => `[Source ${i + 1}: ${r.payload.original_name}]\n${r.payload.text}`)
       .join('\n\n---\n\n');
 
     const systemContent = context.length > 0
-      ? `You are an academic assistant for a university course. Answer ONLY based on the context provided below.
-If the answer is not found in the context, say "Không tìm thấy thông tin này trong tài liệu môn học."
-Always cite the source document names when answering.
+      ? `You are EduChat, an academic assistant for a university course. You have access to course documents provided below.
+IMPORTANT RULES:
+- Answer ONLY using information from the provided context. Do NOT use your own training knowledge.
+- Always mention the source document name when answering.
+- If the user asks who you are, say: "Tôi là EduChat, trợ lý học tập dựa trên tài liệu môn học của bạn."
+- If asked if you have documents, confirm you have the documents listed in the context.
+- Never say you are trained on internet data or that you are a general AI.
 
-Context:
+Context from course documents:
 ${context}`
-      : `You are an academic assistant. There are no relevant documents found for this query.
-Please inform the user: "Không tìm thấy thông tin này trong tài liệu môn học."`;
+      : `You are EduChat, an academic assistant for a university course.
+No relevant documents were found for this query.
+Respond in the same language as the user's question.
+Say: "Không tìm thấy thông tin này trong tài liệu môn học. Hãy thử đặt câu hỏi khác hoặc upload thêm tài liệu."
+Do NOT answer from general knowledge.`;
 
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
       { role: 'system', content: systemContent },
