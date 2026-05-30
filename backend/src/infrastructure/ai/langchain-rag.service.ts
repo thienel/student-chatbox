@@ -43,12 +43,10 @@ export class LangchainRagService {
     settings: { topK: number; minScore: number },
   ): Promise<{ stream: AsyncIterable<string>; sources: SearchResult[] }> {
     const queryVector = await this.embedText(query);
-    const searchResults = await this.qdrant.searchSimilar(
-      queryVector,
-      subjectId,
-      settings.topK,
-      settings.minScore,
-    );
+    this.logger.log(`RAG search: subjectId=${subjectId}, topK=${settings.topK}, minScore=${settings.minScore}, queryDim=${queryVector.length}`);
+    const allResults = await this.qdrant.searchSimilar(queryVector, subjectId, settings.topK, 0);
+    this.logger.log(`Qdrant returned ${allResults.length} results, scores: [${allResults.map(r => r.score.toFixed(3)).join(', ')}]`);
+    const searchResults = allResults.filter(r => r.score >= settings.minScore);
 
     const context = searchResults
       .map((r, i) => `[Source ${i + 1}: ${r.payload.original_name}]\n${r.payload.text}`)
