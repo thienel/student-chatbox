@@ -11,18 +11,23 @@ export default function AdminSettingsPage() {
   const { data: settings = [], isLoading } = useSystemSettings()
   const updateSettings = useUpdateSettings()
 
+  const encodeKey = (k: string) => k.replace(/\./g, '․')
+  const decodeKey = (k: string) => k.replace(/․/g, '.')
+
   const { register, handleSubmit, reset, formState: { isSubmitting } } = useForm<Record<string, string>>()
 
   useEffect(() => {
     if (settings.length > 0) {
       const defaults: Record<string, string> = {}
-      settings.forEach(s => { defaults[s.key] = String(s.value) })
+      settings.forEach(s => { defaults[encodeKey(s.key)] = String(s.value) })
       reset(defaults)
     }
   }, [settings, reset])
 
   const onSubmit = async (data: Record<string, string>) => {
-    await updateSettings.mutateAsync(data)
+    const normalized: Record<string, string> = {}
+    Object.entries(data).forEach(([k, v]) => { normalized[decodeKey(k)] = v })
+    await updateSettings.mutateAsync(normalized)
   }
 
   return (
@@ -53,7 +58,7 @@ export default function AdminSettingsPage() {
                 </div>
                 <div className="w-48">
                   <Input
-                    {...register(setting.key)}
+                    {...register(encodeKey(setting.key))}
                     className="bg-zinc-950 border-zinc-800 text-zinc-50 h-8 text-sm"
                   />
                 </div>
