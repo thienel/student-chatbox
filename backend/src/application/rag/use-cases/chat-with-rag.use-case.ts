@@ -42,18 +42,18 @@ export class ChatWithRagUseCase {
     const topK = Number(topKSetting?.value ?? 5);
     const minScore = Number(minScoreSetting?.value ?? 0.7);
 
+    // Get chat history BEFORE saving current message (avoid duplicate)
+    const existingMessages = await this.chatRepo.findMessages(chatId);
+    const chatHistory = existingMessages
+      .slice(-20)
+      .map((m) => ({ role: m.role, content: m.content }));
+
     // Save user message
     await this.chatRepo.createMessage({
       chatId,
       role: 'user',
       content: dto.content,
     });
-
-    // Get chat history for context
-    const messages = await this.chatRepo.findMessages(chatId);
-    const chatHistory = messages
-      .slice(-20)
-      .map((m) => ({ role: m.role, content: m.content }));
 
     // Generate message ID
     const messageId = require('uuid').v4();
