@@ -17,6 +17,7 @@ import { CurrentUser } from '../../decorators/current-user.decorator';
 import { GetSettingsUseCase } from '../../../application/system/use-cases/get-settings.use-case';
 import { UpdateSettingsUseCase } from '../../../application/system/use-cases/update-settings.use-case';
 import { ListAuditLogsUseCase } from '../../../application/system/use-cases/list-audit-logs.use-case';
+import { GetAdminStatsUseCase } from '../../../application/system/use-cases/get-admin-stats.use-case';
 import { ListAuditLogsDto } from '../../../application/system/dtos/system.dto';
 import { AuditLogService } from '../../../application/system/services/audit-log.service';
 
@@ -28,6 +29,7 @@ export class SystemController {
     private readonly getSettingsUseCase: GetSettingsUseCase,
     private readonly updateSettingsUseCase: UpdateSettingsUseCase,
     private readonly listAuditLogsUseCase: ListAuditLogsUseCase,
+    private readonly getAdminStatsUseCase: GetAdminStatsUseCase,
     private readonly auditLogService: AuditLogService,
   ) {}
 
@@ -60,5 +62,11 @@ export class SystemController {
   @RequirePermission('system:read-audit-log')
   async listAuditLogs(@Query() dto: ListAuditLogsDto) {
     return this.listAuditLogsUseCase.execute(dto);
+  }
+
+  @Get('stats')
+  @RequirePermission('system:manage-settings')
+  async getStats() {
+    return this.getAdminStatsUseCase.execute();
   }
 }
