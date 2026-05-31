@@ -6,7 +6,7 @@ export const chatsApi = {
     axiosInstance.get<ApiResponse<Chat[]>>('/chats', { params }).then(r => r.data.data),
 
   get: (id: string) =>
-    axiosInstance.get<ApiResponse<{ chat: Chat; messages: Message[] }>>(`/chats/${id}`).then(r => r.data.data),
+    axiosInstance.get<ApiResponse<Chat & { messages: Message[] }>>(`/chats/${id}`).then(r => r.data.data),
 
   create: (data: { subjectId: string; title?: string }) =>
     axiosInstance.post<ApiResponse<Chat>>('/chats', data).then(r => r.data.data),

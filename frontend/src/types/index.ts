@@ -62,8 +62,8 @@ export interface ApiResponse<T> {
 export interface PaginatedResponse<T> {
   items: T[];
   total: number;
-  page: number;
-  limit: number;
+  page?: number;
+  limit?: number;
 }
 
 export interface SystemSetting {
