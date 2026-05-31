@@ -16,6 +16,8 @@ export class AuditLogTypeOrmRepository implements IAuditLogRepository {
     const log = new AuditLog();
     log.id = orm.id;
     log.userId = orm.userId;
+    log.userEmail = orm.user?.email;
+    log.userFullName = orm.user?.fullName;
     log.action = orm.action;
     log.resourceType = orm.resourceType;
     log.resourceId = orm.resourceId;
@@ -39,7 +41,7 @@ export class AuditLogTypeOrmRepository implements IAuditLogRepository {
   }
 
   async findAll(filter: ListAuditLogsFilter): Promise<{ items: AuditLog[]; total: number }> {
-    const qb = this.repo.createQueryBuilder('al');
+    const qb = this.repo.createQueryBuilder('al').leftJoinAndSelect('al.user', 'user');
 
     if (filter.userId) {
       qb.andWhere('al.user_id = :userId', { userId: filter.userId });
