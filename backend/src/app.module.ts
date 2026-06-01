@@ -6,6 +6,7 @@ import { SubjectModule } from './interface/http/subject/subject.module';
 import { DocumentModule } from './interface/http/document/document.module';
 import { ChatModule } from './interface/http/chat/chat.module';
 import { SystemModule } from './interface/http/system/system.module';
+import { InternalModule } from './interface/http/internal/internal.module';
 import { HealthController } from './interface/http/health/health.controller';
 
 @Module({
@@ -20,6 +21,7 @@ import { HealthController } from './interface/http/health/health.controller';
     DocumentModule,
     ChatModule,
     SystemModule,
+    InternalModule,
   ],
   controllers: [HealthController],
 })
