@@ -12,6 +12,18 @@ export interface StreamTokenPayload {
   userId: string;
 }
 
+export interface GeneratedFlashcard {
+  front: string;
+  back: string;
+}
+
+export interface GeneratedQuestion {
+  content: string;
+  options: { key: string; text: string }[];
+  correct_answer: string;
+  explanation?: string;
+}
+
 @Injectable()
 export class AiServiceClient {
   private readonly logger = new Logger(AiServiceClient.name);
@@ -59,5 +71,50 @@ export class AiServiceClient {
     if (!response.ok && response.status !== 404) {
       throw new Error(`AI service DELETE /documents/${documentId} failed: ${response.status}`);
     }
+  }
+
+  async generateFlashcards(
+    subjectId: string,
+    cardCount: number,
+    topic?: string,
+  ): Promise<GeneratedFlashcard[]> {
+    const url = `${this.aiServiceUrl}/flashcards/generate`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-internal-key': this.aiServiceSecret,
+      },
+      body: JSON.stringify({ subject_id: subjectId, card_count: cardCount, topic }),
+    });
+    if (!response.ok) {
+      const body = await response.text().catch(() => '');
+      throw new Error(`AI service /flashcards/generate failed: ${response.status} ${body}`);
+    }
+    const data = (await response.json()) as { cards: GeneratedFlashcard[] };
+    return data.cards;
+  }
+
+  async generateExam(
+    subjectId: string,
+    questionCount: number,
+    difficulty: 'easy' | 'medium' | 'hard',
+    topic?: string,
+  ): Promise<GeneratedQuestion[]> {
+    const url = `${this.aiServiceUrl}/exams/generate`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-internal-key': this.aiServiceSecret,
+      },
+      body: JSON.stringify({ subject_id: subjectId, question_count: questionCount, difficulty, topic }),
+    });
+    if (!response.ok) {
+      const body = await response.text().catch(() => '');
+      throw new Error(`AI service /exams/generate failed: ${response.status} ${body}`);
+    }
+    const data = (await response.json()) as { questions: GeneratedQuestion[] };
+    return data.questions;
   }
 }

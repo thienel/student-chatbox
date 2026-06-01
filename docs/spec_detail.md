@@ -11,9 +11,10 @@
 | Mục | MVP | Full Spec (bổ sung) |
 |---|---|---|
 | **Tính năng** | Auth, Subjects, Documents, RAG Chat | + Flashcards, Exams, Bookmarks, Admin Analytics |
+| **AI Architecture** | Python FastAPI service (`langchain/`) tách biệt; NestJS gọi qua HTTP API | Flashcard/Exam generation thêm endpoints mới vào Python service |
 | **RBAC** | Permission check từ JWT payload | + Admin UI để manage roles/permissions trong DB |
-| **AI features** | RAG Chat | + AI Generate Flashcard, AI Generate Exam |
-| **Analytics** | Audit Log cơ bản | + Dashboard thống kê chi tiết |
+| **AI features** | RAG Chat (stream trực tiếp từ Python → frontend) | + AI Generate Flashcard, AI Generate Exam |
+| **Analytics** | Audit Log cơ bản + Admin stats (totalUsers/Subjects/Documents) | + Dashboard thống kê chi tiết |
 | **Pagination** | Cơ bản | Đầy đủ: filter, sort, cursor-based pagination |
 
 ---
@@ -184,6 +185,8 @@ CREATE INDEX idx_bookmarks_user_id ON bookmarks(user_id);
 ---
 
 ## 4. AI Pipeline Bổ Sung
+
+> **Lưu ý kiến trúc**: Toàn bộ AI logic (embedding, vector search, LLM calls) đã được tách ra service riêng tại `educhat/langchain/` (Python FastAPI). NestJS backend chỉ điều phối qua HTTP API. Các flow flashcard và exam generation bên dưới sẽ được implement thêm vào Python service này.
 
 ### 4.1 Flashcard Generation Flow
 
@@ -515,10 +518,38 @@ Query: ?resourceType=flashcard_set&page=1&limit=20
 
 ## 6. Clean Architecture — Bổ Sung Module
 
-### 6.1 Các Module Bổ Sung
+### 6.0 Python AI Service (đã có — `educhat/langchain/`)
+
+Service tách biệt chạy song song với NestJS backend. Hiện tại đã implement RAG chat; các endpoint flashcard/exam generation sẽ thêm vào đây.
 
 ```
-educhat/server/src/
+educhat/langchain/
+├── app/
+│   ├── main.py                        # FastAPI app, CORS, health
+│   ├── config.py                      # pydantic-settings (env vars)
+│   ├── dependencies.py                # Auth: X-Internal-Key + JWT stream token
+│   ├── routers/
+│   │   ├── documents.py               # POST /documents/process, DELETE /documents/{id}
+│   │   ├── chat.py                    # POST /chat/stream (SSE — đã có)
+│   │   ├── flashcards.py              # POST /flashcards/generate (bổ sung)
+│   │   └── exams.py                   # POST /exams/generate (bổ sung)
+│   └── services/
+│       ├── qdrant_service.py          # Qdrant client (ensure, upsert, search, delete)
+│       ├── document_processor.py      # Extract PDF/DOCX/PPTX → chunk → embed → upsert
+│       ├── rag_service.py             # Embed query → search → build prompt → stream LLM
+│       ├── flashcard_service.py       # Lấy chunks → gpt-4o-mini → parse JSON (bổ sung)
+│       └── exam_service.py            # Lấy chunks → gpt-4o-mini → parse JSON (bổ sung)
+└── requirements.txt
+```
+
+**Auth giữa các service:**
+- NestJS → Python (document process/delete, flashcard/exam generate): header `X-Internal-Key`
+- Frontend → Python (RAG stream): `Authorization: Bearer <stream_token>` (JWT signed bởi `AI_SERVICE_SECRET`)
+
+### 6.1 Các Module Bổ Sung vào NestJS (`educhat/backend/src/`)
+
+```
+educhat/backend/src/
 
 ├── domain/
 │   ├── flashcard/
@@ -575,29 +606,31 @@ educhat/server/src/
             └── rbac.controller.ts
 ```
 
+> **Lưu ý**: Thư mục thực tế là `educhat/backend/src/` (không phải `educhat/server/src/`).
+
 ---
 
 ## 7. Frontend — Bổ Sung Routes & Components
 
 ### 7.1 Routes Bổ Sung
 
+> **Pattern hiện tại**: Project không dùng prefix `/student/` hay `/lecturer/`. Tất cả subject-scoped routes đều dùng pattern `/subjects/:id/<tab>` chung cho mọi role, phân quyền bằng permission check.
+
 ```
-[Student]
-/student/subjects/:id/flashcards       → Flashcards (danh sách bộ thẻ)
-/student/subjects/:id/flashcards/:setId → FlashcardStudy (luyện tập)
-/student/subjects/:id/exams            → Exams (danh sách đề thi)
-/student/subjects/:id/exams/:examId    → TakeExam (làm bài)
-/student/exam-history                  → ExamHistory (lịch sử)
-/student/exam-history/:attemptId       → ExamResult (kết quả chi tiết)
-/student/bookmarks                     → Bookmarks
+[Subject shell — thêm tab mới vào /subjects/:id/*]
+/subjects/:id/flashcards               → FlashcardsPage (danh sách bộ thẻ)
+/subjects/:id/flashcards/:setId        → FlashcardStudyPage (luyện tập)
+/subjects/:id/exams                    → ExamsPage (danh sách đề thi)
+/subjects/:id/exams/:examId            → TakeExamPage (làm bài)
 
-[Lecturer — thêm vào]
-/lecturer/subjects/:id/flashcards      → FlashcardManage (quản lý + generate)
-/lecturer/analytics                    → LecturerAnalytics (thống kê môn học của mình)
+[App shell — thêm top-level routes]
+/exam-history                          → ExamHistoryPage (lịch sử thi)
+/exam-history/:attemptId               → ExamResultPage (kết quả chi tiết)
+/bookmarks                             → BookmarksPage
 
-[Admin — thêm vào]
-/admin/analytics                       → AdminAnalytics (dashboard đầy đủ)
-/admin/rbac                            → RbacManagement (quản lý roles/permissions)
+[Admin shell — thêm vào]
+/admin/analytics                       → AdminAnalyticsPage (dashboard đầy đủ)
+/admin/rbac                            → RbacManagementPage (quản lý roles/permissions)
 ```
 
 ### 7.2 Components Bổ Sung (Tái sử dụng từ dự án cũ)
@@ -693,7 +726,7 @@ Phần này ghi lại các hướng mở rộng đã được xác định, đ�
 | **AI features** | RAG Chat (có rate limit) | + Generate Flashcard + Generate Exam |
 | **Admin tools** | User/Subject mgmt + Settings + Audit log | + Analytics Dashboard + RBAC Management |
 | **RBAC** | Permission check từ JWT, roles hardcoded ở seed | + API quản lý roles/permissions trong DB |
-| **Frontend pages** | ~13 trang | ~20 trang |
-| **DB tables** | 11 bảng | 16 bảng |
-| **API endpoints** | ~30 endpoints | ~50 endpoints |
+| **Frontend pages** | 13 trang | ~21 trang |
+| **DB tables** | 11 bảng | 17 bảng (+6: flashcard_sets, flashcards, exams, questions, exam_attempts, bookmarks) |
+| **API endpoints** | ~34 endpoints (NestJS) + 3 Python | ~54 endpoints |
 | **Thứ tự xây dựng** | Xây dựng trước | Xây dựng sau khi MVP ổn định |
