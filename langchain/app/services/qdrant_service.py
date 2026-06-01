@@ -1,3 +1,4 @@
+import random
 from qdrant_client import QdrantClient
 from qdrant_client.models import (
     Distance,
@@ -56,7 +57,31 @@ class QdrantService:
             ),
             with_payload=True,
         )
-        return [{"id": str(r.id), "score": r.score, "payload": r.payload} for r in results]
+        return [
+            {
+                "id": str(r.id),
+                "score": r.score,
+                "text": (r.payload or {}).get("text", ""),
+                "payload": r.payload,
+            }
+            for r in results
+        ]
+
+    def get_random_chunks(self, subject_id: str, limit: int = 20) -> list[dict]:
+        results, _ = self._client.scroll(
+            self._collection,
+            scroll_filter=Filter(
+                must=[FieldCondition(key="subject_id", match=MatchValue(value=subject_id))]
+            ),
+            limit=200,
+            with_payload=True,
+            with_vectors=False,
+        )
+        sample = random.sample(results, min(limit, len(results)))
+        return [
+            {"id": str(p.id), "text": (p.payload or {}).get("text", ""), "payload": p.payload}
+            for p in sample
+        ]
 
     def delete_by_document_id(self, document_id: str) -> None:
         self._client.delete(

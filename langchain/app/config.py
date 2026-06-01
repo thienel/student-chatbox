@@ -6,6 +6,8 @@ class Settings(BaseSettings):
     openai_base_url: str = ""
     openai_embedding_model: str = "text-embedding-3-small"
     openai_chat_model: str = "gpt-4o"
+    openai_flashcard_model: str = "gpt-4o-mini"
+    openai_exam_model: str = "gpt-4o-mini"
 
     qdrant_url: str = "http://localhost:6333"
     qdrant_collection: str = "documents"
