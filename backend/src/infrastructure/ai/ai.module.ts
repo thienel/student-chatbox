@@ -1,12 +1,10 @@
 import { Module } from '@nestjs/common';
-import { LangchainRagService } from './langchain-rag.service';
-import { DocumentProcessorService } from './document-processor.service';
-import { QdrantModule } from '../database/qdrant/qdrant.module';
-import { TypeOrmDatabaseModule } from '../database/typeorm/typeorm.module';
+import { JwtModule } from '@nestjs/jwt';
+import { AiServiceClient } from './ai-service.client';
 
 @Module({
-  imports: [QdrantModule, TypeOrmDatabaseModule],
-  providers: [LangchainRagService, DocumentProcessorService],
-  exports: [LangchainRagService, DocumentProcessorService],
+  imports: [JwtModule.register({})],
+  providers: [AiServiceClient],
+  exports: [AiServiceClient],
 })
 export class AiModule {}

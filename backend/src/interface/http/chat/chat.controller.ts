@@ -11,9 +11,7 @@ import {
   ValidationPipe,
   HttpCode,
   HttpStatus,
-  Sse,
 } from '@nestjs/common';
-import { Observable } from 'rxjs';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { PermissionGuard } from '../../guards/permission.guard';
 import { AiRateLimitGuard } from '../../guards/ai-rate-limit.guard';
@@ -23,8 +21,9 @@ import { CreateChatUseCase } from '../../../application/rag/use-cases/create-cha
 import { ListChatsUseCase } from '../../../application/rag/use-cases/list-chats.use-case';
 import { GetChatUseCase } from '../../../application/rag/use-cases/get-chat.use-case';
 import { DeleteChatUseCase } from '../../../application/rag/use-cases/delete-chat.use-case';
-import { ChatWithRagUseCase } from '../../../application/rag/use-cases/chat-with-rag.use-case';
-import { CreateChatDto, SendMessageDto } from '../../../application/rag/dtos/chat.dto';
+import { PrepareRagStreamUseCase } from '../../../application/rag/use-cases/prepare-rag-stream.use-case';
+import { SaveAssistantMessageUseCase } from '../../../application/rag/use-cases/save-assistant-message.use-case';
+import { CreateChatDto, SendMessageDto, SaveAssistantMessageDto } from '../../../application/rag/dtos/chat.dto';
 import { User } from '../../../domain/user/entities/user.entity';
 
 @Controller('chats')
@@ -36,7 +35,8 @@ export class ChatController {
     private readonly listChatsUseCase: ListChatsUseCase,
     private readonly getChatUseCase: GetChatUseCase,
     private readonly deleteChatUseCase: DeleteChatUseCase,
-    private readonly chatWithRagUseCase: ChatWithRagUseCase,
+    private readonly prepareRagStreamUseCase: PrepareRagStreamUseCase,
+    private readonly saveAssistantMessageUseCase: SaveAssistantMessageUseCase,
   ) {}
 
   @Post()
@@ -55,27 +55,35 @@ export class ChatController {
   @Get(':id')
   @RequirePermission('chat:read-own')
   async getChat(@Param('id') id: string, @CurrentUser() user: any) {
-    const isAdmin = user.role === 'admin';
-    return this.getChatUseCase.execute(id, user.id, isAdmin);
+    return this.getChatUseCase.execute(id, user.id, user.role === 'admin');
   }
 
   @Delete(':id')
   @RequirePermission('chat:read-own')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteChat(@Param('id') id: string, @CurrentUser() user: any) {
-    const isAdmin = user.role === 'admin';
-    await this.deleteChatUseCase.execute(id, user.id, isAdmin);
+    await this.deleteChatUseCase.execute(id, user.id, user.role === 'admin');
   }
 
   @Post(':id/messages')
-  @Sse(':id/messages')
   @RequirePermission('ai:chat-rag')
   @UseGuards(AiRateLimitGuard)
-  sendMessage(
+  async prepareStream(
     @Param('id') chatId: string,
     @Body() dto: SendMessageDto,
     @CurrentUser() user: User,
-  ): Observable<MessageEvent> {
-    return this.chatWithRagUseCase.execute(chatId, dto, user);
+  ) {
+    return this.prepareRagStreamUseCase.execute(chatId, dto, user);
+  }
+
+  @Post(':id/messages/complete')
+  @RequirePermission('ai:chat-rag')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async saveAssistantMessage(
+    @Param('id') chatId: string,
+    @Body() dto: SaveAssistantMessageDto,
+    @CurrentUser() user: User,
+  ): Promise<void> {
+    await this.saveAssistantMessageUseCase.execute(chatId, dto, user);
   }
 }

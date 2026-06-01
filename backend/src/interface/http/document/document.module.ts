@@ -5,12 +5,11 @@ import { ListDocumentsUseCase } from '../../../application/document/use-cases/li
 import { DeleteDocumentUseCase } from '../../../application/document/use-cases/delete-document.use-case';
 import { TypeOrmDatabaseModule } from '../../../infrastructure/database/typeorm/typeorm.module';
 import { AiModule } from '../../../infrastructure/ai/ai.module';
-import { QdrantModule } from '../../../infrastructure/database/qdrant/qdrant.module';
 import { LocalFileService } from '../../../infrastructure/storage/local-file.service';
 import { AuditLogService } from '../../../application/system/services/audit-log.service';
 
 @Module({
-  imports: [TypeOrmDatabaseModule, AiModule, QdrantModule],
+  imports: [TypeOrmDatabaseModule, AiModule],
   controllers: [DocumentController],
   providers: [
     UploadDocumentUseCase,
