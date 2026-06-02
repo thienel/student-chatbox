@@ -28,6 +28,8 @@ import { AuditLogTypeOrmRepository } from './repositories/audit-log.typeorm-repo
 import { AiUsageLogTypeOrmRepository } from './repositories/ai-usage-log.typeorm-repository';
 import { FlashcardTypeOrmRepository } from './repositories/flashcard.typeorm-repository';
 import { ExamTypeOrmRepository } from './repositories/exam.typeorm-repository';
+import { BookmarkOrmEntity } from './orm-entities/bookmark.orm-entity';
+import { BookmarkTypeOrmRepository } from './repositories/bookmark.typeorm-repository';
 import { TOKENS } from '../../../shared/constants/tokens';
 
 const ormEntities = [
@@ -47,6 +49,7 @@ const ormEntities = [
   ExamOrmEntity,
   QuestionOrmEntity,
   ExamAttemptOrmEntity,
+  BookmarkOrmEntity,
 ];
 
 @Module({
@@ -76,6 +79,7 @@ const ormEntities = [
     AiUsageLogTypeOrmRepository,
     FlashcardTypeOrmRepository,
     ExamTypeOrmRepository,
+    BookmarkTypeOrmRepository,
     { provide: TOKENS.USER_REPO, useClass: UserTypeOrmRepository },
     { provide: TOKENS.ROLE_REPO, useClass: RoleTypeOrmRepository },
     { provide: TOKENS.REFRESH_TOKEN_REPO, useClass: RefreshTokenTypeOrmRepository },
@@ -87,6 +91,7 @@ const ormEntities = [
     { provide: TOKENS.AI_USAGE_LOG_REPO, useClass: AiUsageLogTypeOrmRepository },
     { provide: TOKENS.FLASHCARD_REPO, useClass: FlashcardTypeOrmRepository },
     { provide: TOKENS.EXAM_REPO, useClass: ExamTypeOrmRepository },
+    { provide: TOKENS.BOOKMARK_REPO, useClass: BookmarkTypeOrmRepository },
   ],
   exports: [
     TypeOrmModule,
@@ -101,6 +106,7 @@ const ormEntities = [
     { provide: TOKENS.AI_USAGE_LOG_REPO, useClass: AiUsageLogTypeOrmRepository },
     { provide: TOKENS.FLASHCARD_REPO, useClass: FlashcardTypeOrmRepository },
     { provide: TOKENS.EXAM_REPO, useClass: ExamTypeOrmRepository },
+    { provide: TOKENS.BOOKMARK_REPO, useClass: BookmarkTypeOrmRepository },
     UserTypeOrmRepository,
     RoleTypeOrmRepository,
     RefreshTokenTypeOrmRepository,
@@ -112,6 +118,7 @@ const ormEntities = [
     AiUsageLogTypeOrmRepository,
     FlashcardTypeOrmRepository,
     ExamTypeOrmRepository,
+    BookmarkTypeOrmRepository,
   ],
 })
 export class TypeOrmDatabaseModule {}
