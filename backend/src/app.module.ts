@@ -7,6 +7,7 @@ import { DocumentModule } from './interface/http/document/document.module';
 import { ChatModule } from './interface/http/chat/chat.module';
 import { SystemModule } from './interface/http/system/system.module';
 import { InternalModule } from './interface/http/internal/internal.module';
+import { FlashcardModule } from './interface/http/flashcard/flashcard.module';
 import { HealthController } from './interface/http/health/health.controller';
 
 @Module({
@@ -22,6 +23,7 @@ import { HealthController } from './interface/http/health/health.controller';
     ChatModule,
     SystemModule,
     InternalModule,
+    FlashcardModule,
   ],
   controllers: [HealthController],
 })
