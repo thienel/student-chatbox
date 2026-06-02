@@ -14,6 +14,9 @@ import { SystemSettingOrmEntity } from './orm-entities/system-setting.orm-entity
 import { AuditLogOrmEntity } from './orm-entities/audit-log.orm-entity';
 import { FlashcardSetOrmEntity } from './orm-entities/flashcard-set.orm-entity';
 import { FlashcardOrmEntity } from './orm-entities/flashcard.orm-entity';
+import { ExamOrmEntity } from './orm-entities/exam.orm-entity';
+import { QuestionOrmEntity } from './orm-entities/question.orm-entity';
+import { ExamAttemptOrmEntity } from './orm-entities/exam-attempt.orm-entity';
 import { UserTypeOrmRepository } from './repositories/user.typeorm-repository';
 import { RoleTypeOrmRepository } from './repositories/role.typeorm-repository';
 import { RefreshTokenTypeOrmRepository } from './repositories/refresh-token.typeorm-repository';
@@ -24,6 +27,7 @@ import { SystemSettingTypeOrmRepository } from './repositories/system-setting.ty
 import { AuditLogTypeOrmRepository } from './repositories/audit-log.typeorm-repository';
 import { AiUsageLogTypeOrmRepository } from './repositories/ai-usage-log.typeorm-repository';
 import { FlashcardTypeOrmRepository } from './repositories/flashcard.typeorm-repository';
+import { ExamTypeOrmRepository } from './repositories/exam.typeorm-repository';
 import { TOKENS } from '../../../shared/constants/tokens';
 
 const ormEntities = [
@@ -40,6 +44,9 @@ const ormEntities = [
   AuditLogOrmEntity,
   FlashcardSetOrmEntity,
   FlashcardOrmEntity,
+  ExamOrmEntity,
+  QuestionOrmEntity,
+  ExamAttemptOrmEntity,
 ];
 
 @Module({
@@ -68,6 +75,7 @@ const ormEntities = [
     AuditLogTypeOrmRepository,
     AiUsageLogTypeOrmRepository,
     FlashcardTypeOrmRepository,
+    ExamTypeOrmRepository,
     { provide: TOKENS.USER_REPO, useClass: UserTypeOrmRepository },
     { provide: TOKENS.ROLE_REPO, useClass: RoleTypeOrmRepository },
     { provide: TOKENS.REFRESH_TOKEN_REPO, useClass: RefreshTokenTypeOrmRepository },
@@ -78,6 +86,7 @@ const ormEntities = [
     { provide: TOKENS.AUDIT_LOG_REPO, useClass: AuditLogTypeOrmRepository },
     { provide: TOKENS.AI_USAGE_LOG_REPO, useClass: AiUsageLogTypeOrmRepository },
     { provide: TOKENS.FLASHCARD_REPO, useClass: FlashcardTypeOrmRepository },
+    { provide: TOKENS.EXAM_REPO, useClass: ExamTypeOrmRepository },
   ],
   exports: [
     TypeOrmModule,
@@ -91,6 +100,7 @@ const ormEntities = [
     { provide: TOKENS.AUDIT_LOG_REPO, useClass: AuditLogTypeOrmRepository },
     { provide: TOKENS.AI_USAGE_LOG_REPO, useClass: AiUsageLogTypeOrmRepository },
     { provide: TOKENS.FLASHCARD_REPO, useClass: FlashcardTypeOrmRepository },
+    { provide: TOKENS.EXAM_REPO, useClass: ExamTypeOrmRepository },
     UserTypeOrmRepository,
     RoleTypeOrmRepository,
     RefreshTokenTypeOrmRepository,
@@ -101,6 +111,7 @@ const ormEntities = [
     AuditLogTypeOrmRepository,
     AiUsageLogTypeOrmRepository,
     FlashcardTypeOrmRepository,
+    ExamTypeOrmRepository,
   ],
 })
 export class TypeOrmDatabaseModule {}
