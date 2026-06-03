@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { FileText, MessageSquare, Users } from 'lucide-react'
+import { FileText, MessageSquare, Users, Layers, ClipboardList } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface SubjectTabsProps {
@@ -12,6 +12,8 @@ export function SubjectTabs({ subjectId }: SubjectTabsProps) {
   const tabs = [
     { label: 'Documents', href: `/subjects/${subjectId}/documents`, icon: FileText },
     { label: 'Chat', href: `/subjects/${subjectId}/chat`, icon: MessageSquare },
+    { label: 'Flashcards', href: `/subjects/${subjectId}/flashcards`, icon: Layers },
+    { label: 'Exams', href: `/subjects/${subjectId}/exams`, icon: ClipboardList },
     { label: 'Members', href: `/subjects/${subjectId}/members`, icon: Users },
   ]
 
