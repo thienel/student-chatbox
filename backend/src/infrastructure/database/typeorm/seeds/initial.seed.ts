@@ -65,6 +65,22 @@ async function seed() {
       { name: 'ai:chat-rag', description: 'Sử dụng AI chat RAG' },
       { name: 'system:manage-settings', description: 'Quản lý cài đặt hệ thống' },
       { name: 'system:read-audit-log', description: 'Xem audit log' },
+      // Flashcard
+      { name: 'flashcard:create', description: 'Tạo bộ flashcard' },
+      { name: 'flashcard:delete', description: 'Xoá bộ flashcard' },
+      { name: 'flashcard:read', description: 'Xem flashcard' },
+      { name: 'ai:generate-flashcard', description: 'AI tạo flashcard' },
+      // Exam
+      { name: 'exam:read', description: 'Xem đề thi' },
+      { name: 'exam:take', description: 'Làm bài thi' },
+      { name: 'ai:generate-exam', description: 'AI tạo đề thi' },
+      // Bookmark
+      { name: 'bookmark:manage', description: 'Quản lý bookmarks' },
+      // Analytics
+      { name: 'analytics:read-own', description: 'Xem analytics môn học của mình' },
+      { name: 'analytics:read-all', description: 'Xem toàn bộ analytics' },
+      // RBAC
+      { name: 'rbac:manage', description: 'Quản lý roles và permissions' },
     ];
 
     const permissions: Record<string, PermissionOrmEntity> = {};
@@ -94,6 +110,15 @@ async function seed() {
       'chat:create',
       'chat:read-own',
       'ai:chat-rag',
+      'flashcard:create',
+      'flashcard:delete',
+      'flashcard:read',
+      'ai:generate-flashcard',
+      'exam:read',
+      'exam:take',
+      'ai:generate-exam',
+      'bookmark:manage',
+      'analytics:read-own',
     ];
     const lecturerRole = await roleRepo.findOne({
       where: { id: roles['lecturer'].id },
@@ -110,6 +135,12 @@ async function seed() {
       'chat:create',
       'chat:read-own',
       'ai:chat-rag',
+      'flashcard:read',
+      'ai:generate-flashcard',
+      'exam:read',
+      'exam:take',
+      'ai:generate-exam',
+      'bookmark:manage',
     ];
     const studentRole = await roleRepo.findOne({
       where: { id: roles['student'].id },
@@ -125,6 +156,14 @@ async function seed() {
       { key: 'ai_daily_limit.admin.chat_rag', value: -1, description: '-1 = unlimited' },
       { key: 'rag.top_k', value: 5, description: 'Số chunks lấy từ Qdrant' },
       { key: 'rag.min_score', value: 0.4, description: 'Ngưỡng score tối thiểu của chunk (0.4 phù hợp với text-embedding-3-small)' },
+      // Flashcard limits
+      { key: 'ai_daily_limit.student.generate_flashcard', value: 5, description: 'Số lần generate flashcard / ngày cho SV' },
+      { key: 'ai_daily_limit.lecturer.generate_flashcard', value: 20, description: 'Số lần generate flashcard / ngày cho GV' },
+      { key: 'ai_daily_limit.admin.generate_flashcard', value: -1, description: 'unlimited' },
+      // Exam limits
+      { key: 'ai_daily_limit.student.generate_exam', value: 3, description: 'Số lần gen đề thi / ngày cho SV' },
+      { key: 'ai_daily_limit.lecturer.generate_exam', value: 10, description: 'Số lần gen đề thi / ngày cho GV' },
+      { key: 'ai_daily_limit.admin.generate_exam', value: -1, description: 'unlimited' },
     ];
 
     for (const s of settingsDefaults) {

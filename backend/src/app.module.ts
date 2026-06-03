@@ -7,6 +7,11 @@ import { DocumentModule } from './interface/http/document/document.module';
 import { ChatModule } from './interface/http/chat/chat.module';
 import { SystemModule } from './interface/http/system/system.module';
 import { InternalModule } from './interface/http/internal/internal.module';
+import { FlashcardModule } from './interface/http/flashcard/flashcard.module';
+import { ExamModule } from './interface/http/exam/exam.module';
+import { BookmarkModule } from './interface/http/bookmark/bookmark.module';
+import { AnalyticsModule } from './interface/http/analytics/analytics.module';
+import { RbacModule } from './interface/http/rbac/rbac.module';
 import { HealthController } from './interface/http/health/health.controller';
 
 @Module({
@@ -22,6 +27,11 @@ import { HealthController } from './interface/http/health/health.controller';
     ChatModule,
     SystemModule,
     InternalModule,
+    FlashcardModule,
+    ExamModule,
+    BookmarkModule,
+    AnalyticsModule,
+    RbacModule,
   ],
   controllers: [HealthController],
 })

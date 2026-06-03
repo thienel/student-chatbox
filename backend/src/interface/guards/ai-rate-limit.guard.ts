@@ -27,8 +27,10 @@ export class AiRateLimitGuard implements CanActivate {
     const user = request.user;
     if (!user) return false;
 
-    const feature =
-      this.reflector.get<string>(AI_FEATURE_KEY, context.getHandler()) ?? 'chat_rag';
+    const feature: import('../../domain/system/entities/ai-usage-log.entity').AiFeature =
+      this.reflector.get<import('../../domain/system/entities/ai-usage-log.entity').AiFeature>(
+        AI_FEATURE_KEY, context.getHandler()
+      ) ?? 'chat_rag';
 
     const role = user.role;
     const settingKey = `ai_daily_limit.${role}.${feature}`;
