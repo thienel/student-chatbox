@@ -95,3 +95,110 @@ export interface AdminStats {
   totalSubjects: number;
   totalDocuments: number;
 }
+
+// Flashcards
+export interface FlashcardSet {
+  id: string;
+  subjectId: string;
+  title: string;
+  description?: string;
+  isPublic: boolean;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Flashcard {
+  id: string;
+  setId: string;
+  front: string;
+  back: string;
+  position: number;
+  createdAt: string;
+}
+
+export interface FlashcardSetWithCards extends FlashcardSet {
+  cards: Flashcard[];
+}
+
+// Exams
+export type ExamDifficulty = 'easy' | 'medium' | 'hard';
+export type ExamType = 'official' | 'ai_generated';
+
+export interface QuestionOption {
+  key: string;
+  text: string;
+}
+
+export interface Question {
+  id: string;
+  examId: string;
+  content: string;
+  options: QuestionOption[];
+  correctAnswer?: string;  // only in results
+  explanation?: string;    // only in results
+  position: number;
+}
+
+export interface Exam {
+  id: string;
+  subjectId: string;
+  title: string;
+  description?: string;
+  type: ExamType;
+  difficulty?: ExamDifficulty;
+  durationMinutes: number;
+  questionCount: number;
+  isPublic: boolean;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ExamAttempt {
+  id: string;
+  examId: string;
+  userId: string;
+  answers: Record<string, string>;
+  score?: number;
+  totalQuestions?: number;
+  correctCount?: number;
+  status: 'in_progress' | 'completed' | 'abandoned';
+  startedAt: string;
+  completedAt?: string;
+  timeSpentSecs?: number;
+}
+
+// Bookmarks
+export type BookmarkResourceType = 'document' | 'flashcard_set' | 'exam' | 'message';
+
+export interface Bookmark {
+  id: string;
+  userId: string;
+  resourceType: BookmarkResourceType;
+  resourceId: string;
+  note?: string;
+  createdAt: string;
+}
+
+// RBAC
+export interface Role {
+  id: string;
+  name: string;
+  description?: string;
+  isSystem: boolean;
+  permissions?: string[];
+  createdAt: string;
+}
+
+export interface Permission {
+  id: string;
+  name: string;
+  description: string;
+}
+
+// Analytics
+export interface AiUsageStats {
+  allTime: Record<string, number>;
+  today: Record<string, number>;
+}
