@@ -43,7 +43,7 @@ export default function ExamHistoryPage() {
                   {(attempt as any).exam?.title ?? 'Exam'}
                 </p>
                 <p className="text-xs text-zinc-500 mt-0.5">
-                  {new Date(attempt.submittedAt ?? attempt.startedAt).toLocaleDateString()}
+                  {new Date(attempt.completedAt ?? attempt.startedAt).toLocaleDateString()}
                   {attempt.timeSpentSecs ? ` · ${Math.round(attempt.timeSpentSecs / 60)} min` : ''}
                 </p>
               </div>

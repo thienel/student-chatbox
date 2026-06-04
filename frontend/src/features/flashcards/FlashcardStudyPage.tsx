@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, RotateCcw, Shuffle, ChevronLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import type { Flashcard } from '@/types'
 import { useFlashcardSet } from './queries'
 
 function shuffle<T>(arr: T[]): T[] {
@@ -17,16 +18,16 @@ function shuffle<T>(arr: T[]): T[] {
 export default function FlashcardStudyPage() {
   const { id: subjectId = '', setId = '' } = useParams<{ id: string; setId: string }>()
   const navigate = useNavigate()
-  const { data: set, isLoading } = useFlashcardSet(subjectId, setId)
+  const { data, isLoading } = useFlashcardSet(subjectId, setId)
 
-  const [cards, setCards] = useState<typeof set extends { cards: infer C } ? C : never[]>([])
+  const [cards, setCards] = useState<Flashcard[]>([])
   const [index, setIndex] = useState(0)
   const [flipped, setFlipped] = useState(false)
   const [isAnimating, setIsAnimating] = useState(false)
 
   useEffect(() => {
-    if (set?.cards) setCards(set.cards as typeof cards)
-  }, [set])
+    if (data?.cards) setCards(data.cards)
+  }, [data])
 
   const total = cards.length
   const card = cards[index]
@@ -57,7 +58,7 @@ export default function FlashcardStudyPage() {
   }
 
   const doReset = () => {
-    if (set?.cards) setCards(set.cards as typeof cards)
+    if (data?.cards) setCards(data.cards)
     setIndex(0)
     setFlipped(false)
   }
@@ -81,7 +82,7 @@ export default function FlashcardStudyPage() {
     )
   }
 
-  if (!set || total === 0) return null
+  if (!data || total === 0) return null
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-6">
@@ -92,7 +93,7 @@ export default function FlashcardStudyPage() {
           className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-zinc-50 transition-colors duration-150"
         >
           <ChevronLeft className="h-4 w-4" />
-          {set.title}
+          {data.set.title}
         </button>
         <div className="flex items-center gap-2">
           <button

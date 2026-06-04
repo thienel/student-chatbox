@@ -103,7 +103,7 @@ export default function TakeExamPage() {
               )}
             >
               <span className="font-medium mr-2 text-zinc-500">{opt.key}.</span>
-              {opt.value}
+              {opt.text}
             </button>
           ))}
         </div>
