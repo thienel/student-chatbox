@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Home, BookOpen, MessageSquare, ShieldCheck, Settings } from 'lucide-react'
+import { Home, BookOpen, MessageSquare, Bookmark, ShieldCheck, Settings } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/store/useAuthStore'
@@ -51,6 +51,7 @@ export function Dock() {
         <DockItem to="/home" icon={Home} label="Home" exact />
         <DockItem to="/subjects" icon={BookOpen} label="Subjects" />
         <DockItem to="/chats" icon={MessageSquare} label="My Chats" />
+        <DockItem to="/bookmarks" icon={Bookmark} label="Bookmarks" />
         {isAdmin && (
           <>
             <div className="w-px h-5 bg-zinc-800 mx-1" />
