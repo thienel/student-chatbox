@@ -4,7 +4,6 @@ import { ClipboardList, Sparkles, ChevronRight, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
@@ -107,9 +106,11 @@ export default function SubjectExamsPage() {
                   {exam.questionCount} questions · {new Date(exam.createdAt).toLocaleDateString()}
                 </p>
               </div>
-              <Badge className="shrink-0 text-xs font-medium bg-zinc-800 text-zinc-400 border-zinc-700 rounded-md">
-                {difficultyLabel[exam.difficulty]}
-              </Badge>
+              {exam.difficulty && (
+                <Badge className="shrink-0 text-xs font-medium bg-zinc-800 text-zinc-400 border-zinc-700 rounded-md">
+                  {difficultyLabel[exam.difficulty]}
+                </Badge>
+              )}
               <ChevronRight className="h-4 w-4 text-zinc-600 shrink-0 group-hover:text-zinc-400 transition-colors duration-150" />
             </Link>
           ))}
@@ -148,16 +149,15 @@ export default function SubjectExamsPage() {
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-zinc-400 uppercase tracking-wide">Difficulty</Label>
-                <Select value={difficulty} onValueChange={v => setDifficulty(v as ExamDifficulty)}>
-                  <SelectTrigger className="bg-zinc-800 border-zinc-700 text-zinc-50 h-9 text-sm rounded-md focus:ring-1 focus:ring-zinc-600">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-zinc-900 border-zinc-700 rounded-md">
-                    <SelectItem value="easy" className="text-zinc-300 focus:bg-zinc-800">Easy</SelectItem>
-                    <SelectItem value="medium" className="text-zinc-300 focus:bg-zinc-800">Medium</SelectItem>
-                    <SelectItem value="hard" className="text-zinc-300 focus:bg-zinc-800">Hard</SelectItem>
-                  </SelectContent>
-                </Select>
+                <select
+                  value={difficulty}
+                  onChange={e => setDifficulty(e.target.value as ExamDifficulty)}
+                  className="w-full h-9 px-3 bg-zinc-800 border border-zinc-700 text-zinc-50 text-sm rounded-md focus:outline-none focus:ring-1 focus:ring-zinc-600"
+                >
+                  <option value="easy">Easy</option>
+                  <option value="medium">Medium</option>
+                  <option value="hard">Hard</option>
+                </select>
               </div>
             </div>
           </div>

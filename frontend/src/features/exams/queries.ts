@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { examsApi } from '@/api/endpoints/exams'
+import type { ExamDifficulty } from '@/types'
 
 export const examKeys = {
   list: (subjectId: string) => ['exams', subjectId] as const,
@@ -27,7 +28,7 @@ export function useExam(subjectId: string, examId: string) {
 export function useGenerateExam(subjectId: string) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (data: { questionCount?: number; difficulty?: string; topic?: string }) =>
+    mutationFn: (data: { questionCount?: number; difficulty?: ExamDifficulty; topic?: string }) =>
       examsApi.generate(subjectId, data),
     onSuccess: () => qc.invalidateQueries({ queryKey: examKeys.list(subjectId) }),
   })

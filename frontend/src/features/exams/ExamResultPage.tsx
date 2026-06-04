@@ -91,7 +91,7 @@ export default function ExamResultPage() {
                       )}
                     >
                       <span className="font-medium mr-1.5 text-zinc-500">{opt.key}.</span>
-                      {opt.value}
+                      {opt.text}
                       {isCorrectOpt && <span className="ml-2 text-xs text-zinc-500">✓ Correct</span>}
                     </div>
                   )

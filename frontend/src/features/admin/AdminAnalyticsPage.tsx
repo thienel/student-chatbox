@@ -22,6 +22,10 @@ export default function AdminAnalyticsPage() {
     queryFn: analyticsApi.aiUsage,
   })
 
+  const aiFeatures = aiUsage
+    ? Object.keys({ ...aiUsage.allTime, ...aiUsage.today })
+    : []
+
   return (
     <div className="max-w-5xl mx-auto px-6 py-6">
       <div className="mb-6">
@@ -32,17 +36,16 @@ export default function AdminAnalyticsPage() {
       {/* Overview stats */}
       <p className="text-xs font-medium text-zinc-500 uppercase tracking-wide mb-3">Overview</p>
       {ovLoading ? (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-          {Array.from({ length: 4 }).map((_, i) => (
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-8">
+          {Array.from({ length: 3 }).map((_, i) => (
             <Skeleton key={i} className="h-20 rounded-lg bg-zinc-900" />
           ))}
         </div>
       ) : overview ? (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-8">
           <StatCard label="Total Users" value={overview.totalUsers} />
           <StatCard label="Total Subjects" value={overview.totalSubjects} />
           <StatCard label="Total Documents" value={overview.totalDocuments} />
-          <StatCard label="Total Chats" value={overview.totalChats} />
         </div>
       ) : null}
 
@@ -54,31 +57,33 @@ export default function AdminAnalyticsPage() {
             <Skeleton key={i} className="h-14 rounded-lg bg-zinc-900" />
           ))}
         </div>
-      ) : aiUsage ? (
+      ) : aiUsage && aiFeatures.length > 0 ? (
         <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
-          <div className="grid grid-cols-4 px-4 py-2.5 border-b border-zinc-800 bg-zinc-950">
+          <div className="grid grid-cols-3 px-4 py-2.5 border-b border-zinc-800 bg-zinc-950">
             <p className="text-xs font-medium text-zinc-500">Feature</p>
             <p className="text-xs font-medium text-zinc-500 text-right">All-time</p>
             <p className="text-xs font-medium text-zinc-500 text-right">Today</p>
-            <p className="text-xs font-medium text-zinc-500 text-right">Avg/day</p>
           </div>
-          {aiUsage.features.map((f, i) => (
+          {aiFeatures.map((feature, i) => (
             <div
-              key={f.feature}
+              key={feature}
               className={[
-                'grid grid-cols-4 px-4 py-3',
-                i < aiUsage.features.length - 1 ? 'border-b border-zinc-800' : '',
+                'grid grid-cols-3 px-4 py-3',
+                i < aiFeatures.length - 1 ? 'border-b border-zinc-800' : '',
               ].join(' ')}
             >
-              <p className="text-sm text-zinc-300 font-medium">{f.feature}</p>
-              <p className="text-sm text-zinc-50 text-right tabular-nums">{f.total}</p>
-              <p className="text-sm text-zinc-50 text-right tabular-nums">{f.today}</p>
-              <p className="text-sm text-zinc-400 text-right tabular-nums">
-                {f.avgPerDay != null ? f.avgPerDay.toFixed(1) : '—'}
+              <p className="text-sm text-zinc-300 font-medium">{feature}</p>
+              <p className="text-sm text-zinc-50 text-right tabular-nums">
+                {aiUsage.allTime[feature] ?? 0}
+              </p>
+              <p className="text-sm text-zinc-50 text-right tabular-nums">
+                {aiUsage.today[feature] ?? 0}
               </p>
             </div>
           ))}
         </div>
+      ) : aiUsage ? (
+        <p className="text-sm text-zinc-600">No AI usage recorded yet.</p>
       ) : null}
     </div>
   )

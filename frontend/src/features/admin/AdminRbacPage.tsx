@@ -4,7 +4,6 @@ import { rbacApi } from '@/api/endpoints/rbac'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useToast } from '@/hooks/use-toast'
@@ -62,7 +61,7 @@ export default function AdminRbacPage() {
     setExpandedRole(role.id)
     setRolePerms(prev => ({
       ...prev,
-      [role.id]: role.permissions?.map(p => p.name) ?? [],
+      [role.id]: role.permissions ?? [],
     }))
   }
 
@@ -132,19 +131,23 @@ export default function AdminRbacPage() {
                       <div key={group}>
                         <p className="text-xs font-medium text-zinc-500 uppercase tracking-wide mb-2">{group}</p>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                          {perms.map(permName => (
-                            <label
-                              key={permName}
-                              className="flex items-center gap-2 text-xs text-zinc-400 cursor-pointer hover:text-zinc-200 transition-colors duration-150"
-                            >
-                              <Checkbox
-                                checked={(rolePerms[role.id] ?? []).includes(permName)}
-                                onCheckedChange={() => togglePerm(role.id, permName)}
-                                className="border-zinc-600 data-[state=checked]:bg-zinc-50 data-[state=checked]:border-zinc-50 data-[state=checked]:text-zinc-950 h-3.5 w-3.5 rounded"
-                              />
-                              <span>{permName.split(':')[1]}</span>
-                            </label>
-                          ))}
+                          {perms.map(permName => {
+                            const checked = (rolePerms[role.id] ?? []).includes(permName)
+                            return (
+                              <label
+                                key={permName}
+                                className="flex items-center gap-2 text-xs text-zinc-400 cursor-pointer hover:text-zinc-200 transition-colors duration-150"
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={checked}
+                                  onChange={() => togglePerm(role.id, permName)}
+                                  className="h-3.5 w-3.5 rounded border-zinc-600 bg-zinc-800 accent-zinc-50 cursor-pointer"
+                                />
+                                <span>{permName.split(':')[1]}</span>
+                              </label>
+                            )
+                          })}
                         </div>
                       </div>
                     ))}

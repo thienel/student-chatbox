@@ -53,10 +53,10 @@ export default function ExamDetailPage() {
                 <BarChart2 className="h-3.5 w-3.5" />
                 {exam.questionCount} questions
               </div>
-              {exam.timeLimitMins && (
+              {exam.durationMinutes && (
                 <div className="flex items-center gap-1.5 text-xs text-zinc-500">
                   <Clock className="h-3.5 w-3.5" />
-                  {exam.timeLimitMins} min
+                  {exam.durationMinutes} min
                 </div>
               )}
               <Badge className="text-xs font-medium bg-zinc-800 text-zinc-400 border-zinc-700 rounded-md capitalize">
@@ -73,8 +73,8 @@ export default function ExamDetailPage() {
           <li>· Answer all {exam.questionCount} multiple-choice questions.</li>
           <li>· Each question has one correct answer.</li>
           <li>· Your score will be shown upon submission.</li>
-          {exam.timeLimitMins && (
-            <li>· You have {exam.timeLimitMins} minutes to complete this exam.</li>
+          {exam.durationMinutes && (
+            <li>· You have {exam.durationMinutes} minutes to complete this exam.</li>
           )}
         </ul>
       </div>
