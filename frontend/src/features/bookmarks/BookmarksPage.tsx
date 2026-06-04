@@ -23,13 +23,8 @@ const ResourceIcon: Record<BookmarkResourceType, React.ElementType> = {
   message: MessageSquare,
 }
 
-function resourceHref(type: BookmarkResourceType, resourceId: string) {
-  switch (type) {
-    case 'document': return '#'
-    case 'flashcard_set': return '#'
-    case 'exam': return '#'
-    case 'message': return '#'
-  }
+function resourceHref(_type: BookmarkResourceType) {
+  return '#'
 }
 
 export default function BookmarksPage() {
@@ -88,7 +83,7 @@ export default function BookmarksPage() {
         <div className="space-y-2">
           {bookmarks.map(bm => {
             const Icon = ResourceIcon[bm.resourceType]
-            const href = resourceHref(bm.resourceType, bm.resourceId)
+            const href = resourceHref(bm.resourceType)
             return (
               <div
                 key={bm.id}
