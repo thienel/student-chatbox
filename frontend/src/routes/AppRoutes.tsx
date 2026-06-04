@@ -24,6 +24,8 @@ import AdminUsersPage from '@/features/admin/AdminUsersPage'
 import AdminSubjectsPage from '@/features/admin/AdminSubjectsPage'
 import AdminSettingsPage from '@/features/admin/AdminSettingsPage'
 import AdminAuditLogsPage from '@/features/admin/AdminAuditLogsPage'
+import AdminAnalyticsPage from '@/features/admin/AdminAnalyticsPage'
+import AdminRbacPage from '@/features/admin/AdminRbacPage'
 import SettingsPage from '@/features/settings/SettingsPage'
 
 interface ProtectedProps {
@@ -79,6 +81,8 @@ export default function AppRoutes() {
         <Route path="/admin" element={<AdminDashboardPage />} />
         <Route path="/admin/users" element={<AdminUsersPage />} />
         <Route path="/admin/subjects" element={<AdminSubjectsPage />} />
+        <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
+        <Route path="/admin/rbac" element={<AdminRbacPage />} />
         <Route path="/admin/settings" element={<AdminSettingsPage />} />
         <Route path="/admin/audit-logs" element={<AdminAuditLogsPage />} />
       </Route>

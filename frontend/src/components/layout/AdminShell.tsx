@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from 'react-router-dom'
-import { Users, BookOpen, Settings, ScrollText, LayoutDashboard } from 'lucide-react'
+import { Users, BookOpen, Settings, ScrollText, LayoutDashboard, BarChart2, Shield } from 'lucide-react'
 import { Topbar } from './Topbar'
 import { Dock } from './Dock'
 import { Toaster } from '@/components/ui/toaster'
@@ -10,6 +10,8 @@ const adminTabs = [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard, exact: true },
   { label: 'Users', href: '/admin/users', icon: Users },
   { label: 'Subjects', href: '/admin/subjects', icon: BookOpen },
+  { label: 'Analytics', href: '/admin/analytics', icon: BarChart2 },
+  { label: 'Roles', href: '/admin/rbac', icon: Shield },
   { label: 'Settings', href: '/admin/settings', icon: Settings },
   { label: 'Audit Logs', href: '/admin/audit-logs', icon: ScrollText },
 ]
