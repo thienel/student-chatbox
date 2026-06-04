@@ -1,5 +1,9 @@
-# Development override — chỉ chạy services infrastructure, không build app containers
+# Development override — chỉ chạy infrastructure services, không build app containers
 # Usage: docker-compose -f docker-compose.dev.yml up -d
+#
+# Chạy backend và langchain trực tiếp trên máy:
+#   cd backend && npm run start:dev
+#   cd langchain && uvicorn app.main:app --reload
 services:
   postgres:
     image: postgres:16-alpine
