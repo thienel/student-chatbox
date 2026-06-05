@@ -45,7 +45,9 @@ export class PrepareRagStreamUseCase {
       userId: user.id,
     });
 
-    const streamUrl = this.config.get<string>('AI_SERVICE_URL', 'http://localhost:8000');
+    const streamUrl =
+      this.config.get<string>('PUBLIC_STREAM_URL') ||
+      this.config.get<string>('AI_SERVICE_URL', 'http://localhost:8000');
 
     return {
       streamToken,
