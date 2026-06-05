@@ -30,6 +30,7 @@ import { FlashcardTypeOrmRepository } from './repositories/flashcard.typeorm-rep
 import { ExamTypeOrmRepository } from './repositories/exam.typeorm-repository';
 import { BookmarkOrmEntity } from './orm-entities/bookmark.orm-entity';
 import { BookmarkTypeOrmRepository } from './repositories/bookmark.typeorm-repository';
+import { DatabaseSeederService } from './seeds/seed.service';
 import { TOKENS } from '../../../shared/constants/tokens';
 
 const ormEntities = [
@@ -80,6 +81,7 @@ const ormEntities = [
     FlashcardTypeOrmRepository,
     ExamTypeOrmRepository,
     BookmarkTypeOrmRepository,
+    DatabaseSeederService,
     { provide: TOKENS.USER_REPO, useClass: UserTypeOrmRepository },
     { provide: TOKENS.ROLE_REPO, useClass: RoleTypeOrmRepository },
     { provide: TOKENS.REFRESH_TOKEN_REPO, useClass: RefreshTokenTypeOrmRepository },
