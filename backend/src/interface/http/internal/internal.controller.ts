@@ -1,13 +1,21 @@
 import { Controller, Patch, Param, Body, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { Inject } from '@nestjs/common';
+import { IsIn, IsNumber, IsOptional, IsString } from 'class-validator';
 import { InternalKeyGuard } from '../../guards/internal-key.guard';
 import { IDocumentRepository } from '../../../domain/document/repositories/document.repository.interface';
 import { DocumentStatus } from '../../../domain/document/entities/document.entity';
 import { TOKENS } from '../../../shared/constants/tokens';
 
 class ProcessingResultDto {
+  @IsIn(['ready', 'failed'])
   status: 'ready' | 'failed';
+
+  @IsOptional()
+  @IsNumber()
   chunkCount?: number;
+
+  @IsOptional()
+  @IsString()
   error?: string;
 }
 
