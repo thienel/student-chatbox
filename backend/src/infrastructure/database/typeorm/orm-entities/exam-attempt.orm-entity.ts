@@ -26,10 +26,10 @@ export class ExamAttemptOrmEntity {
   @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
   score: number | null;
 
-  @Column({ name: 'total_questions', nullable: true })
+  @Column({ type: 'int', name: 'total_questions', nullable: true })
   totalQuestions: number | null;
 
-  @Column({ name: 'correct_count', nullable: true })
+  @Column({ type: 'int', name: 'correct_count', nullable: true })
   correctCount: number | null;
 
   @Column({ length: 20, default: 'in_progress' })
@@ -41,7 +41,7 @@ export class ExamAttemptOrmEntity {
   @Column({ name: 'completed_at', nullable: true, type: 'timestamptz' })
   completedAt: Date | null;
 
-  @Column({ name: 'time_spent_secs', nullable: true })
+  @Column({ type: 'int', name: 'time_spent_secs', nullable: true })
   timeSpentSecs: number | null;
 
   @ManyToOne(() => ExamOrmEntity, { onDelete: 'CASCADE' })
