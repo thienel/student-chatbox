@@ -29,7 +29,7 @@ export class ExamOrmEntity {
   @Column({ length: 30 })
   type: string;
 
-  @Column({ length: 10, nullable: true })
+  @Column({ type: 'varchar', length: 10, nullable: true })
   difficulty: string | null;
 
   @Column({ name: 'duration_minutes', default: 0 })
