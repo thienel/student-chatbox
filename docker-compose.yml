@@ -49,6 +49,8 @@ services:
       AI_SERVICE_SECRET: ${AI_SERVICE_SECRET}
       NESTJS_URL: http://backend:3000/api/v1
       PORT: 8000
+    volumes:
+      - uploads_data:/app/uploads:ro
     ports:
       - "8000:8000"
     healthcheck:
