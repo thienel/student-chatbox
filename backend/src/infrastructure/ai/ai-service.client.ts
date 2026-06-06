@@ -45,6 +45,33 @@ export class AiServiceClient {
     });
   }
 
+  async *streamChat(streamToken: string, payload: object): AsyncGenerator<string> {
+    const url = `${this.aiServiceUrl}/chat/stream`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${streamToken}`,
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok || !response.body) {
+      const text = response.body ? await response.text().catch(() => '') : '';
+      throw new Error(`AI chat stream failed: ${response.status} ${text}`);
+    }
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        yield decoder.decode(value, { stream: true });
+      }
+    } finally {
+      reader.cancel().catch(() => {});
+    }
+  }
+
   async processDocument(documentId: string, filePath: string, subjectId: string): Promise<void> {
     const url = `${this.aiServiceUrl}/documents/process`;
     const response = await fetch(url, {
