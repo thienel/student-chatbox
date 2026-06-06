@@ -4,14 +4,6 @@ import type { MessageSource } from '../types';
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api/v1';
 
-export interface StreamMessage {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  sources?: MessageSource[];
-  createdAt: string;
-}
-
 interface UseChatStreamReturn {
   sendMessage: (
     chatId: string,
@@ -43,53 +35,29 @@ export function useChatStream(): UseChatStreamReturn {
       let finalSources: MessageSource[] = [];
 
       try {
-        // Step 1: Save user message and receive stream token from NestJS
-        const prepareRes = await fetch(`${BASE_URL}/chats/${chatId}/messages`, {
+        // NestJS streams the AI response directly — single round trip
+        const res = await fetch(`${BASE_URL}/chats/${chatId}/messages`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            Accept: 'text/event-stream',
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
           body: JSON.stringify({ content }),
         });
 
-        if (!prepareRes.ok) {
-          const errorData = await prepareRes.json().catch(() => ({})) as {
-            error?: { message?: string };
-          };
-          onError(errorData?.error?.message ?? `HTTP ${prepareRes.status}`);
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({})) as { error?: { message?: string } };
+          onError(errorData?.error?.message ?? `HTTP ${res.status}`);
           return;
         }
 
-        const { streamToken, streamUrl, streamPayload } = await prepareRes.json() as {
-          streamToken: string;
-          streamUrl: string;
-          streamPayload: object;
-        };
-
-        // Step 2: Open SSE stream directly to Python AI service
-        const streamRes = await fetch(`${streamUrl}/chat/stream`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'text/event-stream',
-            Authorization: `Bearer ${streamToken}`,
-          },
-          body: JSON.stringify(streamPayload),
-        });
-
-        if (!streamRes.ok) {
-          const errorData = await streamRes.json().catch(() => ({})) as { detail?: string };
-          onError(errorData?.detail ?? `AI service error: ${streamRes.status}`);
+        if (!res.body) {
+          onError('No response body from server');
           return;
         }
 
-        if (!streamRes.body) {
-          onError('No response body from AI service');
-          return;
-        }
-
-        const reader = streamRes.body.getReader();
+        const reader = res.body.getReader();
         const decoder = new TextDecoder();
         let buffer = '';
 
@@ -110,6 +78,7 @@ export function useChatStream(): UseChatStreamReturn {
                 type: string;
                 content?: string;
                 sources?: MessageSource[];
+                message?: string;
               };
               if (parsed.type === 'chunk' && parsed.content) {
                 fullContent += parsed.content;
@@ -117,24 +86,15 @@ export function useChatStream(): UseChatStreamReturn {
                 onChunk(parsed.content);
               } else if (parsed.type === 'done' && parsed.sources) {
                 finalSources = parsed.sources;
+              } else if (parsed.type === 'error') {
+                onError(parsed.message ?? 'AI service error');
+                return;
               }
             } catch {
               // skip malformed events
             }
           }
         }
-
-        // Step 3: Persist assistant message to NestJS (fire-and-forget is fine here)
-        fetch(`${BASE_URL}/chats/${chatId}/messages/complete`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-          body: JSON.stringify({ content: fullContent, sources: finalSources }),
-        }).catch(() => {
-          // non-critical: message already shown to user
-        });
 
         onDone(finalSources, fullContent);
       } catch (err) {
