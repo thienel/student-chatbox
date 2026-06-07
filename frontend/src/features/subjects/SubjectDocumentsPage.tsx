@@ -1,9 +1,19 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { FileText, Upload, Trash2, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { useSubjectDocuments, useUploadDocument, useDeleteDocument } from './queries'
 import { useAuthStore } from '@/store/useAuthStore'
@@ -26,6 +36,7 @@ export default function SubjectDocumentsPage() {
   const user = useAuthStore(s => s.user)
   const canUpload = user?.role === 'admin' || user?.role === 'lecturer'
   const fileRef = useRef<HTMLInputElement>(null)
+  const [confirmId, setConfirmId] = useState<string | null>(null)
 
   const { data: documents = [], isLoading } = useSubjectDocuments(subjectId)
   const upload = useUploadDocument(subjectId)
@@ -36,6 +47,8 @@ export default function SubjectDocumentsPage() {
     if (file) upload.mutate(file)
     e.target.value = ''
   }
+
+  const confirmingDoc = documents.find(d => d.id === confirmId)
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-6">
@@ -116,6 +129,7 @@ export default function SubjectDocumentsPage() {
                   </td>
                   <td className="py-3 px-4 hidden md:table-cell">
                     <Badge className={cn('text-[10px] rounded capitalize', statusColor[doc.status] ?? statusColor['processing'])}>
+                      {doc.status === 'processing' && <Loader2 className="h-2.5 w-2.5 animate-spin mr-1" />}
                       {doc.status}
                     </Badge>
                   </td>
@@ -127,8 +141,8 @@ export default function SubjectDocumentsPage() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        disabled={remove.isPending}
-                        onClick={() => remove.mutate(doc.id)}
+                        disabled={remove.isPending && confirmId === doc.id}
+                        onClick={() => setConfirmId(doc.id)}
                         className="h-7 w-7 rounded-md text-zinc-600 hover:text-red-400 hover:bg-zinc-800"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
@@ -141,6 +155,33 @@ export default function SubjectDocumentsPage() {
           </table>
         </div>
       )}
+
+      <AlertDialog open={!!confirmId} onOpenChange={open => { if (!open) setConfirmId(null) }}>
+        <AlertDialogContent className="bg-zinc-900 border border-zinc-800 rounded-lg shadow-none p-0 max-w-md">
+          <div className="px-5 py-4 border-b border-zinc-800">
+            <AlertDialogTitle className="text-base font-semibold text-zinc-50">Delete document?</AlertDialogTitle>
+            <AlertDialogDescription className="text-sm text-zinc-400 mt-0.5">
+              <span className="text-zinc-300 font-medium">{confirmingDoc?.originalName}</span> will be permanently deleted from the knowledge base. This cannot be undone.
+            </AlertDialogDescription>
+          </div>
+          <AlertDialogFooter className="px-5 py-4 border-t border-zinc-800 flex justify-end gap-2">
+            <AlertDialogCancel
+              className="border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50 h-8 px-3 text-sm rounded-md"
+              onClick={() => setConfirmId(null)}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-950 text-red-400 border border-red-900 hover:bg-red-900 hover:text-red-300 h-8 px-3 text-sm rounded-md"
+              onClick={() => {
+                if (confirmId) remove.mutate(confirmId, { onSettled: () => setConfirmId(null) })
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
