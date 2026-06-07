@@ -57,7 +57,7 @@ export class ChatTypeOrmRepository implements IChatRepository {
     const orm = this.chatRepo.create({
       userId: data.userId,
       subjectId: data.subjectId,
-      title: data.title ?? 'Cuộc trò chuyện mới',
+      title: data.title ?? 'New conversation',
     });
     const saved = await this.chatRepo.save(orm);
     return this.toChatEntity(saved);
@@ -73,6 +73,10 @@ export class ChatTypeOrmRepository implements IChatRepository {
       order: { createdAt: 'ASC' },
     });
     return orms.map((o) => this.toMessageEntity(o));
+  }
+
+  async updateTitle(id: string, title: string): Promise<void> {
+    await this.chatRepo.update(id, { title });
   }
 
   async createMessage(data: Partial<Message>): Promise<Message> {
