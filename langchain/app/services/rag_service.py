@@ -40,10 +40,17 @@ async def stream_rag_response(
     embeddings = _get_embeddings()
     query_vector: list[float] = await asyncio.to_thread(embeddings.embed_query, query)
 
+    logger.info("[RAG] Searching subject_id=%s top_k=%d min_score=%.2f", subject_id, top_k, min_score)
     all_results = await asyncio.to_thread(
         qdrant_service.search_similar, query_vector, subject_id, top_k, 0.0
     )
+    logger.info(
+        "[RAG] Qdrant returned %d results: %s",
+        len(all_results),
+        [(r["id"][:8], round(r["score"], 4)) for r in all_results],
+    )
     results = [r for r in all_results if r["score"] >= min_score]
+    logger.info("[RAG] After score filter (>= %.2f): %d results", min_score, len(results))
 
     context = "\n\n---\n\n".join(
         f"[Source {i + 1}: {r['payload']['original_name']}]\n{r['payload']['text']}"
@@ -57,7 +64,7 @@ async def stream_rag_response(
             "IMPORTANT RULES:\n"
             "- Answer ONLY using information from the provided context. Do NOT use your own training knowledge.\n"
             "- Always mention the source document name when answering.\n"
-            "- If the user asks who you are, say: \"Tôi là EduChat, trợ lý học tập dựa trên tài liệu môn học của bạn.\"\n"
+            "- If the user asks who you are, say: \"I am EduChat, your academic assistant powered by your course documents.\"\n"
             "- Never say you are trained on internet data or that you are a general AI.\n\n"
             f"Context from course documents:\n{context}"
         )
@@ -65,9 +72,8 @@ async def stream_rag_response(
         system_content = (
             "You are EduChat, an academic assistant for a university course.\n"
             "No relevant documents were found for this query.\n"
-            "Respond in the same language as the user's question.\n"
-            "Say: \"Không tìm thấy thông tin này trong tài liệu môn học. "
-            "Hãy thử đặt câu hỏi khác hoặc upload thêm tài liệu.\"\n"
+            "Say: \"No information found in the course documents. "
+            "Please try a different question or upload more documents.\"\n"
             "Do NOT answer from general knowledge."
         )
 
