@@ -35,6 +35,11 @@ export class PrepareRagStreamUseCase {
 
     await this.chatRepo.createMessage({ chatId, role: 'user', content: dto.content });
 
+    if (existingMessages.length === 0) {
+      const title = dto.content.slice(0, 60).trimEnd() + (dto.content.length > 60 ? '…' : '');
+      await this.chatRepo.updateTitle(chatId, title);
+    }
+
     const streamToken = this.aiServiceClient.issueStreamToken({
       chatId,
       subjectId: chat.subjectId,
@@ -45,9 +50,7 @@ export class PrepareRagStreamUseCase {
       userId: user.id,
     });
 
-    const streamUrl =
-      this.config.get<string>('PUBLIC_STREAM_URL') ||
-      this.config.get<string>('AI_SERVICE_URL', 'http://localhost:8000');
+    const streamUrl = this.config.get<string>('AI_SERVICE_URL', 'http://localhost:8000');
 
     return {
       streamToken,

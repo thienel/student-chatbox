@@ -34,14 +34,14 @@ async def generate_flashcards(
         return []
 
     context = "\n\n---\n\n".join(c["text"] for c in chunks if c["text"])
-    topic_hint = f' về chủ đề "{topic}"' if topic else ""
+    topic_hint = f' on the topic "{topic}"' if topic else ""
 
     system_prompt = (
-        f"Bạn là trợ lý học tập. Hãy tạo đúng {card_count} flashcards{topic_hint} "
-        f"dựa trên nội dung tài liệu học bên dưới.\n"
-        f"Trả về JSON array với format: "
-        f'[{{"front": "câu hỏi/khái niệm", "back": "giải thích ngắn gọn"}}]\n'
-        f"Chỉ trả về JSON, không có text nào khác."
+        f"You are a study assistant. Generate exactly {card_count} flashcards{topic_hint} "
+        f"based on the course document content below.\n"
+        f"Return a JSON array in this format: "
+        f'[{{"front": "question or concept", "back": "brief explanation"}}]\n'
+        f"Return ONLY the JSON, no other text."
     )
 
     llm = ChatOpenAI(
@@ -53,7 +53,7 @@ async def generate_flashcards(
 
     response = await llm.ainvoke([
         SystemMessage(content=system_prompt),
-        HumanMessage(content=f"Nội dung tài liệu:\n\n{context}"),
+        HumanMessage(content=f"Document content:\n\n{context}"),
     ])
 
     raw = str(response.content).strip()

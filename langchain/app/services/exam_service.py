@@ -12,9 +12,9 @@ logger = logging.getLogger(__name__)
 Difficulty = Literal["easy", "medium", "hard"]
 
 _DIFFICULTY_LABELS = {
-    "easy": "dễ (kiến thức cơ bản, nhận biết)",
-    "medium": "trung bình (hiểu và áp dụng)",
-    "hard": "khó (phân tích, đánh giá, suy luận)",
+    "easy": "easy (basic knowledge, recall)",
+    "medium": "medium (understanding and application)",
+    "hard": "hard (analysis, evaluation, reasoning)",
 }
 
 
@@ -43,19 +43,19 @@ async def generate_exam(
         return []
 
     context = "\n\n---\n\n".join(c["text"] for c in chunks if c["text"])
-    diff_label = _DIFFICULTY_LABELS.get(difficulty, "trung bình")
-    topic_hint = f' về chủ đề "{topic}"' if topic else ""
+    diff_label = _DIFFICULTY_LABELS.get(difficulty, "medium")
+    topic_hint = f' on the topic "{topic}"' if topic else ""
 
     system_prompt = (
-        f"Bạn là giảng viên ra đề. Hãy tạo đúng {question_count} câu hỏi trắc nghiệm "
-        f"độ khó {diff_label}{topic_hint}, chỉ dựa trên nội dung tài liệu bên dưới.\n"
-        f"Mỗi câu có đúng 4 lựa chọn A/B/C/D, chỉ 1 đáp án đúng.\n"
-        f"Trả về JSON array:\n"
-        f'[{{"content": "câu hỏi", '
+        f"You are an exam creator. Generate exactly {question_count} multiple-choice questions "
+        f"at {diff_label} difficulty{topic_hint}, based only on the document content below.\n"
+        f"Each question has exactly 4 options A/B/C/D, with only 1 correct answer.\n"
+        f"Return a JSON array:\n"
+        f'[{{"content": "question text", '
         f'"options": [{{"key": "A", "text": "..."}}, {{"key": "B", "text": "..."}}, '
         f'{{"key": "C", "text": "..."}}, {{"key": "D", "text": "..."}}], '
-        f'"correct_answer": "A", "explanation": "giải thích ngắn"}}]\n'
-        f"Chỉ trả về JSON, không có text nào khác."
+        f'"correct_answer": "A", "explanation": "brief explanation"}}]\n'
+        f"Return ONLY the JSON, no other text."
     )
 
     llm = ChatOpenAI(
@@ -67,7 +67,7 @@ async def generate_exam(
 
     response = await llm.ainvoke([
         SystemMessage(content=system_prompt),
-        HumanMessage(content=f"Nội dung tài liệu:\n\n{context}"),
+        HumanMessage(content=f"Document content:\n\n{context}"),
     ])
 
     raw = str(response.content).strip()

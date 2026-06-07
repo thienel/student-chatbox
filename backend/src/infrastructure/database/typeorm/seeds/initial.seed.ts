@@ -30,9 +30,9 @@ async function seed() {
 
     // Roles
     const roleNames = [
-      { name: 'admin', description: 'Quản trị viên hệ thống' },
-      { name: 'lecturer', description: 'Giảng viên' },
-      { name: 'student', description: 'Sinh viên' },
+      { name: 'admin', description: 'System administrator' },
+      { name: 'lecturer', description: 'Lecturer' },
+      { name: 'student', description: 'Student' },
     ];
 
     const roles: Record<string, RoleOrmEntity> = {};
@@ -47,40 +47,40 @@ async function seed() {
 
     // Permissions
     const permissionDefs = [
-      { name: 'user:create', description: 'Tạo tài khoản người dùng' },
-      { name: 'user:read-list', description: 'Xem danh sách người dùng' },
-      { name: 'user:update', description: 'Cập nhật thông tin người dùng' },
-      { name: 'user:suspend', description: 'Khoá/mở khoá tài khoản' },
-      { name: 'subject:create', description: 'Tạo môn học' },
-      { name: 'subject:update', description: 'Cập nhật môn học' },
-      { name: 'subject:delete', description: 'Xoá môn học' },
-      { name: 'subject:read', description: 'Xem thông tin môn học' },
-      { name: 'subject:assign-lecturer', description: 'Assign giảng viên vào môn học' },
-      { name: 'subject:enroll', description: 'Tự đăng ký môn học' },
-      { name: 'document:upload', description: 'Upload tài liệu' },
-      { name: 'document:delete', description: 'Xoá tài liệu' },
-      { name: 'document:read', description: 'Xem danh sách tài liệu' },
-      { name: 'chat:create', description: 'Tạo chat session' },
-      { name: 'chat:read-own', description: 'Xem chat của mình' },
-      { name: 'ai:chat-rag', description: 'Sử dụng AI chat RAG' },
-      { name: 'system:manage-settings', description: 'Quản lý cài đặt hệ thống' },
-      { name: 'system:read-audit-log', description: 'Xem audit log' },
+      { name: 'user:create', description: 'Create user accounts' },
+      { name: 'user:read-list', description: 'View user list' },
+      { name: 'user:update', description: 'Update user information' },
+      { name: 'user:suspend', description: 'Lock/unlock accounts' },
+      { name: 'subject:create', description: 'Create subjects' },
+      { name: 'subject:update', description: 'Update subjects' },
+      { name: 'subject:delete', description: 'Delete subjects' },
+      { name: 'subject:read', description: 'View subject information' },
+      { name: 'subject:assign-lecturer', description: 'Assign lecturer to subject' },
+      { name: 'subject:enroll', description: 'Self-enroll in subject' },
+      { name: 'document:upload', description: 'Upload documents' },
+      { name: 'document:delete', description: 'Delete documents' },
+      { name: 'document:read', description: 'View document list' },
+      { name: 'chat:create', description: 'Create chat session' },
+      { name: 'chat:read-own', description: 'View own chats' },
+      { name: 'ai:chat-rag', description: 'Use AI RAG chat' },
+      { name: 'system:manage-settings', description: 'Manage system settings' },
+      { name: 'system:read-audit-log', description: 'View audit log' },
       // Flashcard
-      { name: 'flashcard:create', description: 'Tạo bộ flashcard' },
-      { name: 'flashcard:delete', description: 'Xoá bộ flashcard' },
-      { name: 'flashcard:read', description: 'Xem flashcard' },
-      { name: 'ai:generate-flashcard', description: 'AI tạo flashcard' },
+      { name: 'flashcard:create', description: 'Create flashcard sets' },
+      { name: 'flashcard:delete', description: 'Delete flashcard sets' },
+      { name: 'flashcard:read', description: 'View flashcards' },
+      { name: 'ai:generate-flashcard', description: 'AI generate flashcards' },
       // Exam
-      { name: 'exam:read', description: 'Xem đề thi' },
-      { name: 'exam:take', description: 'Làm bài thi' },
-      { name: 'ai:generate-exam', description: 'AI tạo đề thi' },
+      { name: 'exam:read', description: 'View exams' },
+      { name: 'exam:take', description: 'Take exams' },
+      { name: 'ai:generate-exam', description: 'AI generate exams' },
       // Bookmark
-      { name: 'bookmark:manage', description: 'Quản lý bookmarks' },
+      { name: 'bookmark:manage', description: 'Manage bookmarks' },
       // Analytics
-      { name: 'analytics:read-own', description: 'Xem analytics môn học của mình' },
-      { name: 'analytics:read-all', description: 'Xem toàn bộ analytics' },
+      { name: 'analytics:read-own', description: 'View own subject analytics' },
+      { name: 'analytics:read-all', description: 'View all analytics' },
       // RBAC
-      { name: 'rbac:manage', description: 'Quản lý roles và permissions' },
+      { name: 'rbac:manage', description: 'Manage roles and permissions' },
     ];
 
     const permissions: Record<string, PermissionOrmEntity> = {};
@@ -151,18 +151,18 @@ async function seed() {
 
     // System Settings
     const settingsDefaults = [
-      { key: 'ai_daily_limit.student.chat_rag', value: 20, description: 'Số lượt chat RAG / ngày cho sinh viên' },
-      { key: 'ai_daily_limit.lecturer.chat_rag', value: 100, description: 'Số lượt chat RAG / ngày cho giảng viên' },
+      { key: 'ai_daily_limit.student.chat_rag', value: 20, description: 'Daily RAG chat limit for students' },
+      { key: 'ai_daily_limit.lecturer.chat_rag', value: 100, description: 'Daily RAG chat limit for lecturers' },
       { key: 'ai_daily_limit.admin.chat_rag', value: -1, description: '-1 = unlimited' },
-      { key: 'rag.top_k', value: 5, description: 'Số chunks lấy từ Qdrant' },
-      { key: 'rag.min_score', value: 0.4, description: 'Ngưỡng score tối thiểu của chunk (0.4 phù hợp với text-embedding-3-small)' },
+      { key: 'rag.top_k', value: 5, description: 'Number of chunks retrieved from Qdrant' },
+      { key: 'rag.min_score', value: 0.4, description: 'Minimum chunk similarity score (0.4 suits text-embedding-3-small)' },
       // Flashcard limits
-      { key: 'ai_daily_limit.student.generate_flashcard', value: 5, description: 'Số lần generate flashcard / ngày cho SV' },
-      { key: 'ai_daily_limit.lecturer.generate_flashcard', value: 20, description: 'Số lần generate flashcard / ngày cho GV' },
+      { key: 'ai_daily_limit.student.generate_flashcard', value: 5, description: 'Daily flashcard generation limit for students' },
+      { key: 'ai_daily_limit.lecturer.generate_flashcard', value: 20, description: 'Daily flashcard generation limit for lecturers' },
       { key: 'ai_daily_limit.admin.generate_flashcard', value: -1, description: 'unlimited' },
       // Exam limits
-      { key: 'ai_daily_limit.student.generate_exam', value: 3, description: 'Số lần gen đề thi / ngày cho SV' },
-      { key: 'ai_daily_limit.lecturer.generate_exam', value: 10, description: 'Số lần gen đề thi / ngày cho GV' },
+      { key: 'ai_daily_limit.student.generate_exam', value: 3, description: 'Daily exam generation limit for students' },
+      { key: 'ai_daily_limit.lecturer.generate_exam', value: 10, description: 'Daily exam generation limit for lecturers' },
       { key: 'ai_daily_limit.admin.generate_exam', value: -1, description: 'unlimited' },
     ];
 

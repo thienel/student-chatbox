@@ -8,4 +8,5 @@ export interface IChatRepository {
   delete(id: string): Promise<void>;
   findMessages(chatId: string): Promise<Message[]>;
   createMessage(data: Partial<Message>): Promise<Message>;
+  updateTitle(id: string, title: string): Promise<void>;
 }

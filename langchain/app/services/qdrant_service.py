@@ -48,10 +48,10 @@ class QdrantService:
         self, vector: list[float], subject_id: str, top_k: int, min_score: float
     ) -> list[dict]:
         results = self._client.search(
-            self._collection,
+            collection_name=self._collection,
             query_vector=vector,
             limit=top_k,
-            score_threshold=min_score,
+            score_threshold=min_score if min_score > 0.0 else None,
             query_filter=Filter(
                 must=[FieldCondition(key="subject_id", match=MatchValue(value=subject_id))]
             ),
