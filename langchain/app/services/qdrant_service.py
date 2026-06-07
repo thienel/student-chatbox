@@ -47,9 +47,9 @@ class QdrantService:
     def search_similar(
         self, vector: list[float], subject_id: str, top_k: int, min_score: float
     ) -> list[dict]:
-        response = self._client.query_points(
+        results = self._client.search(
             collection_name=self._collection,
-            query=vector,
+            query_vector=vector,
             limit=top_k,
             score_threshold=min_score if min_score > 0.0 else None,
             query_filter=Filter(
@@ -64,7 +64,7 @@ class QdrantService:
                 "text": (r.payload or {}).get("text", ""),
                 "payload": r.payload,
             }
-            for r in response.points
+            for r in results
         ]
 
     def get_random_chunks(self, subject_id: str, limit: int = 20) -> list[dict]:
