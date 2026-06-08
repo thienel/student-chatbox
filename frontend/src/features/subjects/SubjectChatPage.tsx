@@ -128,7 +128,7 @@ export default function SubjectChatPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-88px)]">
+    <div className="flex h-[calc(100dvh-10.5rem)]">
       {/* Sidebar — chat list */}
       <div className="w-56 border-r border-zinc-800 flex flex-col shrink-0">
         <div className="p-3 border-b border-zinc-800">
