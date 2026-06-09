@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 import { useAttemptResult } from './queries'
 
 export default function ExamResultPage() {
-  const { attemptId = '' } = useParams<{ attemptId: string }>()
+  const { id: subjectId, examId, attemptId = '' } = useParams<{ id?: string; examId?: string; attemptId: string }>()
   const { data, isLoading } = useAttemptResult(attemptId)
 
   if (isLoading) {
@@ -28,7 +28,7 @@ export default function ExamResultPage() {
   return (
     <div className="max-w-3xl mx-auto px-6 py-6">
       <Link
-        to="/exam-history"
+        to={subjectId ? `/subjects/${subjectId}/exam-history` : '/exam-history'}
         className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-zinc-50 transition-colors duration-150 mb-6"
       >
         <ChevronLeft className="h-4 w-4" />
