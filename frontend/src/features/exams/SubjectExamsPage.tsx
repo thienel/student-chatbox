@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ClipboardList, Sparkles, ChevronRight, Loader2 } from 'lucide-react'
+import { ClipboardList, Sparkles, ChevronRight, Loader2, History } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { useToast } from '@/hooks/use-toast'
 import { useAuthStore } from '@/store/useAuthStore'
-import { useExams, useGenerateExam } from './queries'
+import { useExams, useGenerateExam, useMyAttempts } from './queries'
 import type { ExamDifficulty } from '@/types'
 
 const difficultyLabel: Record<ExamDifficulty, string> = {
@@ -32,6 +32,13 @@ export default function SubjectExamsPage() {
 
   const { data: exams = [], isLoading } = useExams(subjectId)
   const generate = useGenerateExam(subjectId)
+  const { data: attempts = [] } = useMyAttempts()
+
+  const examIds = new Set(exams.map(e => e.id))
+  const examMap = new Map(exams.map(e => [e.id, e]))
+  const subjectAttempts = attempts
+    .filter(a => examIds.has(a.examId) && a.status === 'completed')
+    .slice(0, 5)
 
   const handleGenerate = async () => {
     try {
@@ -114,6 +121,40 @@ export default function SubjectExamsPage() {
               <ChevronRight className="h-4 w-4 text-zinc-600 shrink-0 group-hover:text-zinc-400 transition-colors duration-150" />
             </Link>
           ))}
+        </div>
+      )}
+
+      {subjectAttempts.length > 0 && (
+        <div className="mt-8">
+          <div className="flex items-center gap-2 mb-3">
+            <History className="h-3.5 w-3.5 text-zinc-500" />
+            <p className="text-xs font-medium text-zinc-500 uppercase tracking-wide">My Recent Attempts</p>
+          </div>
+          <div className="space-y-2">
+            {subjectAttempts.map(attempt => (
+              <Link
+                key={attempt.id}
+                to={`/exam-attempts/${attempt.id}`}
+                className="bg-zinc-900 border border-zinc-800 rounded-lg p-3.5 flex items-center gap-3 group hover:border-zinc-700 transition-colors duration-150"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm text-zinc-300 truncate">
+                    {examMap.get(attempt.examId)?.title ?? 'Exam'}
+                  </p>
+                  <p className="text-xs text-zinc-600 mt-0.5">
+                    {new Date(attempt.completedAt ?? attempt.startedAt).toLocaleDateString()}
+                    {attempt.timeSpentSecs ? ` · ${Math.round(attempt.timeSpentSecs / 60)} min` : ''}
+                  </p>
+                </div>
+                {attempt.score != null && (
+                  <Badge className="shrink-0 text-xs font-medium bg-zinc-800 text-zinc-300 border-zinc-700 rounded-md tabular-nums">
+                    {Number(attempt.score).toFixed(1)} / 10
+                  </Badge>
+                )}
+                <ChevronRight className="h-4 w-4 text-zinc-600 shrink-0 group-hover:text-zinc-400 transition-colors duration-150" />
+              </Link>
+            ))}
+          </div>
         </div>
       )}
 
