@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { Bot, SendHorizonal, Plus, Trash2, MessageSquare, FileText } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -7,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Skeleton } from '@/components/ui/skeleton'
 import { EmptyState } from '@/components/shared/EmptyState'
-import { useChats, useChat, useCreateChat, useDeleteChat } from '@/features/chat/queries'
+import { useChats, useChat, useCreateChat, useDeleteChat, chatKeys } from '@/features/chat/queries'
 import { useChatStream } from '@/hooks/useChatStream'
 import type { Message, MessageSource } from '@/types'
 import { cn } from '@/lib/utils'
@@ -30,11 +31,17 @@ export default function SubjectChatPage() {
   const bottomRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
+  const qc = useQueryClient()
   const { data: chats = [], isLoading: chatsLoading } = useChats(subjectId)
   const { data: chatDetail, isLoading: chatLoading } = useChat(chatId ?? '')
   const createChat = useCreateChat()
   const deleteChat = useDeleteChat()
   const { sendMessage, isStreaming } = useChatStream()
+
+  const autoResize = (el: HTMLTextAreaElement) => {
+    el.style.height = 'auto'
+    el.style.height = `${Math.min(el.scrollHeight, 120)}px`
+  }
 
   useEffect(() => {
     if (chatDetail) {
@@ -79,6 +86,9 @@ export default function SubjectChatPage() {
     setMessages(prev => [...prev, userMsg, aiMsg])
     setSources([])
     setInput('')
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto'
+    }
 
     await sendMessage(
       chatId,
@@ -106,7 +116,9 @@ export default function SubjectChatPage() {
         ))
       }
     )
-  }, [input, chatId, isStreaming, sendMessage])
+
+    qc.invalidateQueries({ queryKey: chatKeys.list(subjectId) })
+  }, [input, chatId, isStreaming, sendMessage, qc, subjectId])
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -116,7 +128,7 @@ export default function SubjectChatPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-88px)]">
+    <div className="flex h-[calc(100dvh-10.5rem)]">
       {/* Sidebar — chat list */}
       <div className="w-56 border-r border-zinc-800 flex flex-col shrink-0">
         <div className="p-3 border-b border-zinc-800">
@@ -241,11 +253,11 @@ export default function SubjectChatPage() {
                 <Textarea
                   ref={textareaRef}
                   value={input}
-                  onChange={e => setInput(e.target.value)}
+                  onChange={e => { setInput(e.target.value); autoResize(e.target) }}
                   onKeyDown={handleKeyDown}
                   placeholder="Ask anything about this subject..."
                   rows={1}
-                  className="flex-1 bg-transparent border-0 text-sm text-zinc-50 placeholder:text-zinc-600 resize-none focus-visible:ring-0 min-h-[20px] max-h-[120px] p-0"
+                  className="flex-1 bg-transparent border-0 text-sm text-zinc-50 placeholder:text-zinc-600 resize-none focus-visible:ring-0 min-h-[20px] max-h-[120px] p-0 overflow-y-hidden"
                   disabled={isStreaming}
                 />
                 <Button

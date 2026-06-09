@@ -49,7 +49,7 @@ export default function ExamHistoryPage() {
               </div>
               {attempt.score != null && (
                 <Badge className="shrink-0 text-xs font-medium bg-zinc-800 text-zinc-300 border-zinc-700 rounded-md tabular-nums">
-                  {attempt.score.toFixed(1)} / 10
+                  {Number(attempt.score).toFixed(1)} / 10
                 </Badge>
               )}
               <ChevronRight className="h-4 w-4 text-zinc-600 shrink-0 group-hover:text-zinc-400 transition-colors duration-150" />

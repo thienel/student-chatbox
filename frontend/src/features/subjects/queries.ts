@@ -36,6 +36,15 @@ export function useSubjectDocuments(subjectId: string) {
     queryKey: subjectKeys.documents(subjectId),
     queryFn: () => subjectsApi.getDocuments(subjectId),
     enabled: !!subjectId,
+    refetchInterval: (query) =>
+      query.state.data?.some(d => d.status === 'processing') ? 3000 : false,
+  })
+}
+
+export function useLecturers() {
+  return useQuery({
+    queryKey: ['users', 'lecturers'],
+    queryFn: () => import('@/api/endpoints/users').then(m => m.usersApi.list({ role: 'lecturer', limit: 100 })),
   })
 }
 

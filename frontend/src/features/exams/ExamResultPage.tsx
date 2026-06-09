@@ -22,7 +22,7 @@ export default function ExamResultPage() {
   if (!data) return null
 
   const { attempt, exam, questions } = data
-  const score = attempt.score ?? 0
+  const score = Number(attempt.score ?? 0)
   const scorePercent = Math.round(score * 10)
 
   return (

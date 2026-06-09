@@ -28,6 +28,7 @@ export default function TakeExamPage() {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [elapsed, setElapsed] = useState(0)
   const startRef = useRef(Date.now())
+  const advanceTimerRef = useRef<ReturnType<typeof setTimeout>>()
 
   const submit = useSubmitAttempt(subjectId, examId)
 
@@ -35,6 +36,8 @@ export default function TakeExamPage() {
     const interval = setInterval(() => setElapsed(Math.floor((Date.now() - startRef.current) / 1000)), 1000)
     return () => clearInterval(interval)
   }, [])
+
+  useEffect(() => () => clearTimeout(advanceTimerRef.current), [])
 
   const formatTime = (secs: number) => {
     const m = Math.floor(secs / 60).toString().padStart(2, '0')
@@ -51,6 +54,35 @@ export default function TakeExamPage() {
     }
   }, [submit, attemptId, answers, elapsed, navigate, toast])
 
+  const questions = state?.questions ?? []
+  const total = questions.length
+
+  const handleAnswer = useCallback((questionId: string, optionKey: string, fromIndex: number) => {
+    setAnswers(a => ({ ...a, [questionId]: optionKey }))
+    if (fromIndex < total - 1) {
+      clearTimeout(advanceTimerRef.current)
+      advanceTimerRef.current = setTimeout(() => {
+        setCurrentIndex(i => i === fromIndex ? i + 1 : i)
+      }, 380)
+    }
+  }, [total])
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
+      if (e.key === 'ArrowLeft') {
+        setCurrentIndex(i => Math.max(0, i - 1))
+      } else if (e.key === 'ArrowRight') {
+        setCurrentIndex(i => Math.min(total - 1, i + 1))
+      } else if (['1', '2', '3', '4'].includes(e.key)) {
+        const opt = questions[currentIndex]?.options[Number(e.key) - 1]
+        if (opt) handleAnswer(questions[currentIndex].id, opt.key, currentIndex)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [currentIndex, total, questions, handleAnswer])
+
   if (!state) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -59,8 +91,7 @@ export default function TakeExamPage() {
     )
   }
 
-  const { exam, questions } = state
-  const total = questions.length
+  const { exam } = state
   const answered = Object.keys(answers).length
   const question = questions[currentIndex]
 
@@ -91,10 +122,10 @@ export default function TakeExamPage() {
         <p className="text-xs text-zinc-600 mb-3">Question {currentIndex + 1} of {total}</p>
         <p className="text-sm font-medium text-zinc-50 leading-relaxed mb-5">{question.content}</p>
         <div className="space-y-2">
-          {question.options.map(opt => (
+          {question.options.map((opt, i) => (
             <button
               key={opt.key}
-              onClick={() => setAnswers(a => ({ ...a, [question.id]: opt.key }))}
+              onClick={() => handleAnswer(question.id, opt.key, currentIndex)}
               className={cn(
                 'w-full text-left px-4 py-3 rounded-md border text-sm transition-colors duration-150',
                 answers[question.id] === opt.key
@@ -102,7 +133,7 @@ export default function TakeExamPage() {
                   : 'border-zinc-800 bg-zinc-950 text-zinc-400 hover:border-zinc-700 hover:text-zinc-300'
               )}
             >
-              <span className="font-medium mr-2 text-zinc-500">{opt.key}.</span>
+              <span className="font-medium mr-2 text-zinc-600">{i + 1}.</span>
               {opt.text}
             </button>
           ))}
@@ -158,6 +189,10 @@ export default function TakeExamPage() {
           </Button>
         )}
       </div>
+
+      <p className="text-center text-[11px] text-zinc-700 mt-4">
+        ← → navigate · 1–4 select answer
+      </p>
     </div>
   )
 }
