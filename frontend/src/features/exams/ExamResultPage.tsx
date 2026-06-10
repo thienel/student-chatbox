@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 import { useAttemptResult } from './queries'
 
 export default function ExamResultPage() {
-  const { id: subjectId, examId, attemptId = '' } = useParams<{ id?: string; examId?: string; attemptId: string }>()
+  const { id: subjectId, attemptId = '' } = useParams<{ id?: string; attemptId: string }>()
   const { data, isLoading } = useAttemptResult(attemptId)
 
   if (isLoading) {
