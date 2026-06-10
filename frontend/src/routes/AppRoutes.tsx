@@ -72,8 +72,10 @@ export default function AppRoutes() {
         <Route path="/subjects/:id/flashcards" element={<SubjectFlashcardsPage />} />
         <Route path="/subjects/:id/flashcards/:setId" element={<FlashcardStudyPage />} />
         <Route path="/subjects/:id/exams" element={<SubjectExamsPage />} />
+        <Route path="/subjects/:id/exam-history" element={<ExamHistoryPage />} />
         <Route path="/subjects/:id/exams/:examId" element={<ExamDetailPage />} />
         <Route path="/subjects/:id/exams/:examId/attempt/:attemptId" element={<TakeExamPage />} />
+        <Route path="/subjects/:id/exams/:examId/result/:attemptId" element={<ExamResultPage />} />
       </Route>
 
       {/* Admin shell */}
