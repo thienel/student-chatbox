@@ -1,18 +1,35 @@
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { ClipboardList, ChevronRight } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/shared/EmptyState'
-import { useMyAttempts } from './queries'
+import { useMyAttempts, useExams } from './queries'
 
 export default function ExamHistoryPage() {
+  const { id: subjectId } = useParams<{ id?: string }>()
   const { data: attempts = [], isLoading } = useMyAttempts()
+  const { data: subjectExams = [] } = useExams(subjectId ?? '')
+
+  const examIds = subjectId ? new Set(subjectExams.map(e => e.id)) : null
+  const examMap = new Map(subjectExams.map(e => [e.id, e]))
+
+  const filtered = examIds
+    ? attempts.filter(a => examIds.has(a.examId) && a.status === 'completed')
+    : attempts.filter(a => a.status === 'completed')
+
+  const resultUrl = (attempt: typeof attempts[number]) =>
+    subjectId
+      ? `/subjects/${subjectId}/exams/${attempt.examId}/result/${attempt.id}`
+      : `/exam-attempts/${attempt.id}`
+
+  const examTitle = (attempt: typeof attempts[number]) =>
+    examMap.get(attempt.examId)?.title ?? (attempt as any).exam?.title ?? 'Exam'
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-6">
       <div className="mb-6">
         <h2 className="text-base font-medium text-zinc-50">Exam History</h2>
-        <p className="text-xs text-zinc-500 mt-0.5">{attempts.length} attempts</p>
+        <p className="text-xs text-zinc-500 mt-0.5">{filtered.length} attempts</p>
       </div>
 
       {isLoading ? (
@@ -21,7 +38,7 @@ export default function ExamHistoryPage() {
             <Skeleton key={i} className="h-16 rounded-lg bg-zinc-900" />
           ))}
         </div>
-      ) : attempts.length === 0 ? (
+      ) : filtered.length === 0 ? (
         <EmptyState
           icon={ClipboardList}
           title="No exam attempts"
@@ -29,10 +46,10 @@ export default function ExamHistoryPage() {
         />
       ) : (
         <div className="space-y-2">
-          {attempts.map(attempt => (
+          {filtered.map(attempt => (
             <Link
               key={attempt.id}
-              to={`/exam-attempts/${attempt.id}`}
+              to={resultUrl(attempt)}
               className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 flex items-center gap-3 group hover:border-zinc-700 transition-colors duration-150"
             >
               <div className="h-8 w-8 rounded-md bg-zinc-800 flex items-center justify-center shrink-0">
@@ -40,7 +57,7 @@ export default function ExamHistoryPage() {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium text-zinc-50 truncate">
-                  {(attempt as any).exam?.title ?? 'Exam'}
+                  {examTitle(attempt)}
                 </p>
                 <p className="text-xs text-zinc-500 mt-0.5">
                   {new Date(attempt.completedAt ?? attempt.startedAt).toLocaleDateString()}

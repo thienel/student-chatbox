@@ -29,6 +29,12 @@ export default function TakeExamPage() {
   const [elapsed, setElapsed] = useState(0)
   const startRef = useRef(Date.now())
   const advanceTimerRef = useRef<ReturnType<typeof setTimeout>>()
+  // ref so the keyboard handler always reads fresh state without re-registering
+  const currentIndexRef = useRef(0)
+  currentIndexRef.current = currentIndex
+
+  const questions = state?.questions ?? []
+  const total = questions.length
 
   const submit = useSubmitAttempt(subjectId, examId)
 
@@ -48,14 +54,11 @@ export default function TakeExamPage() {
   const handleSubmit = useCallback(async () => {
     try {
       await submit.mutateAsync({ attemptId, answers, timeSpentSecs: elapsed })
-      navigate(`/exam-attempts/${attemptId}`)
+      navigate(`/subjects/${subjectId}/exams/${examId}/result/${attemptId}`)
     } catch {
       toast({ variant: 'destructive', description: 'Failed to submit exam.' })
     }
-  }, [submit, attemptId, answers, elapsed, navigate, toast])
-
-  const questions = state?.questions ?? []
-  const total = questions.length
+  }, [submit, attemptId, answers, elapsed, navigate, subjectId, examId, toast])
 
   const handleAnswer = useCallback((questionId: string, optionKey: string, fromIndex: number) => {
     setAnswers(a => ({ ...a, [questionId]: optionKey }))
@@ -67,21 +70,26 @@ export default function TakeExamPage() {
     }
   }, [total])
 
+  // Registered once — reads currentIndex via ref to avoid stale closures
   useEffect(() => {
+    const qs = state?.questions ?? []
+    const tot = qs.length
     const onKey = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
+      const idx = currentIndexRef.current
       if (e.key === 'ArrowLeft') {
         setCurrentIndex(i => Math.max(0, i - 1))
       } else if (e.key === 'ArrowRight') {
-        setCurrentIndex(i => Math.min(total - 1, i + 1))
-      } else if (['1', '2', '3', '4'].includes(e.key)) {
-        const opt = questions[currentIndex]?.options[Number(e.key) - 1]
-        if (opt) handleAnswer(questions[currentIndex].id, opt.key, currentIndex)
+        setCurrentIndex(i => Math.min(tot - 1, i + 1))
+      } else if (e.key === '1' || e.key === '2' || e.key === '3' || e.key === '4') {
+        const q = qs[idx]
+        const opt = q?.options[Number(e.key) - 1]
+        if (q && opt) handleAnswer(q.id, opt.key, idx)
       }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [currentIndex, total, questions, handleAnswer])
+  }, [state, handleAnswer])
 
   if (!state) {
     return (
