@@ -1,4 +1,5 @@
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import { CheckCircle2, XCircle, ChevronLeft } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
@@ -6,9 +7,20 @@ import { useAttemptResult } from './queries'
 
 export default function ExamResultPage() {
   const { id: subjectId, attemptId = '' } = useParams<{ id?: string; attemptId: string }>()
+  const navigate = useNavigate()
   const { data, isLoading } = useAttemptResult(attemptId)
 
-  if (isLoading) {
+  // When accessed via global route (/exam-attempts/:id), redirect to subject-scoped URL
+  useEffect(() => {
+    if (!subjectId && data) {
+      navigate(
+        `/subjects/${data.exam.subjectId}/exams/${data.exam.id}/result/${attemptId}`,
+        { replace: true }
+      )
+    }
+  }, [subjectId, data, navigate, attemptId])
+
+  if (isLoading || (!subjectId && !data)) {
     return (
       <div className="max-w-3xl mx-auto px-6 py-6 space-y-4">
         <Skeleton className="h-28 rounded-lg bg-zinc-900" />
