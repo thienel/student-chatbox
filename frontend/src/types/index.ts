@@ -167,6 +167,7 @@ export interface ExamAttempt {
   startedAt: string;
   completedAt?: string;
   timeSpentSecs?: number;
+  exam?: { id: string; title: string; subjectId: string };
 }
 
 // Bookmarks
