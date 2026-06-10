@@ -10,4 +10,5 @@ export class ExamAttempt {
   startedAt: Date;
   completedAt?: Date;
   timeSpentSecs?: number;
+  exam?: { id: string; title: string; subjectId: string };
 }
