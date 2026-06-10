@@ -108,8 +108,16 @@ export class ExamTypeOrmRepository implements IExamRepository {
   }
 
   async findAttemptsByUserId(userId: string): Promise<ExamAttempt[]> {
-    const orms = await this.attemptRepo.find({ where: { userId }, order: { startedAt: 'DESC' } });
-    return orms.map((o) => this.toAttempt(o));
+    const orms = await this.attemptRepo.find({
+      where: { userId },
+      order: { startedAt: 'DESC' },
+      relations: ['exam'],
+    });
+    return orms.map((o) => {
+      const a = this.toAttempt(o);
+      if (o.exam) a.exam = { id: o.exam.id, title: o.exam.title, subjectId: o.exam.subjectId };
+      return a;
+    });
   }
 
   async updateAttempt(id: string, data: Partial<ExamAttempt>): Promise<ExamAttempt> {
