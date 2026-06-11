@@ -77,37 +77,63 @@ export default function TakeExamPage() {
     const isEditable = (t: EventTarget | null) =>
       t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement
 
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (isEditable(e.target)) return
-      if (e.key === 'ArrowLeft') {
+    // Derive a 1-9 digit from several signals so layout/IME/keyboard quirks
+    // can't hide it (e.code is layout-independent, e.key is the produced char,
+    // keyCode is the legacy fallback for both top-row and numpad).
+    const digitOf = (e: KeyboardEvent): number => {
+      const m = /^(?:Digit|Numpad)([1-9])$/.exec(e.code)
+      if (m) return Number(m[1])
+      if (e.key >= '1' && e.key <= '9') return Number(e.key)
+      if (e.keyCode >= 49 && e.keyCode <= 57) return e.keyCode - 48
+      if (e.keyCode >= 97 && e.keyCode <= 105) return e.keyCode - 96
+      return 0
+    }
+
+    // Dedupe so the same physical press isn't handled twice across keydown+keyup.
+    const last = { n: 0, t: 0 }
+    const selectByDigit = (e: KeyboardEvent) => {
+      const n = digitOf(e)
+      if (n < 1 || n > 4) return
+      const now = Date.now()
+      if (last.n === n && now - last.t < 500) return
+      last.n = n
+      last.t = now
+      const idx = currentIndexRef.current
+      const q = qs[idx]
+      const opt = q?.options[n - 1]
+      if (q && opt) {
         e.preventDefault()
-        setCurrentIndex(i => Math.max(0, i - 1))
-      } else if (e.key === 'ArrowRight') {
-        e.preventDefault()
-        setCurrentIndex(i => Math.min(tot - 1, i + 1))
+        handleAnswer(q.id, opt.key, idx)
       }
     }
 
-    // Digit selection is handled on keyup: a Vietnamese IME rewrites the
-    // keydown for number keys into a "Process" event (keyCode 229, empty
-    // e.code), which is why it only fired while Control was held. keyup
-    // reports the real physical key (e.code) regardless of the IME.
-    const onKeyUp = (e: KeyboardEvent) => {
-      if (isEditable(e.target)) return
-      const m = /^(?:Digit|Numpad)([1-4])$/.exec(e.code)
-      if (!m) return
-      const optIdx = Number(m[1]) - 1
-      const idx = currentIndexRef.current
-      const q = qs[idx]
-      const opt = q?.options[optIdx]
-      if (q && opt) handleAnswer(q.id, opt.key, idx)
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (isEditable(e.target) || e.repeat) return
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault()
+        setCurrentIndex(i => Math.max(0, i - 1))
+        return
+      }
+      if (e.key === 'ArrowRight') {
+        e.preventDefault()
+        setCurrentIndex(i => Math.min(tot - 1, i + 1))
+        return
+      }
+      selectByDigit(e)
     }
 
-    window.addEventListener('keydown', onKeyDown)
-    window.addEventListener('keyup', onKeyUp)
+    // keyup as a fallback in case something swallows the keydown.
+    const onKeyUp = (e: KeyboardEvent) => {
+      if (isEditable(e.target)) return
+      selectByDigit(e)
+    }
+
+    // Capture phase: runs before any descendant handler can stop propagation.
+    window.addEventListener('keydown', onKeyDown, true)
+    window.addEventListener('keyup', onKeyUp, true)
     return () => {
-      window.removeEventListener('keydown', onKeyDown)
-      window.removeEventListener('keyup', onKeyUp)
+      window.removeEventListener('keydown', onKeyDown, true)
+      window.removeEventListener('keyup', onKeyUp, true)
     }
   }, [state, handleAnswer])
 
