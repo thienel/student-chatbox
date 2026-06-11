@@ -17,13 +17,14 @@ export default function ExamHistoryPage() {
     ? attempts.filter(a => examIds.has(a.examId) && a.status === 'completed')
     : attempts.filter(a => a.status === 'completed')
 
-  const resultUrl = (attempt: typeof attempts[number]) =>
-    subjectId
-      ? `/subjects/${subjectId}/exams/${attempt.examId}/result/${attempt.id}`
-      : `/exam-attempts/${attempt.id}`
+  const resultUrl = (attempt: typeof attempts[number]) => {
+    const sid = attempt.exam?.subjectId ?? subjectId
+    if (sid) return `/subjects/${sid}/exams/${attempt.examId}/result/${attempt.id}`
+    return `/exam-attempts/${attempt.id}`
+  }
 
   const examTitle = (attempt: typeof attempts[number]) =>
-    examMap.get(attempt.examId)?.title ?? (attempt as any).exam?.title ?? 'Exam'
+    attempt.exam?.title ?? examMap.get(attempt.examId)?.title ?? 'Exam'
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-6">
