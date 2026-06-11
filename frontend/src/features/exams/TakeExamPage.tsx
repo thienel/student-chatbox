@@ -78,13 +78,19 @@ export default function TakeExamPage() {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
       const idx = currentIndexRef.current
       if (e.key === 'ArrowLeft') {
+        e.preventDefault()
         setCurrentIndex(i => Math.max(0, i - 1))
       } else if (e.key === 'ArrowRight') {
+        e.preventDefault()
         setCurrentIndex(i => Math.min(tot - 1, i + 1))
-      } else if (e.key === '1' || e.key === '2' || e.key === '3' || e.key === '4') {
+      } else if (e.code === 'Digit1' || e.code === 'Digit2' || e.code === 'Digit3' || e.code === 'Digit4') {
+        const optIdx = Number(e.code.slice(-1)) - 1
         const q = qs[idx]
-        const opt = q?.options[Number(e.key) - 1]
-        if (q && opt) handleAnswer(q.id, opt.key, idx)
+        const opt = q?.options[optIdx]
+        if (q && opt) {
+          e.preventDefault()
+          handleAnswer(q.id, opt.key, idx)
+        }
       }
     }
     window.addEventListener('keydown', onKey)
