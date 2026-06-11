@@ -74,27 +74,41 @@ export default function TakeExamPage() {
   useEffect(() => {
     const qs = state?.questions ?? []
     const tot = qs.length
-    const onKey = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
-      const idx = currentIndexRef.current
+    const isEditable = (t: EventTarget | null) =>
+      t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (isEditable(e.target)) return
       if (e.key === 'ArrowLeft') {
         e.preventDefault()
         setCurrentIndex(i => Math.max(0, i - 1))
       } else if (e.key === 'ArrowRight') {
         e.preventDefault()
         setCurrentIndex(i => Math.min(tot - 1, i + 1))
-      } else if (e.code === 'Digit1' || e.code === 'Digit2' || e.code === 'Digit3' || e.code === 'Digit4') {
-        const optIdx = Number(e.code.slice(-1)) - 1
-        const q = qs[idx]
-        const opt = q?.options[optIdx]
-        if (q && opt) {
-          e.preventDefault()
-          handleAnswer(q.id, opt.key, idx)
-        }
       }
     }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+
+    // Digit selection is handled on keyup: a Vietnamese IME rewrites the
+    // keydown for number keys into a "Process" event (keyCode 229, empty
+    // e.code), which is why it only fired while Control was held. keyup
+    // reports the real physical key (e.code) regardless of the IME.
+    const onKeyUp = (e: KeyboardEvent) => {
+      if (isEditable(e.target)) return
+      const m = /^(?:Digit|Numpad)([1-4])$/.exec(e.code)
+      if (!m) return
+      const optIdx = Number(m[1]) - 1
+      const idx = currentIndexRef.current
+      const q = qs[idx]
+      const opt = q?.options[optIdx]
+      if (q && opt) handleAnswer(q.id, opt.key, idx)
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    window.addEventListener('keyup', onKeyUp)
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+      window.removeEventListener('keyup', onKeyUp)
+    }
   }, [state, handleAnswer])
 
   if (!state) {
