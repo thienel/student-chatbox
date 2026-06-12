@@ -17,7 +17,8 @@ export const examsApi = {
     data: { questionCount?: number; difficulty?: ExamDifficulty; topic?: string },
   ) =>
     axiosInstance
-      .post<ApiResponse<Exam>>(`/subjects/${subjectId}/exams/generate`, data)
+      // AI generation runs an LLM call — override the short global timeout.
+      .post<ApiResponse<Exam>>(`/subjects/${subjectId}/exams/generate`, data, { timeout: 120000 })
       .then(r => r.data.data),
 
   startAttempt: (subjectId: string, examId: string) =>

@@ -16,9 +16,11 @@ export const flashcardsApi = {
 
   generate: (subjectId: string, data: { topic?: string; cardCount?: number }) =>
     axiosInstance
+      // AI generation runs an LLM call — override the short global timeout.
       .post<ApiResponse<{ set: FlashcardSet; cards: FlashcardSetWithCards['cards'] }>>(
         `/subjects/${subjectId}/flashcard-sets/generate`,
         data,
+        { timeout: 120000 },
       )
       .then(r => r.data.data),
 
