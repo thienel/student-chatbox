@@ -1,5 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
-import { ClipboardList, ChevronRight } from 'lucide-react'
+import { ClipboardList, ChevronRight, ChevronLeft } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/shared/EmptyState'
@@ -17,16 +17,26 @@ export default function ExamHistoryPage() {
     ? attempts.filter(a => examIds.has(a.examId) && a.status === 'completed')
     : attempts.filter(a => a.status === 'completed')
 
-  const resultUrl = (attempt: typeof attempts[number]) =>
-    subjectId
-      ? `/subjects/${subjectId}/exams/${attempt.examId}/result/${attempt.id}`
-      : `/exam-attempts/${attempt.id}`
+  const resultUrl = (attempt: typeof attempts[number]) => {
+    const sid = attempt.exam?.subjectId ?? subjectId
+    if (sid) return `/subjects/${sid}/exams/${attempt.examId}/result/${attempt.id}`
+    return `/exam-attempts/${attempt.id}`
+  }
 
   const examTitle = (attempt: typeof attempts[number]) =>
-    examMap.get(attempt.examId)?.title ?? (attempt as any).exam?.title ?? 'Exam'
+    attempt.exam?.title ?? examMap.get(attempt.examId)?.title ?? 'Exam'
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-6">
+      {subjectId && (
+        <Link
+          to={`/subjects/${subjectId}/exams`}
+          className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-zinc-50 transition-colors duration-150 mb-6"
+        >
+          <ChevronLeft className="h-4 w-4" />
+          Back to Exams
+        </Link>
+      )}
       <div className="mb-6">
         <h2 className="text-base font-medium text-zinc-50">Exam History</h2>
         <p className="text-xs text-zinc-500 mt-0.5">{filtered.length} attempts</p>

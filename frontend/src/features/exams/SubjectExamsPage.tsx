@@ -134,7 +134,7 @@ export default function SubjectExamsPage() {
             {subjectAttempts.map(attempt => (
               <Link
                 key={attempt.id}
-                to={`/exam-attempts/${attempt.id}`}
+                to={`/subjects/${subjectId}/exams/${attempt.examId}/result/${attempt.id}`}
                 className="bg-zinc-900 border border-zinc-800 rounded-lg p-3.5 flex items-center gap-3 group hover:border-zinc-700 transition-colors duration-150"
               >
                 <div className="min-w-0 flex-1">
