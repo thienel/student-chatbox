@@ -11,6 +11,7 @@ export class Subject {
   status: SubjectStatus;
   createdBy?: string;
   lecturers?: { id: string; fullName: string; email: string }[];
+  isEnrolled?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
