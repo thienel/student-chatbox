@@ -74,41 +74,11 @@ export default function TakeExamPage() {
   useEffect(() => {
     const qs = state?.questions ?? []
     const tot = qs.length
-    const isEditable = (t: EventTarget | null) =>
-      t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement
 
-    // Derive a 1-9 digit from several signals so layout/IME/keyboard quirks
-    // can't hide it (e.code is layout-independent, e.key is the produced char,
-    // keyCode is the legacy fallback for both top-row and numpad).
-    const digitOf = (e: KeyboardEvent): number => {
-      const m = /^(?:Digit|Numpad)([1-9])$/.exec(e.code)
-      if (m) return Number(m[1])
-      if (e.key >= '1' && e.key <= '9') return Number(e.key)
-      if (e.keyCode >= 49 && e.keyCode <= 57) return e.keyCode - 48
-      if (e.keyCode >= 97 && e.keyCode <= 105) return e.keyCode - 96
-      return 0
-    }
+    const handler = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
+      if (e.repeat) return
 
-    // Dedupe so the same physical press isn't handled twice across keydown+keyup.
-    const last = { n: 0, t: 0 }
-    const selectByDigit = (e: KeyboardEvent) => {
-      const n = digitOf(e)
-      if (n < 1 || n > 4) return
-      const now = Date.now()
-      if (last.n === n && now - last.t < 500) return
-      last.n = n
-      last.t = now
-      const idx = currentIndexRef.current
-      const q = qs[idx]
-      const opt = q?.options[n - 1]
-      if (q && opt) {
-        e.preventDefault()
-        handleAnswer(q.id, opt.key, idx)
-      }
-    }
-
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (isEditable(e.target) || e.repeat) return
       if (e.key === 'ArrowLeft') {
         e.preventDefault()
         setCurrentIndex(i => Math.max(0, i - 1))
@@ -119,22 +89,22 @@ export default function TakeExamPage() {
         setCurrentIndex(i => Math.min(tot - 1, i + 1))
         return
       }
-      selectByDigit(e)
+
+      // 1-4 selects an answer. e.code is layout-independent; fall back to e.key.
+      const m = /^(?:Digit|Numpad)([1-4])$/.exec(e.code)
+      const n = m ? Number(m[1]) : e.key >= '1' && e.key <= '4' ? Number(e.key) : 0
+      if (n < 1) return
+      const idx = currentIndexRef.current
+      const q = qs[idx]
+      const opt = q?.options[n - 1]
+      if (q && opt) {
+        e.preventDefault()
+        handleAnswer(q.id, opt.key, idx)
+      }
     }
 
-    // keyup as a fallback in case something swallows the keydown.
-    const onKeyUp = (e: KeyboardEvent) => {
-      if (isEditable(e.target)) return
-      selectByDigit(e)
-    }
-
-    // Capture phase: runs before any descendant handler can stop propagation.
-    window.addEventListener('keydown', onKeyDown, true)
-    window.addEventListener('keyup', onKeyUp, true)
-    return () => {
-      window.removeEventListener('keydown', onKeyDown, true)
-      window.removeEventListener('keyup', onKeyUp, true)
-    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
   }, [state, handleAnswer])
 
   if (!state) {
