@@ -8,9 +8,10 @@ import { PrepareRagStreamUseCase } from '../../../application/rag/use-cases/prep
 import { SaveAssistantMessageUseCase } from '../../../application/rag/use-cases/save-assistant-message.use-case';
 import { TypeOrmDatabaseModule } from '../../../infrastructure/database/typeorm/typeorm.module';
 import { AiModule } from '../../../infrastructure/ai/ai.module';
+import { ClassModule } from '../class/class.module';
 
 @Module({
-  imports: [TypeOrmDatabaseModule, AiModule],
+  imports: [TypeOrmDatabaseModule, AiModule, ClassModule],
   controllers: [ChatController],
   providers: [
     CreateChatUseCase,

@@ -5,6 +5,11 @@ export class CreateChatDto {
   @IsString()
   subjectId: string;
 
+  /** Lecturer/admin: the class to chat within (students derive it from enrollment). */
+  @IsOptional()
+  @IsString()
+  classId?: string;
+
   @IsOptional()
   @IsString()
   title?: string;

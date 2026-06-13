@@ -7,9 +7,10 @@ import { TypeOrmDatabaseModule } from '../../../infrastructure/database/typeorm/
 import { AiModule } from '../../../infrastructure/ai/ai.module';
 import { LocalFileService } from '../../../infrastructure/storage/local-file.service';
 import { AuditLogService } from '../../../application/system/services/audit-log.service';
+import { ClassModule } from '../class/class.module';
 
 @Module({
-  imports: [TypeOrmDatabaseModule, AiModule],
+  imports: [TypeOrmDatabaseModule, AiModule, ClassModule],
   controllers: [DocumentController],
   providers: [
     UploadDocumentUseCase,

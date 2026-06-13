@@ -8,7 +8,7 @@ export class ListFlashcardSetsUseCase {
     @Inject(TOKENS.FLASHCARD_REPO) private readonly flashcardRepo: IFlashcardRepository,
   ) {}
 
-  async execute(subjectId: string) {
-    return this.flashcardRepo.findSetsBySubjectId(subjectId);
+  async execute(classId: string) {
+    return this.flashcardRepo.findSetsByClassId(classId);
   }
 }

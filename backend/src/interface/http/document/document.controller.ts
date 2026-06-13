@@ -4,6 +4,7 @@ import {
   Get,
   Delete,
   Param,
+  Query,
   UseGuards,
   UsePipes,
   ValidationPipe,
@@ -24,6 +25,7 @@ import { UploadDocumentUseCase } from '../../../application/document/use-cases/u
 import { ListDocumentsUseCase } from '../../../application/document/use-cases/list-documents.use-case';
 import { DeleteDocumentUseCase } from '../../../application/document/use-cases/delete-document.use-case';
 import { AuditLogService } from '../../../application/system/services/audit-log.service';
+import { ClassContextService } from '../../../application/class/services/class-context.service';
 import { User } from '../../../domain/user/entities/user.entity';
 
 @Controller('subjects/:subjectId/documents')
@@ -35,6 +37,7 @@ export class DocumentController {
     private readonly listDocumentsUseCase: ListDocumentsUseCase,
     private readonly deleteDocumentUseCase: DeleteDocumentUseCase,
     private readonly auditLogService: AuditLogService,
+    private readonly classContext: ClassContextService,
   ) {}
 
   @Post()
@@ -48,11 +51,13 @@ export class DocumentController {
   )
   async uploadDocument(
     @Param('subjectId') subjectId: string,
+    @Query('classId') classId: string,
     @UploadedFile() file: Express.Multer.File,
     @CurrentUser() user: User,
     @Req() req: Request,
   ) {
-    const document = await this.uploadDocumentUseCase.execute(subjectId, file, user);
+    const resolvedClassId = await this.classContext.resolveClassId(subjectId, user, classId);
+    const document = await this.uploadDocumentUseCase.execute(subjectId, resolvedClassId, file, user);
     await this.auditLogService.log(
       user.id,
       'DOCUMENT_UPLOADED',
@@ -70,8 +75,13 @@ export class DocumentController {
 
   @Get()
   @RequirePermission('document:read')
-  async listDocuments(@Param('subjectId') subjectId: string) {
-    const documents = await this.listDocumentsUseCase.execute(subjectId);
+  async listDocuments(
+    @Param('subjectId') subjectId: string,
+    @Query('classId') classId: string,
+    @CurrentUser() user: User,
+  ) {
+    const resolvedClassId = await this.classContext.resolveClassId(subjectId, user, classId);
+    const documents = await this.listDocumentsUseCase.execute(resolvedClassId);
     return { items: documents, total: documents.length };
   }
 

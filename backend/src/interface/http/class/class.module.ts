@@ -6,6 +6,7 @@ import { ListSubjectLecturersUseCase } from '../../../application/class/use-case
 import { EnrollByPasswordUseCase } from '../../../application/class/use-cases/enroll-by-password.use-case';
 import { UnenrollClassUseCase } from '../../../application/class/use-cases/unenroll-class.use-case';
 import { GetMyClassUseCase } from '../../../application/class/use-cases/get-my-class.use-case';
+import { ClassContextService } from '../../../application/class/services/class-context.service';
 import { TypeOrmDatabaseModule } from '../../../infrastructure/database/typeorm/typeorm.module';
 
 @Module({
@@ -18,6 +19,8 @@ import { TypeOrmDatabaseModule } from '../../../infrastructure/database/typeorm/
     EnrollByPasswordUseCase,
     UnenrollClassUseCase,
     GetMyClassUseCase,
+    ClassContextService,
   ],
+  exports: [ClassContextService],
 })
 export class ClassModule {}

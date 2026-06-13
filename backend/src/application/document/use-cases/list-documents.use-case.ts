@@ -9,7 +9,7 @@ export class ListDocumentsUseCase {
     @Inject(TOKENS.DOCUMENT_REPO) private readonly documentRepo: IDocumentRepository,
   ) {}
 
-  async execute(subjectId: string): Promise<Document[]> {
-    return this.documentRepo.findBySubjectId(subjectId);
+  async execute(classId: string): Promise<Document[]> {
+    return this.documentRepo.findByClassId(classId);
   }
 }

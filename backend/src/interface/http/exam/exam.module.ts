@@ -9,9 +9,10 @@ import { GetAttemptResultUseCase } from '../../../application/exam/use-cases/get
 import { ListMyAttemptsUseCase } from '../../../application/exam/use-cases/list-my-attempts.use-case';
 import { TypeOrmDatabaseModule } from '../../../infrastructure/database/typeorm/typeorm.module';
 import { AiModule } from '../../../infrastructure/ai/ai.module';
+import { ClassModule } from '../class/class.module';
 
 @Module({
-  imports: [TypeOrmDatabaseModule, AiModule],
+  imports: [TypeOrmDatabaseModule, AiModule, ClassModule],
   controllers: [SubjectExamController, ExamAttemptController],
   providers: [
     GenerateExamUseCase,

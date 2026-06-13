@@ -1,5 +1,5 @@
 import {
-  Controller, Post, Get, Body, Param,
+  Controller, Post, Get, Body, Param, Query,
   UseGuards, UsePipes, ValidationPipe,
   HttpCode, HttpStatus,
 } from '@nestjs/common';
@@ -17,6 +17,7 @@ import { SubmitAttemptUseCase } from '../../../application/exam/use-cases/submit
 import { GetAttemptResultUseCase } from '../../../application/exam/use-cases/get-attempt-result.use-case';
 import { ListMyAttemptsUseCase } from '../../../application/exam/use-cases/list-my-attempts.use-case';
 import { GenerateExamDto, SubmitAttemptDto } from '../../../application/exam/dtos/exam.dto';
+import { ClassContextService } from '../../../application/class/services/class-context.service';
 import { User } from '../../../domain/user/entities/user.entity';
 
 @Controller('subjects/:subjectId/exams')
@@ -29,12 +30,18 @@ export class SubjectExamController {
     private readonly getExamUseCase: GetExamUseCase,
     private readonly startAttemptUseCase: StartAttemptUseCase,
     private readonly submitAttemptUseCase: SubmitAttemptUseCase,
+    private readonly classContext: ClassContextService,
   ) {}
 
   @Get()
   @RequirePermission('exam:read')
-  async list(@Param('subjectId') subjectId: string, @CurrentUser() user: User) {
-    return this.listExamsUseCase.execute(subjectId, user);
+  async list(
+    @Param('subjectId') subjectId: string,
+    @Query('classId') classId: string,
+    @CurrentUser() user: User,
+  ) {
+    const resolvedClassId = await this.classContext.resolveClassId(subjectId, user, classId);
+    return this.listExamsUseCase.execute(resolvedClassId, user);
   }
 
   @Post('generate')
@@ -47,20 +54,29 @@ export class SubjectExamController {
     @Body() dto: GenerateExamDto,
     @CurrentUser() user: User,
   ) {
-    return this.generateExamUseCase.execute(subjectId, dto, user);
+    const resolvedClassId = await this.classContext.resolveClassId(subjectId, user, dto.classId);
+    return this.generateExamUseCase.execute(subjectId, resolvedClassId, dto, user);
   }
 
   @Get(':examId')
   @RequirePermission('exam:read')
-  async getExam(@Param('examId') examId: string) {
-    return this.getExamUseCase.execute(examId);
+  async getExam(
+    @Param('subjectId') subjectId: string,
+    @Param('examId') examId: string,
+    @CurrentUser() user: User,
+  ) {
+    return this.getExamUseCase.execute(subjectId, examId, user);
   }
 
   @Post(':examId/attempts')
   @RequirePermission('exam:take')
   @HttpCode(HttpStatus.CREATED)
-  async startAttempt(@Param('examId') examId: string, @CurrentUser() user: User) {
-    return this.startAttemptUseCase.execute(examId, user);
+  async startAttempt(
+    @Param('subjectId') subjectId: string,
+    @Param('examId') examId: string,
+    @CurrentUser() user: User,
+  ) {
+    return this.startAttemptUseCase.execute(subjectId, examId, user);
   }
 
   @Post(':examId/attempts/:attemptId')

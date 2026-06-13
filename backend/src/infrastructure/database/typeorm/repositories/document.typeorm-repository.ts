@@ -16,6 +16,7 @@ export class DocumentTypeOrmRepository implements IDocumentRepository {
     const doc = new Document();
     doc.id = orm.id;
     doc.subjectId = orm.subjectId;
+    doc.classId = orm.classId;
     doc.originalName = orm.originalName;
     doc.storedPath = orm.storedPath;
     doc.mimeType = orm.mimeType;
@@ -46,9 +47,19 @@ export class DocumentTypeOrmRepository implements IDocumentRepository {
     return orms.map((o) => this.toEntity(o));
   }
 
+  async findByClassId(classId: string): Promise<Document[]> {
+    const orms = await this.repo.find({
+      where: { classId },
+      relations: ['uploader'],
+      order: { createdAt: 'DESC' },
+    });
+    return orms.map((o) => this.toEntity(o));
+  }
+
   async create(data: Partial<Document>): Promise<Document> {
     const orm = this.repo.create({
       subjectId: data.subjectId,
+      classId: data.classId,
       originalName: data.originalName,
       storedPath: data.storedPath,
       mimeType: data.mimeType,

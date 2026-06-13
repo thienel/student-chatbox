@@ -5,6 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 export interface StreamTokenPayload {
   chatId: string;
   subjectId: string;
+  classId: string;
   content: string;
   chatHistory: { role: string; content: string }[];
   topK: number;
@@ -72,7 +73,12 @@ export class AiServiceClient {
     }
   }
 
-  async processDocument(documentId: string, filePath: string, subjectId: string): Promise<void> {
+  async processDocument(
+    documentId: string,
+    filePath: string,
+    subjectId: string,
+    classId: string,
+  ): Promise<void> {
     const url = `${this.aiServiceUrl}/documents/process`;
     const response = await fetch(url, {
       method: 'POST',
@@ -80,7 +86,7 @@ export class AiServiceClient {
         'Content-Type': 'application/json',
         'x-internal-key': this.aiServiceSecret,
       },
-      body: JSON.stringify({ documentId, filePath, subjectId }),
+      body: JSON.stringify({ documentId, filePath, subjectId, classId }),
     });
     if (!response.ok) {
       const body = await response.text().catch(() => '');
@@ -102,8 +108,10 @@ export class AiServiceClient {
 
   async generateFlashcards(
     subjectId: string,
+    classId: string,
     cardCount: number,
     topic?: string,
+    documentIds?: string[],
   ): Promise<GeneratedFlashcard[]> {
     const url = `${this.aiServiceUrl}/flashcards/generate`;
     const response = await fetch(url, {
@@ -112,7 +120,13 @@ export class AiServiceClient {
         'Content-Type': 'application/json',
         'x-internal-key': this.aiServiceSecret,
       },
-      body: JSON.stringify({ subject_id: subjectId, card_count: cardCount, topic }),
+      body: JSON.stringify({
+        subject_id: subjectId,
+        class_id: classId,
+        card_count: cardCount,
+        topic,
+        document_ids: documentIds,
+      }),
     });
     if (!response.ok) {
       const body = await response.text().catch(() => '');
@@ -124,9 +138,11 @@ export class AiServiceClient {
 
   async generateExam(
     subjectId: string,
+    classId: string,
     questionCount: number,
     difficulty: 'easy' | 'medium' | 'hard',
     topic?: string,
+    documentIds?: string[],
   ): Promise<GeneratedQuestion[]> {
     const url = `${this.aiServiceUrl}/exams/generate`;
     const response = await fetch(url, {
@@ -135,7 +151,14 @@ export class AiServiceClient {
         'Content-Type': 'application/json',
         'x-internal-key': this.aiServiceSecret,
       },
-      body: JSON.stringify({ subject_id: subjectId, question_count: questionCount, difficulty, topic }),
+      body: JSON.stringify({
+        subject_id: subjectId,
+        class_id: classId,
+        question_count: questionCount,
+        difficulty,
+        topic,
+        document_ids: documentIds,
+      }),
     });
     if (!response.ok) {
       const body = await response.text().catch(() => '');
