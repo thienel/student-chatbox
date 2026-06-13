@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
-import { FileText, MessageSquare, Users, Layers, ClipboardList } from 'lucide-react'
+import { FileText, MessageSquare, Users, Layers, ClipboardList, GraduationCap } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useAuthStore } from '@/store/useAuthStore'
 
 interface SubjectTabsProps {
   subjectId: string
@@ -8,6 +9,8 @@ interface SubjectTabsProps {
 
 export function SubjectTabs({ subjectId }: SubjectTabsProps) {
   const { pathname } = useLocation()
+  const role = useAuthStore(s => s.user?.role)
+  const canManageClasses = role === 'lecturer' || role === 'admin'
 
   const tabs = [
     { label: 'Documents', href: `/subjects/${subjectId}/documents`, icon: FileText },
@@ -15,6 +18,9 @@ export function SubjectTabs({ subjectId }: SubjectTabsProps) {
     { label: 'Flashcards', href: `/subjects/${subjectId}/flashcards`, icon: Layers },
     { label: 'Exams', href: `/subjects/${subjectId}/exams`, icon: ClipboardList },
     { label: 'Members', href: `/subjects/${subjectId}/members`, icon: Users },
+    ...(canManageClasses
+      ? [{ label: 'Classes', href: `/subjects/${subjectId}/classes`, icon: GraduationCap }]
+      : []),
   ]
 
   return (

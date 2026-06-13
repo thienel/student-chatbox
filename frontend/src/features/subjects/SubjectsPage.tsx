@@ -6,7 +6,9 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { EmptyState } from '@/components/shared/EmptyState'
-import { useSubjects, useEnrollSubject, useUnenrollSubject } from './queries'
+import { useSubjects } from './queries'
+import { useUnenroll } from '@/features/classes/queries'
+import { EnrollDialog } from '@/features/classes/EnrollDialog'
 import { useAuthStore } from '@/store/useAuthStore'
 import { cn } from '@/lib/utils'
 
@@ -16,8 +18,6 @@ export default function SubjectsPage() {
   const [search, setSearch] = useState('')
 
   const { data, isLoading } = useSubjects({ search: search || undefined, limit: 50 })
-  const enroll = useEnrollSubject()
-  const unenroll = useUnenrollSubject()
 
   const subjects = data?.items ?? []
   const isStudent = user?.role === 'student'
@@ -99,24 +99,7 @@ export default function SubjectsPage() {
 
               {isStudent && (
                 <div className="mt-auto pt-1" onClick={e => e.stopPropagation()}>
-                  <Button
-                    size="sm"
-                    disabled={enroll.isPending || unenroll.isPending}
-                    onClick={() => subject.isEnrolled
-                      ? unenroll.mutate(subject.id)
-                      : enroll.mutate(subject.id)
-                    }
-                    className={cn(
-                      'h-7 px-3 text-xs rounded-md w-full',
-                      subject.isEnrolled
-                        ? 'bg-transparent border border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-50'
-                        : 'bg-zinc-50 text-zinc-950 hover:bg-zinc-200'
-                    )}
-                  >
-                    {(enroll.isPending || unenroll.isPending) ? (
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                    ) : subject.isEnrolled ? 'Unenroll' : 'Enroll'}
-                  </Button>
+                  <EnrollButton subjectId={subject.id} isEnrolled={!!subject.isEnrolled} />
                 </div>
               )}
             </div>
@@ -124,5 +107,36 @@ export default function SubjectsPage() {
         </div>
       )}
     </div>
+  )
+}
+
+function EnrollButton({ subjectId, isEnrolled }: { subjectId: string; isEnrolled: boolean }) {
+  const [open, setOpen] = useState(false)
+  const unenroll = useUnenroll(subjectId)
+
+  if (isEnrolled) {
+    return (
+      <Button
+        size="sm"
+        disabled={unenroll.isPending}
+        onClick={() => unenroll.mutate()}
+        className="h-7 px-3 text-xs rounded-md w-full bg-transparent border border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-50"
+      >
+        {unenroll.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Leave class'}
+      </Button>
+    )
+  }
+
+  return (
+    <>
+      <Button
+        size="sm"
+        onClick={() => setOpen(true)}
+        className="h-7 px-3 text-xs rounded-md w-full bg-zinc-50 text-zinc-950 hover:bg-zinc-200"
+      >
+        Enroll
+      </Button>
+      <EnrollDialog subjectId={subjectId} open={open} onOpenChange={setOpen} />
+    </>
   )
 }

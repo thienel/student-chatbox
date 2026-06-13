@@ -7,6 +7,15 @@ import { Toaster } from '@/components/ui/toaster'
 import { CommandPalette } from '@/components/shared/CommandPalette'
 import { useBreadcrumbStore } from '@/store/useBreadcrumbStore'
 import { useSubject } from '@/features/subjects/queries'
+import { SubjectClassProvider, useSubjectClass } from '@/features/classes/ClassContext'
+import { ClassBar } from '@/features/classes/ClassBar'
+import { ClassGate } from '@/features/classes/ClassGate'
+
+function SubjectBody({ subjectId }: { subjectId: string }) {
+  const { needsEnroll } = useSubjectClass()
+  if (needsEnroll) return <ClassGate subjectId={subjectId} />
+  return <Outlet />
+}
 
 export function SubjectShell() {
   const { id = '' } = useParams<{ id: string }>()
@@ -25,17 +34,20 @@ export function SubjectShell() {
   }, [subject, setBreadcrumbs, resetBreadcrumbs])
 
   return (
-    <div className="min-h-screen bg-zinc-950">
-      <Topbar />
-      <div className="fixed top-12 left-0 right-0 z-[39]">
-        <SubjectTabs subjectId={id} />
+    <SubjectClassProvider subjectId={id}>
+      <div className="min-h-screen bg-zinc-950">
+        <Topbar />
+        <div className="fixed top-12 left-0 right-0 z-[39]">
+          <SubjectTabs subjectId={id} />
+          <ClassBar />
+        </div>
+        <main className="pt-[7.75rem] pb-20 min-h-screen">
+          <SubjectBody subjectId={id} />
+        </main>
+        <Dock />
+        <CommandPalette />
+        <Toaster />
       </div>
-      <main className="pt-[5.5rem] pb-20 min-h-screen">
-        <Outlet />
-      </main>
-      <Dock />
-      <CommandPalette />
-      <Toaster />
-    </div>
+    </SubjectClassProvider>
   )
 }
