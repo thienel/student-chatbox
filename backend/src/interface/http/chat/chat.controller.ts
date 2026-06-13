@@ -50,7 +50,7 @@ export class ChatController {
   @RequirePermission('chat:create')
   @HttpCode(HttpStatus.CREATED)
   async createChat(@Body() dto: CreateChatDto, @CurrentUser() user: User) {
-    return this.createChatUseCase.execute(dto, user.id);
+    return this.createChatUseCase.execute(dto, user);
   }
 
   @Get()

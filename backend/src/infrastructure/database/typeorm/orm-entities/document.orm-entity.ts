@@ -18,6 +18,9 @@ export class DocumentOrmEntity {
   @Column({ name: 'subject_id' })
   subjectId: string;
 
+  @Column({ name: 'class_id', type: 'uuid', nullable: true })
+  classId: string;
+
   @Column({ name: 'original_name', length: 500 })
   originalName: string;
 

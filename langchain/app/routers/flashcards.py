@@ -9,8 +9,10 @@ router = APIRouter(prefix="/flashcards", tags=["flashcards"])
 
 class GenerateFlashcardsRequest(BaseModel):
     subject_id: str
+    class_id: str
     card_count: int = Field(default=10, ge=1, le=50)
     topic: Optional[str] = None
+    document_ids: Optional[list[str]] = None
 
 
 class FlashcardItem(BaseModel):
@@ -30,8 +32,10 @@ async def generate_flashcards_endpoint(
     try:
         cards = await generate_flashcards(
             subject_id=body.subject_id,
+            class_id=body.class_id,
             card_count=body.card_count,
             topic=body.topic,
+            document_ids=body.document_ids,
         )
         return GenerateFlashcardsResponse(
             cards=[FlashcardItem(front=c["front"], back=c["back"]) for c in cards]

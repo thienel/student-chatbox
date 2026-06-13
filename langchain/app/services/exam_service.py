@@ -20,9 +20,11 @@ _DIFFICULTY_LABELS = {
 
 async def generate_exam(
     subject_id: str,
+    class_id: str,
     question_count: int = 10,
     difficulty: Difficulty = "medium",
     topic: Optional[str] = None,
+    document_ids: Optional[list[str]] = None,
 ) -> list[dict]:
     embeddings = OpenAIEmbeddings(
         model=settings.openai_embedding_model,
@@ -34,10 +36,12 @@ async def generate_exam(
         query_vector: list[float] = await asyncio.to_thread(embeddings.embed_query, topic)
         chunks = await asyncio.to_thread(
             qdrant_service.search_similar,
-            query_vector, subject_id, min(20, question_count * 2), 0.3,
+            query_vector, class_id, min(20, question_count * 2), 0.3, document_ids,
         )
     else:
-        chunks = await asyncio.to_thread(qdrant_service.get_random_chunks, subject_id, 20)
+        chunks = await asyncio.to_thread(
+            qdrant_service.get_random_chunks, class_id, 20, document_ids
+        )
 
     if not chunks:
         return []

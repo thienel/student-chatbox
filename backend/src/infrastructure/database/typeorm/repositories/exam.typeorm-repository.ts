@@ -22,7 +22,7 @@ export class ExamTypeOrmRepository implements IExamRepository {
 
   private toExam(o: ExamOrmEntity): Exam {
     const e = new Exam();
-    e.id = o.id; e.subjectId = o.subjectId; e.title = o.title;
+    e.id = o.id; e.subjectId = o.subjectId; e.classId = o.classId; e.title = o.title;
     e.description = o.description ?? undefined;
     e.type = o.type as Exam['type'];
     e.difficulty = (o.difficulty ?? undefined) as Exam['difficulty'];
@@ -58,7 +58,7 @@ export class ExamTypeOrmRepository implements IExamRepository {
 
   async createExam(data: Partial<Exam>): Promise<Exam> {
     const saved = await this.examRepo.save(this.examRepo.create({
-      subjectId: data.subjectId, title: data.title,
+      subjectId: data.subjectId, classId: data.classId, title: data.title,
       description: data.description ?? null, type: data.type,
       difficulty: data.difficulty ?? null, durationMinutes: data.durationMinutes ?? 0,
       questionCount: data.questionCount ?? 10, isPublic: data.isPublic ?? false,
@@ -70,6 +70,11 @@ export class ExamTypeOrmRepository implements IExamRepository {
   async findExamById(id: string): Promise<Exam | null> {
     const o = await this.examRepo.findOne({ where: { id } });
     return o ? this.toExam(o) : null;
+  }
+
+  async findExamsByClassId(classId: string): Promise<Exam[]> {
+    const orms = await this.examRepo.find({ where: { classId }, order: { createdAt: 'DESC' } });
+    return orms.map((o) => this.toExam(o));
   }
 
   async findExamsBySubjectId(subjectId: string): Promise<Exam[]> {

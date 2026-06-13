@@ -9,11 +9,8 @@ export class ListExamsUseCase {
     @Inject(TOKENS.EXAM_REPO) private readonly examRepo: IExamRepository,
   ) {}
 
-  async execute(subjectId: string, user: User) {
-    const all = await this.examRepo.findExamsBySubjectId(subjectId);
-    // ai_generated exams: only creator and admin can see them
-    return all.filter(
-      (e) => e.isPublic || e.createdBy === user.id || user.roleName === 'admin',
-    );
+  async execute(classId: string, _user: User) {
+    // A class has a single lecturer, so class membership is the visibility gate.
+    return this.examRepo.findExamsByClassId(classId);
   }
 }

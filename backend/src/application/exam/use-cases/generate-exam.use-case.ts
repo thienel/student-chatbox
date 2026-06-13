@@ -16,7 +16,7 @@ export class GenerateExamUseCase {
     private readonly aiServiceClient: AiServiceClient,
   ) {}
 
-  async execute(subjectId: string, dto: GenerateExamDto, user: User) {
+  async execute(subjectId: string, classId: string, dto: GenerateExamDto, user: User) {
     const subject = await this.subjectRepo.findById(subjectId);
     if (!subject) throw new NotFoundException('Subject not found');
 
@@ -24,7 +24,7 @@ export class GenerateExamUseCase {
     const difficulty = dto.difficulty ?? 'medium';
 
     const generatedQuestions = await this.aiServiceClient.generateExam(
-      subjectId, questionCount, difficulty, dto.topic,
+      subjectId, classId, questionCount, difficulty, dto.topic, dto.documentIds,
     );
 
     const title = dto.topic
@@ -32,7 +32,7 @@ export class GenerateExamUseCase {
       : `Đề thi AI: ${subject.name} (${difficulty})`;
 
     const exam = await this.examRepo.createExam({
-      subjectId, title, type: 'ai_generated',
+      subjectId, classId, title, type: 'ai_generated',
       difficulty, questionCount: generatedQuestions.length,
       isPublic: false, createdBy: user.id,
     });

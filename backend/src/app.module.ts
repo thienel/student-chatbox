@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './interface/http/auth/auth.module';
 import { UserModule } from './interface/http/user/user.module';
 import { SubjectModule } from './interface/http/subject/subject.module';
+import { ClassModule } from './interface/http/class/class.module';
 import { DocumentModule } from './interface/http/document/document.module';
 import { ChatModule } from './interface/http/chat/chat.module';
 import { SystemModule } from './interface/http/system/system.module';
@@ -23,6 +24,7 @@ import { HealthController } from './interface/http/health/health.controller';
     AuthModule,
     UserModule,
     SubjectModule,
+    ClassModule,
     DocumentModule,
     ChatModule,
     SystemModule,

@@ -5,6 +5,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   UseGuards,
   UsePipes,
   ValidationPipe,
@@ -22,6 +23,7 @@ import { ListFlashcardSetsUseCase } from '../../../application/flashcard/use-cas
 import { GetFlashcardSetUseCase } from '../../../application/flashcard/use-cases/get-flashcard-set.use-case';
 import { DeleteFlashcardSetUseCase } from '../../../application/flashcard/use-cases/delete-flashcard-set.use-case';
 import { GenerateFlashcardsDto } from '../../../application/flashcard/dtos/flashcard.dto';
+import { ClassContextService } from '../../../application/class/services/class-context.service';
 import { User } from '../../../domain/user/entities/user.entity';
 
 @Controller('subjects/:subjectId/flashcard-sets')
@@ -33,12 +35,18 @@ export class FlashcardController {
     private readonly listFlashcardSetsUseCase: ListFlashcardSetsUseCase,
     private readonly getFlashcardSetUseCase: GetFlashcardSetUseCase,
     private readonly deleteFlashcardSetUseCase: DeleteFlashcardSetUseCase,
+    private readonly classContext: ClassContextService,
   ) {}
 
   @Get()
   @RequirePermission('flashcard:read')
-  async list(@Param('subjectId') subjectId: string) {
-    return this.listFlashcardSetsUseCase.execute(subjectId);
+  async list(
+    @Param('subjectId') subjectId: string,
+    @Query('classId') classId: string,
+    @CurrentUser() user: User,
+  ) {
+    const resolvedClassId = await this.classContext.resolveClassId(subjectId, user, classId);
+    return this.listFlashcardSetsUseCase.execute(resolvedClassId);
   }
 
   @Post('generate')
@@ -51,13 +59,18 @@ export class FlashcardController {
     @Body() dto: GenerateFlashcardsDto,
     @CurrentUser() user: User,
   ) {
-    return this.generateFlashcardsUseCase.execute(subjectId, dto, user);
+    const resolvedClassId = await this.classContext.resolveClassId(subjectId, user, dto.classId);
+    return this.generateFlashcardsUseCase.execute(subjectId, resolvedClassId, dto, user);
   }
 
   @Get(':id')
   @RequirePermission('flashcard:read')
-  async getSet(@Param('id') id: string) {
-    return this.getFlashcardSetUseCase.execute(id);
+  async getSet(
+    @Param('subjectId') subjectId: string,
+    @Param('id') id: string,
+    @CurrentUser() user: User,
+  ) {
+    return this.getFlashcardSetUseCase.execute(subjectId, id, user);
   }
 
   @Delete(':id')

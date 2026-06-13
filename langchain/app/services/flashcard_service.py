@@ -12,8 +12,10 @@ logger = logging.getLogger(__name__)
 
 async def generate_flashcards(
     subject_id: str,
+    class_id: str,
     card_count: int = 10,
     topic: Optional[str] = None,
+    document_ids: Optional[list[str]] = None,
 ) -> list[dict]:
     embeddings = OpenAIEmbeddings(
         model=settings.openai_embedding_model,
@@ -25,10 +27,12 @@ async def generate_flashcards(
         query_vector: list[float] = await asyncio.to_thread(embeddings.embed_query, topic)
         chunks = await asyncio.to_thread(
             qdrant_service.search_similar,
-            query_vector, subject_id, min(20, card_count * 2), 0.3,
+            query_vector, class_id, min(20, card_count * 2), 0.3, document_ids,
         )
     else:
-        chunks = await asyncio.to_thread(qdrant_service.get_random_chunks, subject_id, 20)
+        chunks = await asyncio.to_thread(
+            qdrant_service.get_random_chunks, class_id, 20, document_ids
+        )
 
     if not chunks:
         return []

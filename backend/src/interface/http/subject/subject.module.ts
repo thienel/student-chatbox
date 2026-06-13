@@ -7,8 +7,6 @@ import { UpdateSubjectUseCase } from '../../../application/subject/use-cases/upd
 import { DeleteSubjectUseCase } from '../../../application/subject/use-cases/delete-subject.use-case';
 import { AssignLecturerUseCase } from '../../../application/subject/use-cases/assign-lecturer.use-case';
 import { RemoveLecturerUseCase } from '../../../application/subject/use-cases/remove-lecturer.use-case';
-import { EnrollStudentUseCase } from '../../../application/subject/use-cases/enroll-student.use-case';
-import { UnenrollStudentUseCase } from '../../../application/subject/use-cases/unenroll-student.use-case';
 import { TypeOrmDatabaseModule } from '../../../infrastructure/database/typeorm/typeorm.module';
 import { AuditLogService } from '../../../application/system/services/audit-log.service';
 
@@ -23,8 +21,6 @@ import { AuditLogService } from '../../../application/system/services/audit-log.
     DeleteSubjectUseCase,
     AssignLecturerUseCase,
     RemoveLecturerUseCase,
-    EnrollStudentUseCase,
-    UnenrollStudentUseCase,
     AuditLogService,
   ],
 })

@@ -1,5 +1,6 @@
 import random
 from qdrant_client import QdrantClient
+from typing import Optional
 from qdrant_client.models import (
     Distance,
     VectorParams,
@@ -7,6 +8,7 @@ from qdrant_client.models import (
     Filter,
     FieldCondition,
     MatchValue,
+    MatchAny,
     FilterSelector,
 )
 
@@ -44,17 +46,29 @@ class QdrantService:
                 wait=True,
             )
 
+    def _scope_filter(
+        self, class_id: str, document_ids: Optional[list[str]] = None
+    ) -> Filter:
+        # Content is isolated per class; optionally narrow to specific documents.
+        must = [FieldCondition(key="class_id", match=MatchValue(value=class_id))]
+        if document_ids:
+            must.append(FieldCondition(key="document_id", match=MatchAny(any=document_ids)))
+        return Filter(must=must)
+
     def search_similar(
-        self, vector: list[float], subject_id: str, top_k: int, min_score: float
+        self,
+        vector: list[float],
+        class_id: str,
+        top_k: int,
+        min_score: float,
+        document_ids: Optional[list[str]] = None,
     ) -> list[dict]:
         results = self._client.search(
             collection_name=self._collection,
             query_vector=vector,
             limit=top_k,
             score_threshold=min_score if min_score > 0.0 else None,
-            query_filter=Filter(
-                must=[FieldCondition(key="subject_id", match=MatchValue(value=subject_id))]
-            ),
+            query_filter=self._scope_filter(class_id, document_ids),
             with_payload=True,
         )
         return [
@@ -67,12 +81,15 @@ class QdrantService:
             for r in results
         ]
 
-    def get_random_chunks(self, subject_id: str, limit: int = 20) -> list[dict]:
+    def get_random_chunks(
+        self,
+        class_id: str,
+        limit: int = 20,
+        document_ids: Optional[list[str]] = None,
+    ) -> list[dict]:
         results, _ = self._client.scroll(
             self._collection,
-            scroll_filter=Filter(
-                must=[FieldCondition(key="subject_id", match=MatchValue(value=subject_id))]
-            ),
+            scroll_filter=self._scope_filter(class_id, document_ids),
             limit=200,
             with_payload=True,
             with_vectors=False,

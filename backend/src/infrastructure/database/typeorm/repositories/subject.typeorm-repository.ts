@@ -61,11 +61,8 @@ export class SubjectTypeOrmRepository implements ISubjectRepository {
     if (filter.lecturerId) {
       qb.andWhere('lecturer.id = :lecturerId', { lecturerId: filter.lecturerId });
     }
-    if (filter.studentId) {
-      qb.innerJoin('subject_enrollments', 'se', 'se.subject_id = s.id AND se.student_id = :studentId', {
-        studentId: filter.studentId,
-      });
-    }
+    // Students browse all (active) subjects to discover and enroll; the
+    // enrollment state is surfaced per-subject via isEnrolled below.
 
     const total = await qb.getCount();
     const items = await qb
@@ -73,7 +70,25 @@ export class SubjectTypeOrmRepository implements ISubjectRepository {
       .take(filter.limit)
       .getMany();
 
-    return { items: items.map((o) => this.toEntity(o)), total };
+    let enrolledIds = new Set<string>();
+    if (filter.studentId && items.length > 0) {
+      const rows = await this.dataSource.query(
+        `SELECT DISTINCT c.subject_id FROM class_enrollments ce
+         JOIN classes c ON c.id = ce.class_id
+         WHERE ce.student_id = $1 AND c.subject_id = ANY($2)`,
+        [filter.studentId, items.map((i) => i.id)],
+      );
+      enrolledIds = new Set(rows.map((r: { subject_id: string }) => r.subject_id));
+    }
+
+    return {
+      items: items.map((o) => {
+        const subject = this.toEntity(o);
+        if (filter.studentId) subject.isEnrolled = enrolledIds.has(o.id);
+        return subject;
+      }),
+      total,
+    };
   }
 
   async create(data: Partial<Subject>): Promise<Subject> {
