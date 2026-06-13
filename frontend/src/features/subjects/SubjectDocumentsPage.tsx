@@ -16,6 +16,7 @@ import {
 import { EmptyState } from '@/components/shared/EmptyState'
 import { useSubjectDocuments, useUploadDocument, useDeleteDocument } from './queries'
 import { useAuthStore } from '@/store/useAuthStore'
+import { useSubjectClass } from '@/features/classes/ClassContext'
 import { cn } from '@/lib/utils'
 
 function formatBytes(bytes: number) {
@@ -33,12 +34,14 @@ const statusColor: Record<string, string> = {
 export default function SubjectDocumentsPage() {
   const { id: subjectId = '' } = useParams<{ id: string }>()
   const user = useAuthStore(s => s.user)
-  const canUpload = user?.role === 'admin' || user?.role === 'lecturer'
+  const canManage = user?.role === 'admin' || user?.role === 'lecturer'
   const fileRef = useRef<HTMLInputElement>(null)
   const [confirmId, setConfirmId] = useState<string | null>(null)
 
-  const { data: documents = [], isLoading } = useSubjectDocuments(subjectId)
-  const upload = useUploadDocument(subjectId)
+  const { classId, isLecturer, needsClass } = useSubjectClass()
+  const canUpload = canManage && !!classId
+  const { data: documents = [], isLoading } = useSubjectDocuments(subjectId, classId)
+  const upload = useUploadDocument(subjectId, classId)
   const remove = useDeleteDocument(subjectId)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -81,7 +84,13 @@ export default function SubjectDocumentsPage() {
         )}
       </div>
 
-      {isLoading ? (
+      {isLecturer && needsClass ? (
+        <EmptyState
+          icon={FileText}
+          title="Create a class first"
+          description="Documents belong to a class. Go to the Classes tab to create one."
+        />
+      ) : isLoading || !classId ? (
         <div className="space-y-2">
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-14 rounded-lg bg-zinc-900" />

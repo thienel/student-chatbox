@@ -10,6 +10,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { useToast } from '@/hooks/use-toast'
 import { useAuthStore } from '@/store/useAuthStore'
+import { useSubjectClass } from '@/features/classes/ClassContext'
+import { DocumentPicker } from '@/components/shared/DocumentPicker'
 import { useFlashcardSets, useGenerateFlashcards, useDeleteFlashcardSet } from './queries'
 
 export default function SubjectFlashcardsPage() {
@@ -22,9 +24,11 @@ export default function SubjectFlashcardsPage() {
   const [genOpen, setGenOpen] = useState(false)
   const [topic, setTopic] = useState('')
   const [cardCount, setCardCount] = useState('10')
+  const [documentIds, setDocumentIds] = useState<string[]>([])
 
-  const { data: sets = [], isLoading } = useFlashcardSets(subjectId)
-  const generate = useGenerateFlashcards(subjectId)
+  const { classId } = useSubjectClass()
+  const { data: sets = [], isLoading } = useFlashcardSets(subjectId, classId)
+  const generate = useGenerateFlashcards(subjectId, classId)
   const remove = useDeleteFlashcardSet(subjectId)
 
   const handleGenerate = async () => {
@@ -32,11 +36,13 @@ export default function SubjectFlashcardsPage() {
       await generate.mutateAsync({
         topic: topic.trim() || undefined,
         cardCount: Number(cardCount),
+        documentIds: documentIds.length ? documentIds : undefined,
       })
       toast({ description: 'Flashcard set generated.' })
       setGenOpen(false)
       setTopic('')
       setCardCount('10')
+      setDocumentIds([])
     } catch {
       toast({ variant: 'destructive', description: 'Failed to generate flashcards.' })
     }
@@ -166,6 +172,12 @@ export default function SubjectFlashcardsPage() {
                 className="bg-zinc-800 border-zinc-700 text-zinc-50 h-9 text-sm rounded-md focus-visible:ring-1 focus-visible:ring-zinc-600"
               />
             </div>
+            <DocumentPicker
+              subjectId={subjectId}
+              classId={classId}
+              value={documentIds}
+              onChange={setDocumentIds}
+            />
           </div>
           <div className="px-5 py-4 border-t border-zinc-800 flex justify-end gap-2">
             <Button

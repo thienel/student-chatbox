@@ -9,11 +9,11 @@ export const examKeys = {
   attempt: (attemptId: string) => ['exam-attempt', attemptId] as const,
 }
 
-export function useExams(subjectId: string) {
+export function useExams(subjectId: string, classId?: string) {
   return useQuery({
-    queryKey: examKeys.list(subjectId),
-    queryFn: () => examsApi.list(subjectId),
-    enabled: !!subjectId,
+    queryKey: [...examKeys.list(subjectId), classId ?? null],
+    queryFn: () => examsApi.list(subjectId, classId),
+    enabled: !!subjectId && !!classId,
   })
 }
 
@@ -25,11 +25,15 @@ export function useExam(subjectId: string, examId: string) {
   })
 }
 
-export function useGenerateExam(subjectId: string) {
+export function useGenerateExam(subjectId: string, classId?: string) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (data: { questionCount?: number; difficulty?: ExamDifficulty; topic?: string }) =>
-      examsApi.generate(subjectId, data),
+    mutationFn: (data: {
+      questionCount?: number
+      difficulty?: ExamDifficulty
+      topic?: string
+      documentIds?: string[]
+    }) => examsApi.generate(subjectId, { ...data, classId }),
     onSuccess: () => qc.invalidateQueries({ queryKey: examKeys.list(subjectId) }),
   })
 }

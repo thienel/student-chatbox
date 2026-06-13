@@ -2,9 +2,11 @@ import axiosInstance from '@/api/axiosInstance'
 import type { ApiResponse, Exam, ExamDifficulty, ExamAttempt, Question } from '@/types'
 
 export const examsApi = {
-  list: (subjectId: string) =>
+  list: (subjectId: string, classId?: string) =>
     axiosInstance
-      .get<ApiResponse<Exam[]>>(`/subjects/${subjectId}/exams`)
+      .get<ApiResponse<Exam[]>>(`/subjects/${subjectId}/exams`, {
+        params: classId ? { classId } : undefined,
+      })
       .then(r => r.data.data),
 
   get: (subjectId: string, examId: string) =>
@@ -14,7 +16,13 @@ export const examsApi = {
 
   generate: (
     subjectId: string,
-    data: { questionCount?: number; difficulty?: ExamDifficulty; topic?: string },
+    data: {
+      questionCount?: number
+      difficulty?: ExamDifficulty
+      topic?: string
+      classId?: string
+      documentIds?: string[]
+    },
   ) =>
     axiosInstance
       // AI generation runs an LLM call — override the short global timeout.
