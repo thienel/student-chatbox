@@ -1,0 +1,311 @@
+// ============================================================
+// EduChat — Entity Relationship Diagram (Full Spec)
+// Import vào: https://dbdiagram.io
+// ============================================================
+
+Project EduChat {
+  database_type: 'PostgreSQL'
+  Note: '''
+    EduChat — Internal RAG Chatbot cho Đại học (Full Spec)
+    MVP: Auth + Subjects + Documents + RAG Chat
+    Full: + Flashcards + Exams + Bookmarks + Analytics + RBAC Mgmt
+    Tables: 20 | API Endpoints: ~50
+  '''
+}
+
+// ============================================================
+// GROUP: RBAC
+// ============================================================
+
+Table roles {
+  id          uuid         [pk, default: `gen_random_uuid()`]
+  name        varchar(50)  [unique, not null, note: "'admin' | 'lecturer' | 'student'"]
+  description text
+  is_system   boolean      [default: false, note: "System roles không thể xóa"]
+  created_at  timestamptz  [default: `now()`]
+
+  Note: "Roles được lưu trong DB, không hardcode trong logic"
+}
+
+Table permissions {
+  id          uuid         [pk, default: `gen_random_uuid()`]
+  name        varchar(100) [unique, not null, note: "'user:create' | 'ai:chat-rag' | ..."]
+  description text
+  created_at  timestamptz  [default: `now()`]
+
+  Note: "Permission string format: 'resource:action'"
+}
+
+Table role_permissions {
+  role_id       uuid [not null, ref: > roles.id]
+  permission_id uuid [not null, ref: > permissions.id]
+
+  indexes {
+    (role_id, permission_id) [pk]
+  }
+
+  Note: "Junction table — M:N giữa roles và permissions"
+}
+
+// ============================================================
+// GROUP: USERS & AUTH
+// ============================================================
+
+Table users {
+  id            uuid         [pk, default: `gen_random_uuid()`]
+  email         varchar(255) [unique, not null]
+  password_hash varchar(255) [not null, note: "Bcrypt rounds=12; nullable nếu sau này tích hợp SSO/OAuth"]
+  full_name     varchar(255) [not null]
+  role_id       uuid         [not null, ref: > roles.id]
+  status        varchar(20)  [not null, default: 'active', note: "'active' | 'suspended'"]
+  created_by    uuid         [ref: > users.id, note: "Admin tạo user — tự tham chiếu"]
+  created_at    timestamptz  [default: `now()`]
+  updated_at    timestamptz  [default: `now()`]
+
+  Note: "Không có self-register. Admin tạo tất cả tài khoản."
+}
+
+Table refresh_tokens {
+  id          uuid         [pk, default: `gen_random_uuid()`]
+  user_id     uuid         [not null, ref: > users.id, note: "CASCADE DELETE"]
+  token_hash  varchar(255) [unique, not null, note: "Lưu hash, không lưu raw token"]
+  expires_at  timestamptz  [not null, note: "TTL = 7 ngày"]
+  revoked_at  timestamptz  [note: "NULL = còn hiệu lực"]
+  created_at  timestamptz  [default: `now()`]
+}
+
+// ============================================================
+// GROUP: SUBJECTS
+// ============================================================
+
+Table subjects {
+  id          uuid        [pk, default: `gen_random_uuid()`]
+  code        varchar(20) [unique, not null, note: "'SWD392', 'PRN231'"]
+  name        varchar(255) [not null]
+  description text
+  status      varchar(20) [default: 'active', note: "'active' | 'inactive'"]
+  created_by  uuid        [ref: > users.id]
+  created_at  timestamptz [default: `now()`]
+  updated_at  timestamptz [default: `now()`]
+}
+
+Table subject_lecturers {
+  subject_id  uuid        [not null, ref: > subjects.id, note: "CASCADE DELETE"]
+  lecturer_id uuid        [not null, ref: > users.id, note: "CASCADE DELETE"]
+  assigned_by uuid        [ref: > users.id, note: "Admin đã assign"]
+  assigned_at timestamptz [default: `now()`]
+
+  indexes {
+    (subject_id, lecturer_id) [pk]
+  }
+
+  Note: "1 môn có thể có nhiều GV; 1 GV có thể dạy nhiều môn"
+}
+
+Table subject_enrollments {
+  subject_id  uuid        [not null, ref: > subjects.id, note: "CASCADE DELETE"]
+  student_id  uuid        [not null, ref: > users.id, note: "CASCADE DELETE"]
+  enrolled_at timestamptz [default: `now()`]
+
+  indexes {
+    (subject_id, student_id) [pk]
+  }
+
+  Note: "Student tự enroll qua permission 'subject:enroll'"
+}
+
+// ============================================================
+// GROUP: DOCUMENTS & RAG
+// ============================================================
+
+Table documents {
+  id              uuid          [pk, default: `gen_random_uuid()`]
+  subject_id      uuid          [not null, ref: > subjects.id, note: "CASCADE DELETE"]
+  original_name   varchar(500)  [not null]
+  stored_path     varchar(1000) [not null, note: "stores/uploads/{subjectId}/{uuid}_{name}"]
+  mime_type       varchar(100)  [not null, note: "PDF/DOCX/PPTX only"]
+  file_size_bytes integer       [note: "Max 50MB"]
+  status          varchar(20)   [default: 'processing', note: "'processing' | 'ready' | 'failed'"]
+  chunk_count     integer       [default: 0, note: "Số vector chunks đã embed vào Qdrant"]
+  error_message   text          [note: "Lỗi trong quá trình ingest"]
+  uploaded_by     uuid          [not null, ref: > users.id]
+  created_at      timestamptz   [default: `now()`]
+  updated_at      timestamptz   [default: `now()`]
+
+  Note: "Ingestion flow: Upload → Extract text → Chunk (1000/200) → Embed → Qdrant"
+}
+
+// ============================================================
+// GROUP: CHAT & RAG
+// ============================================================
+
+Table chats {
+  id         uuid         [pk, default: `gen_random_uuid()`]
+  user_id    uuid         [not null, ref: > users.id, note: "CASCADE DELETE"]
+  subject_id uuid         [not null, ref: > subjects.id]
+  title      varchar(500) [default: "Cuộc trò chuyện mới"]
+  created_at timestamptz  [default: `now()`]
+  updated_at timestamptz  [default: `now()`]
+
+  indexes {
+    user_id
+    subject_id
+  }
+}
+
+Table messages {
+  id         uuid        [pk, default: `gen_random_uuid()`]
+  chat_id    uuid        [not null, ref: > chats.id, note: "CASCADE DELETE"]
+  role       varchar(20) [not null, note: "'user' | 'assistant'"]
+  content    text        [not null]
+  sources    jsonb       [note: "JSON: documentId, originalName, excerpt, score"]
+  created_at timestamptz [default: `now()`]
+
+  indexes {
+    chat_id
+  }
+
+  Note: "sources chỉ có với role='assistant' — trích dẫn từ Qdrant chunks"
+}
+
+// ============================================================
+// GROUP: AI USAGE & SYSTEM
+// ============================================================
+
+Table ai_usage_logs {
+  id        uuid        [pk, default: `gen_random_uuid()`]
+  user_id   uuid        [not null, ref: > users.id, note: "CASCADE DELETE"]
+  feature   varchar(30) [not null, note: "'chat_rag' | 'generate_flashcard' | 'generate_exam'"]
+  used_date date        [not null, default: `current_date`]
+  count     integer     [not null, default: 1]
+
+  indexes {
+    (user_id, feature, used_date) [unique, note: "Upsert: ON CONFLICT DO UPDATE SET count = count + 1"]
+  }
+
+  Note: "Rate limit check: count >= system_settings['ai_daily_limit.{role}.{feature}'] → 429"
+}
+
+Table system_settings {
+  key        varchar(100) [pk]
+  value      jsonb        [not null, note: "Stored as JSON — number, string, bool"]
+  description text
+  updated_by uuid         [ref: > users.id]
+  updated_at timestamptz  [default: `now()`]
+
+  Note: "Key examples: ai_daily_limit.student.chat_rag, rag.top_k, ai.chat_model"
+}
+
+Table audit_logs {
+  id            uuid        [pk, default: `gen_random_uuid()`]
+  user_id       uuid        [ref: > users.id, note: "Nullable — system actions"]
+  action        varchar(100) [not null, note: "USER_LOGIN | DOCUMENT_UPLOAD | SETTINGS_UPDATED | ..."]
+  resource_type varchar(50) [note: "Entity type bị tác động"]
+  resource_id   uuid        [note: "ID của entity bị tác động"]
+  details       jsonb       [note: "Context bổ sung"]
+  ip_address    varchar(45) [note: "INET type trong PostgreSQL"]
+  created_at    timestamptz [default: `now()`]
+
+  indexes {
+    user_id
+    created_at [name: "idx_audit_logs_created_at_desc"]
+    action
+  }
+}
+
+// ============================================================
+// GROUP: FLASHCARDS (Full Spec)
+// ============================================================
+
+Table flashcard_sets {
+  id          uuid         [pk, default: `gen_random_uuid()`]
+  subject_id  uuid         [not null, ref: > subjects.id, note: "CASCADE DELETE"]
+  title       varchar(255) [not null, note: "Auto: 'Flashcards: {topic}'"]
+  description text
+  is_public   boolean      [default: true, note: "true = tất cả enrolled students đều thấy"]
+  created_by  uuid         [not null, ref: > users.id]
+  created_at  timestamptz  [default: `now()`]
+  updated_at  timestamptz  [default: `now()`]
+}
+
+Table flashcards {
+  id         uuid        [pk, default: `gen_random_uuid()`]
+  set_id     uuid        [not null, ref: > flashcard_sets.id, note: "CASCADE DELETE"]
+  front      text        [not null, note: "Câu hỏi / từ khoá"]
+  back       text        [not null, note: "Đáp án / giải thích ngắn gọn"]
+  position   integer     [default: 0]
+  created_at timestamptz [default: `now()`]
+
+  indexes {
+    set_id
+  }
+}
+
+// ============================================================
+// GROUP: EXAMS (Full Spec)
+// ============================================================
+
+Table exams {
+  id               uuid         [pk, default: `gen_random_uuid()`]
+  subject_id       uuid         [not null, ref: > subjects.id, note: "CASCADE DELETE"]
+  title            varchar(500) [not null]
+  description      text
+  type             varchar(30)  [not null, note: "'official' | 'ai_generated'"]
+  difficulty       varchar(10)  [note: "'easy' | 'medium' | 'hard'"]
+  duration_minutes integer      [default: 0, note: "0 = không giới hạn thời gian"]
+  question_count   integer      [default: 10]
+  is_public        boolean      [default: false, note: "ai_generated=false (private); official=true"]
+  created_by       uuid         [not null, ref: > users.id]
+  created_at       timestamptz  [default: `now()`]
+  updated_at       timestamptz  [default: `now()`]
+}
+
+Table questions {
+  id             uuid        [pk, default: `gen_random_uuid()`]
+  exam_id        uuid        [not null, ref: > exams.id, note: "CASCADE DELETE"]
+  content        text        [not null]
+  options        jsonb       [not null, note: "JSON array: key A/B/C/D + text"]
+  correct_answer varchar(5)  [not null, note: "'A' | 'B' | 'C' | 'D' — KHÔNG expose khi thi"]
+  explanation    text        [note: "Chỉ hiển thị sau khi nộp bài"]
+  position       integer     [default: 0]
+}
+
+Table exam_attempts {
+  id              uuid           [pk, default: `gen_random_uuid()`]
+  exam_id         uuid           [not null, ref: > exams.id]
+  user_id         uuid           [not null, ref: > users.id]
+  answers         jsonb          [note: "Map of questionId to answer key A/B/C/D"]
+  score           decimal(5,2)   [note: "0.00 - 10.00; NULL khi chưa nộp"]
+  total_questions integer
+  correct_count   integer
+  status          varchar(20)    [default: 'in_progress', note: "'in_progress' | 'completed' | 'abandoned'"]
+  started_at      timestamptz    [default: `now()`]
+  completed_at    timestamptz    [note: "NULL khi chưa nộp"]
+  time_spent_secs integer        [note: "Thời gian làm bài tính bằng giây"]
+
+  indexes {
+    user_id
+    exam_id
+  }
+}
+
+// ============================================================
+// GROUP: BOOKMARKS (Full Spec)
+// ============================================================
+
+Table bookmarks {
+  id            uuid        [pk, default: `gen_random_uuid()`]
+  user_id       uuid        [not null, ref: > users.id, note: "CASCADE DELETE"]
+  resource_type varchar(30) [not null, note: "'document' | 'flashcard_set' | 'exam' | 'message'"]
+  resource_id   uuid        [not null, note: "Polymorphic ref — không có FK constraint"]
+  note          text        [note: "Ghi chú cá nhân của user"]
+  created_at    timestamptz [default: `now()`]
+
+  indexes {
+    user_id
+    (user_id, resource_type, resource_id) [unique, note: "Mỗi resource chỉ bookmark 1 lần"]
+  }
+
+  Note: "Polymorphic: resource_id tham chiếu tới documents/flashcard_sets/exams/messages.id"
+}
+

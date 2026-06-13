@@ -73,7 +73,9 @@ export class SubjectTypeOrmRepository implements ISubjectRepository {
     let enrolledIds = new Set<string>();
     if (filter.studentId && items.length > 0) {
       const rows = await this.dataSource.query(
-        `SELECT subject_id FROM subject_enrollments WHERE student_id = $1 AND subject_id = ANY($2)`,
+        `SELECT DISTINCT c.subject_id FROM class_enrollments ce
+         JOIN classes c ON c.id = ce.class_id
+         WHERE ce.student_id = $1 AND c.subject_id = ANY($2)`,
         [filter.studentId, items.map((i) => i.id)],
       );
       enrolledIds = new Set(rows.map((r: { subject_id: string }) => r.subject_id));
