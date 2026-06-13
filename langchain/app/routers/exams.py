@@ -9,9 +9,11 @@ router = APIRouter(prefix="/exams", tags=["exams"])
 
 class GenerateExamRequest(BaseModel):
     subject_id: str
+    class_id: str
     question_count: int = Field(default=10, ge=1, le=50)
     difficulty: Literal["easy", "medium", "hard"] = "medium"
     topic: Optional[str] = None
+    document_ids: Optional[list[str]] = None
 
 
 class QuestionOption(BaseModel):
@@ -38,9 +40,11 @@ async def generate_exam_endpoint(
     try:
         questions = await generate_exam(
             subject_id=body.subject_id,
+            class_id=body.class_id,
             question_count=body.question_count,
             difficulty=body.difficulty,
             topic=body.topic,
+            document_ids=body.document_ids,
         )
         return GenerateExamResponse(
             questions=[
