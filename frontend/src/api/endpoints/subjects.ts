@@ -17,26 +17,23 @@ export const subjectsApi = {
   delete: (id: string) =>
     axiosInstance.delete(`/subjects/${id}`),
 
-  enroll: (id: string) =>
-    axiosInstance.post(`/subjects/${id}/enroll`),
-
-  unenroll: (id: string) =>
-    axiosInstance.delete(`/subjects/${id}/enroll`),
-
   assignLecturer: (subjectId: string, lecturerId: string) =>
     axiosInstance.post(`/subjects/${subjectId}/lecturers`, { lecturerId }),
 
   removeLecturer: (subjectId: string, lecturerId: string) =>
     axiosInstance.delete(`/subjects/${subjectId}/lecturers/${lecturerId}`),
 
-  getDocuments: (subjectId: string) =>
-    axiosInstance.get<ApiResponse<{ items: Document[]; total: number }>>(`/subjects/${subjectId}/documents`).then(r => r.data.data.items),
+  getDocuments: (subjectId: string, classId?: string) =>
+    axiosInstance.get<ApiResponse<{ items: Document[]; total: number }>>(`/subjects/${subjectId}/documents`, {
+      params: classId ? { classId } : undefined,
+    }).then(r => r.data.data.items),
 
-  uploadDocument: (subjectId: string, file: File) => {
+  uploadDocument: (subjectId: string, file: File, classId?: string) => {
     const form = new FormData()
     form.append('file', file)
     return axiosInstance.post<ApiResponse<Document>>(`/subjects/${subjectId}/documents`, form, {
       headers: { 'Content-Type': 'multipart/form-data' },
+      params: classId ? { classId } : undefined,
     }).then(r => r.data.data)
   },
 

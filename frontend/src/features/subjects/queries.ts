@@ -31,11 +31,11 @@ export function useSubject(id: string) {
   })
 }
 
-export function useSubjectDocuments(subjectId: string) {
+export function useSubjectDocuments(subjectId: string, classId?: string) {
   return useQuery({
-    queryKey: subjectKeys.documents(subjectId),
-    queryFn: () => subjectsApi.getDocuments(subjectId),
-    enabled: !!subjectId,
+    queryKey: [...subjectKeys.documents(subjectId), classId ?? null],
+    queryFn: () => subjectsApi.getDocuments(subjectId, classId),
+    enabled: !!subjectId && !!classId,
     refetchInterval: (query) =>
       query.state.data?.some(d => d.status === 'processing') ? 3000 : false,
   })
@@ -77,26 +77,10 @@ export function useDeleteSubject() {
   })
 }
 
-export function useEnrollSubject() {
+export function useUploadDocument(subjectId: string, classId?: string) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (id: string) => subjectsApi.enroll(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: subjectKeys.all() }),
-  })
-}
-
-export function useUnenrollSubject() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: (id: string) => subjectsApi.unenroll(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: subjectKeys.all() }),
-  })
-}
-
-export function useUploadDocument(subjectId: string) {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: (file: File) => subjectsApi.uploadDocument(subjectId, file),
+    mutationFn: (file: File) => subjectsApi.uploadDocument(subjectId, file, classId),
     onSuccess: () => qc.invalidateQueries({ queryKey: subjectKeys.documents(subjectId) }),
   })
 }

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
+import { getErrorMessage } from '@/lib/errors'
 import { useExam, useStartAttempt } from './queries'
 
 export default function ExamDetailPage() {
@@ -20,8 +21,8 @@ export default function ExamDetailPage() {
       navigate(`/subjects/${subjectId}/exams/${examId}/attempt/${result.attempt.id}`, {
         state: { attempt: result.attempt, exam: result.exam, questions: result.questions },
       })
-    } catch {
-      toast({ variant: 'destructive', description: 'Failed to start exam.' })
+    } catch (err) {
+      toast({ variant: 'destructive', description: getErrorMessage(err, 'Failed to start exam.') })
     }
   }
 

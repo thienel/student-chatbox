@@ -10,6 +10,9 @@ import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { useToast } from '@/hooks/use-toast'
 import { useAuthStore } from '@/store/useAuthStore'
+import { useSubjectClass } from '@/features/classes/ClassContext'
+import { DocumentPicker } from '@/components/shared/DocumentPicker'
+import { getErrorMessage } from '@/lib/errors'
 import { useExams, useGenerateExam, useMyAttempts } from './queries'
 import type { ExamDifficulty } from '@/types'
 
@@ -29,9 +32,11 @@ export default function SubjectExamsPage() {
   const [topic, setTopic] = useState('')
   const [questionCount, setQuestionCount] = useState('10')
   const [difficulty, setDifficulty] = useState<ExamDifficulty>('medium')
+  const [documentIds, setDocumentIds] = useState<string[]>([])
 
-  const { data: exams = [], isLoading } = useExams(subjectId)
-  const generate = useGenerateExam(subjectId)
+  const { classId } = useSubjectClass()
+  const { data: exams = [], isLoading } = useExams(subjectId, classId)
+  const generate = useGenerateExam(subjectId, classId)
   const { data: attempts = [] } = useMyAttempts()
 
   const examIds = new Set(exams.map(e => e.id))
@@ -46,14 +51,16 @@ export default function SubjectExamsPage() {
         topic: topic.trim() || undefined,
         questionCount: Number(questionCount),
         difficulty,
+        documentIds: documentIds.length ? documentIds : undefined,
       })
       toast({ description: 'Exam generated.' })
       setGenOpen(false)
       setTopic('')
       setQuestionCount('10')
       setDifficulty('medium')
-    } catch {
-      toast({ variant: 'destructive', description: 'Failed to generate exam.' })
+      setDocumentIds([])
+    } catch (err) {
+      toast({ variant: 'destructive', description: getErrorMessage(err, 'Failed to generate exam.') })
     }
   }
 
@@ -201,6 +208,12 @@ export default function SubjectExamsPage() {
                 </select>
               </div>
             </div>
+            <DocumentPicker
+              subjectId={subjectId}
+              classId={classId}
+              value={documentIds}
+              onChange={setDocumentIds}
+            />
           </div>
           <div className="px-5 py-4 border-t border-zinc-800 flex justify-end gap-2">
             <Button

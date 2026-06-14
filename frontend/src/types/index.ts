@@ -19,6 +19,21 @@ export interface Subject {
   isEnrolled?: boolean;
 }
 
+export interface SubjectLecturer {
+  id: string;
+  fullName: string;
+}
+
+export interface Class {
+  id: string;
+  subjectId: string;
+  lecturerId: string;
+  name: string;
+  lecturer?: { id: string; fullName: string };
+  studentCount?: number;
+  createdAt: string;
+}
+
 export interface Document {
   id: string;
   originalName: string;

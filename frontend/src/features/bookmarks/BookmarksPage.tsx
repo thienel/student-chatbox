@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { useToast } from '@/hooks/use-toast'
+import { getErrorMessage } from '@/lib/errors'
 import { useBookmarks, useDeleteBookmark } from './queries'
 import type { BookmarkResourceType } from '@/types'
 
@@ -37,8 +38,8 @@ export default function BookmarksPage() {
     try {
       await remove.mutateAsync(id)
       toast({ description: 'Bookmark removed.' })
-    } catch {
-      toast({ variant: 'destructive', description: 'Failed to remove bookmark.' })
+    } catch (err) {
+      toast({ variant: 'destructive', description: getErrorMessage(err, 'Failed to remove bookmark.') })
     }
   }
 

@@ -15,7 +15,8 @@ import {
 } from '@/components/ui/alert-dialog'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { useSubjectDocuments, useUploadDocument, useDeleteDocument } from './queries'
-import { useAuthStore } from '@/store/useAuthStore'
+import { usePermission } from '@/store/useAuthStore'
+import { useSubjectClass } from '@/features/classes/ClassContext'
 import { cn } from '@/lib/utils'
 
 function formatBytes(bytes: number) {
@@ -32,13 +33,15 @@ const statusColor: Record<string, string> = {
 
 export default function SubjectDocumentsPage() {
   const { id: subjectId = '' } = useParams<{ id: string }>()
-  const user = useAuthStore(s => s.user)
-  const canUpload = user?.role === 'admin' || user?.role === 'lecturer'
+  const canUploadDocs = usePermission('document:upload')
+  const canDelete = usePermission('document:delete')
   const fileRef = useRef<HTMLInputElement>(null)
   const [confirmId, setConfirmId] = useState<string | null>(null)
 
-  const { data: documents = [], isLoading } = useSubjectDocuments(subjectId)
-  const upload = useUploadDocument(subjectId)
+  const { classId, isLecturer, needsClass } = useSubjectClass()
+  const canUpload = canUploadDocs && !!classId
+  const { data: documents = [], isLoading } = useSubjectDocuments(subjectId, classId)
+  const upload = useUploadDocument(subjectId, classId)
   const remove = useDeleteDocument(subjectId)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -81,7 +84,13 @@ export default function SubjectDocumentsPage() {
         )}
       </div>
 
-      {isLoading ? (
+      {isLecturer && needsClass ? (
+        <EmptyState
+          icon={FileText}
+          title="Create a class first"
+          description="Documents belong to a class. Go to the Classes tab to create one."
+        />
+      ) : isLoading || !classId ? (
         <div className="space-y-2">
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-14 rounded-lg bg-zinc-900" />
@@ -111,7 +120,7 @@ export default function SubjectDocumentsPage() {
                 <th className="text-left py-3 px-4 text-xs font-medium text-zinc-500 uppercase tracking-wide hidden sm:table-cell">Size</th>
                 <th className="text-left py-3 px-4 text-xs font-medium text-zinc-500 uppercase tracking-wide hidden md:table-cell">Status</th>
                 <th className="text-left py-3 px-4 text-xs font-medium text-zinc-500 uppercase tracking-wide hidden lg:table-cell">Uploaded by</th>
-                {canUpload && <th className="py-3 px-4 w-10" />}
+                {canDelete && <th className="py-3 px-4 w-10" />}
               </tr>
             </thead>
             <tbody>
@@ -135,7 +144,7 @@ export default function SubjectDocumentsPage() {
                   <td className="py-3 px-4 text-zinc-500 text-xs hidden lg:table-cell">
                     {doc.uploadedBy.fullName}
                   </td>
-                  {canUpload && (
+                  {canDelete && (
                     <td className="py-3 px-4">
                       <Button
                         variant="ghost"
