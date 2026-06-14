@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast'
 import { useAuthStore } from '@/store/useAuthStore'
 import { useSubjectClass } from '@/features/classes/ClassContext'
 import { DocumentPicker } from '@/components/shared/DocumentPicker'
+import { getErrorMessage } from '@/lib/errors'
 import { useExams, useGenerateExam, useMyAttempts } from './queries'
 import type { ExamDifficulty } from '@/types'
 
@@ -58,8 +59,8 @@ export default function SubjectExamsPage() {
       setQuestionCount('10')
       setDifficulty('medium')
       setDocumentIds([])
-    } catch {
-      toast({ variant: 'destructive', description: 'Failed to generate exam.' })
+    } catch (err) {
+      toast({ variant: 'destructive', description: getErrorMessage(err, 'Failed to generate exam.') })
     }
   }
 

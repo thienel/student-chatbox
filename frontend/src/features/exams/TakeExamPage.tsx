@@ -4,6 +4,7 @@ import { Clock, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
+import { getErrorMessage } from '@/lib/errors'
 import { useSubmitAttempt } from './queries'
 import type { Question, ExamAttempt, Exam } from '@/types'
 
@@ -55,8 +56,8 @@ export default function TakeExamPage() {
     try {
       await submit.mutateAsync({ attemptId, answers, timeSpentSecs: elapsed })
       navigate(`/subjects/${subjectId}/exams/${examId}/result/${attemptId}`)
-    } catch {
-      toast({ variant: 'destructive', description: 'Failed to submit exam.' })
+    } catch (err) {
+      toast({ variant: 'destructive', description: getErrorMessage(err, 'Failed to submit exam.') })
     }
   }, [submit, attemptId, answers, elapsed, navigate, subjectId, examId, toast])
 

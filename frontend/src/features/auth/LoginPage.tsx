@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuthStore } from '@/store/useAuthStore'
 import { authApi } from '@/api/endpoints/auth'
+import { getErrorMessage } from '@/lib/errors'
 import { cn } from '@/lib/utils'
 
 const schema = z.object({
@@ -34,8 +35,8 @@ export default function LoginPage() {
       const result = await authApi.login(data.email, data.password)
       setAuth(result.user, result.accessToken, result.refreshToken)
       navigate('/home', { replace: true })
-    } catch {
-      setError('password', { message: 'Invalid email or password' })
+    } catch (err) {
+      setError('password', { message: getErrorMessage(err, 'Invalid email or password') })
     }
   }
 

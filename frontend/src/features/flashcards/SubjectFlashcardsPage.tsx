@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast'
 import { useAuthStore } from '@/store/useAuthStore'
 import { useSubjectClass } from '@/features/classes/ClassContext'
 import { DocumentPicker } from '@/components/shared/DocumentPicker'
+import { getErrorMessage } from '@/lib/errors'
 import { useFlashcardSets, useGenerateFlashcards, useDeleteFlashcardSet } from './queries'
 
 export default function SubjectFlashcardsPage() {
@@ -43,8 +44,8 @@ export default function SubjectFlashcardsPage() {
       setTopic('')
       setCardCount('10')
       setDocumentIds([])
-    } catch {
-      toast({ variant: 'destructive', description: 'Failed to generate flashcards.' })
+    } catch (err) {
+      toast({ variant: 'destructive', description: getErrorMessage(err, 'Failed to generate flashcards.') })
     }
   }
 

@@ -14,6 +14,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
+import { getErrorMessage } from '@/lib/errors'
 import { useClasses, useCreateClass } from './queries'
 
 export default function ClassesPage() {
@@ -37,16 +38,8 @@ export default function ClassesPage() {
           setPassword('')
           setOpen(false)
         },
-        onError: (err: unknown) => {
-          const status = (err as { response?: { status?: number } })?.response?.status
-          toast({
-            variant: 'destructive',
-            description:
-              status === 409
-                ? 'You already have a class with this password.'
-                : 'Failed to create class.',
-          })
-        },
+        onError: (err) =>
+          toast({ variant: 'destructive', description: getErrorMessage(err, 'Failed to create class.') }),
       },
     )
   }

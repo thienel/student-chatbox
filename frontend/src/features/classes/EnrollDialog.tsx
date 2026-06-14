@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
+import { getErrorMessage } from '@/lib/errors'
 import { useSubjectLecturers, useEnroll } from './queries'
 import { cn } from '@/lib/utils'
 
@@ -42,8 +43,11 @@ export function EnrollDialog({
           onOpenChange(false)
           onEnrolled?.()
         },
-        onError: () =>
-          toast({ variant: 'destructive', description: 'Invalid lecturer or class password.' }),
+        onError: (err) =>
+          toast({
+            variant: 'destructive',
+            description: getErrorMessage(err, 'Invalid lecturer or class password.'),
+          }),
       },
     )
   }

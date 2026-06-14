@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useToast } from '@/hooks/use-toast'
+import { getErrorMessage } from '@/lib/errors'
 import { Plus, ChevronDown, ChevronRight } from 'lucide-react'
 import type { Role } from '@/types'
 
@@ -40,7 +41,7 @@ export default function AdminRbacPage() {
       setNewName('')
       setNewDesc('')
     },
-    onError: () => toast({ variant: 'destructive', description: 'Failed to create role.' }),
+    onError: (err) => toast({ variant: 'destructive', description: getErrorMessage(err, 'Failed to create role.') }),
   })
 
   const updatePerms = useMutation({
@@ -50,7 +51,7 @@ export default function AdminRbacPage() {
       qc.invalidateQueries({ queryKey: ['rbac', 'roles'] })
       toast({ description: 'Permissions updated.' })
     },
-    onError: () => toast({ variant: 'destructive', description: 'Failed to update permissions.' }),
+    onError: (err) => toast({ variant: 'destructive', description: getErrorMessage(err, 'Failed to update permissions.') }),
   })
 
   const handleExpand = (role: Role) => {
