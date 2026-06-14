@@ -94,12 +94,34 @@ async function seed() {
       permissions[p.name] = perm;
     }
 
-    // Admin: all permissions
+    // Admin: platform administration + content oversight/moderation only.
+    // Not a teaching/learning role — no class:manage, upload, generate, enroll
+    // or take. Holds rbac:manage, so can self-grant more when truly needed.
+    const adminPerms = [
+      'user:create',
+      'user:update',
+      'user:suspend',
+      'rbac:manage',
+      'system:manage-settings',
+      'system:read-audit-log',
+      'subject:create',
+      'subject:update',
+      'subject:delete',
+      'subject:read',
+      'subject:assign-lecturer',
+      'analytics:read-all',
+      // read + moderate content (delete), but not create it
+      'document:read',
+      'document:delete',
+      'flashcard:read',
+      'flashcard:delete',
+      'exam:read',
+    ];
     const adminRole = await roleRepo.findOne({
       where: { id: roles['admin'].id },
       relations: ['permissions'],
     });
-    adminRole!.permissions = Object.values(permissions);
+    adminRole!.permissions = adminPerms.map((n) => permissions[n]);
     await roleRepo.save(adminRole!);
 
     // Lecturer permissions
@@ -129,7 +151,9 @@ async function seed() {
     lecturerRole!.permissions = lecturerPerms.map((n) => permissions[n]);
     await roleRepo.save(lecturerRole!);
 
-    // Student permissions
+    // Student permissions — learning only. No generate: AI-generated exams and
+    // flashcards now live inside a class and are shared, so creating them is a
+    // lecturer action.
     const studentPerms = [
       'subject:read',
       'subject:enroll',
@@ -138,10 +162,8 @@ async function seed() {
       'chat:read-own',
       'ai:chat-rag',
       'flashcard:read',
-      'ai:generate-flashcard',
       'exam:read',
       'exam:take',
-      'ai:generate-exam',
       'bookmark:manage',
     ];
     const studentRole = await roleRepo.findOne({
