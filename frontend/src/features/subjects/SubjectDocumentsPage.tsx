@@ -17,6 +17,7 @@ import { EmptyState } from '@/components/shared/EmptyState'
 import { useSubjectDocuments, useUploadDocument, useDeleteDocument } from './queries'
 import { usePermission } from '@/store/useAuthStore'
 import { useSubjectClass } from '@/features/classes/ClassContext'
+import { NeedClassNotice } from '@/features/classes/NeedClassNotice'
 import { cn } from '@/lib/utils'
 
 function formatBytes(bytes: number) {
@@ -85,11 +86,7 @@ export default function SubjectDocumentsPage() {
       </div>
 
       {isLecturer && needsClass ? (
-        <EmptyState
-          icon={FileText}
-          title="Create a class first"
-          description="Documents belong to a class. Go to the Classes tab to create one."
-        />
+        <NeedClassNotice noun="Documents" />
       ) : isLoading || !classId ? (
         <div className="space-y-2">
           {Array.from({ length: 4 }).map((_, i) => (
