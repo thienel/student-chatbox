@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast'
 import { useAuthStore } from '@/store/useAuthStore'
 import { useSubjectClass } from '@/features/classes/ClassContext'
 import { DocumentPicker } from '@/components/shared/DocumentPicker'
+import { NeedClassNotice } from '@/features/classes/NeedClassNotice'
 import { getErrorMessage } from '@/lib/errors'
 import { useExams, useGenerateExam, useMyAttempts } from './queries'
 import type { ExamDifficulty } from '@/types'
@@ -34,7 +35,7 @@ export default function SubjectExamsPage() {
   const [difficulty, setDifficulty] = useState<ExamDifficulty>('medium')
   const [documentIds, setDocumentIds] = useState<string[]>([])
 
-  const { classId } = useSubjectClass()
+  const { classId, isLecturer, needsClass } = useSubjectClass()
   const { data: exams = [], isLoading } = useExams(subjectId, classId)
   const generate = useGenerateExam(subjectId, classId)
   const { data: attempts = [] } = useMyAttempts()
@@ -82,7 +83,9 @@ export default function SubjectExamsPage() {
         )}
       </div>
 
-      {isLoading ? (
+      {isLecturer && needsClass ? (
+        <NeedClassNotice noun="Exams" />
+      ) : isLoading ? (
         <div className="space-y-2">
           {Array.from({ length: 3 }).map((_, i) => (
             <Skeleton key={i} className="h-16 rounded-lg bg-zinc-900" />
