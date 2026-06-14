@@ -57,6 +57,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
         { name: 'subject:read', description: 'View subject information' },
         { name: 'subject:assign-lecturer', description: 'Assign lecturer to subject' },
         { name: 'subject:enroll', description: 'Self-enroll in subject' },
+        { name: 'class:manage', description: 'Create and manage classes' },
         { name: 'document:upload', description: 'Upload documents' },
         { name: 'document:delete', description: 'Delete documents' },
         { name: 'document:read', description: 'View document list' },
@@ -88,17 +89,29 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
         permissions[p.name] = perm;
       }
 
-      // Admin: all permissions
+      // Admin: platform administration + content oversight/moderation only.
+      // Not a teaching/learning role — no class:manage, upload, generate,
+      // enroll or take. Keeps rbac:manage, so it can self-grant when needed.
+      const adminPerms = [
+        'user:create', 'user:read-list', 'user:update', 'user:suspend',
+        'rbac:manage', 'system:manage-settings', 'system:read-audit-log',
+        'subject:create', 'subject:update', 'subject:delete', 'subject:read',
+        'subject:assign-lecturer', 'analytics:read-all',
+        // read + moderate content (delete), but not create it
+        'document:read', 'document:delete', 'flashcard:read', 'flashcard:delete',
+        'exam:read',
+      ];
       const adminRole = await roleRepo.findOne({
         where: { id: roles['admin'].id },
         relations: ['permissions'],
       });
-      adminRole!.permissions = Object.values(permissions);
+      adminRole!.permissions = adminPerms.map((n) => permissions[n]);
       await roleRepo.save(adminRole!);
 
-      // Lecturer permissions
+      // Lecturer: full teaching set.
       const lecturerPerms = [
-        'subject:read', 'document:upload', 'document:delete', 'document:read',
+        'subject:read', 'class:manage',
+        'document:upload', 'document:delete', 'document:read',
         'chat:create', 'chat:read-own', 'ai:chat-rag',
         'flashcard:create', 'flashcard:delete', 'flashcard:read', 'ai:generate-flashcard',
         'exam:read', 'exam:take', 'ai:generate-exam',
@@ -111,12 +124,13 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
       lecturerRole!.permissions = lecturerPerms.map((n) => permissions[n]);
       await roleRepo.save(lecturerRole!);
 
-      // Student permissions
+      // Student: learning only. No generate — AI-generated exams/flashcards now
+      // live inside a shared class, so creating them is a lecturer action.
       const studentPerms = [
         'subject:read', 'subject:enroll', 'document:read',
         'chat:create', 'chat:read-own', 'ai:chat-rag',
-        'flashcard:read', 'ai:generate-flashcard',
-        'exam:read', 'exam:take', 'ai:generate-exam',
+        'flashcard:read',
+        'exam:read', 'exam:take',
         'bookmark:manage',
       ];
       const studentRole = await roleRepo.findOne({
