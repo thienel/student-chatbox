@@ -9,18 +9,18 @@ import { EmptyState } from '@/components/shared/EmptyState'
 import { useSubjects } from './queries'
 import { useUnenroll } from '@/features/classes/queries'
 import { EnrollDialog } from '@/features/classes/EnrollDialog'
-import { useAuthStore } from '@/store/useAuthStore'
+import { usePermission } from '@/store/useAuthStore'
 import { cn } from '@/lib/utils'
 
 export default function SubjectsPage() {
   const navigate = useNavigate()
-  const user = useAuthStore(s => s.user)
+  const canCreate = usePermission('subject:create')
+  const canEnroll = usePermission('subject:enroll')
   const [search, setSearch] = useState('')
 
   const { data, isLoading } = useSubjects({ search: search || undefined, limit: 50 })
 
   const subjects = data?.items ?? []
-  const isStudent = user?.role === 'student'
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-6">
@@ -31,7 +31,7 @@ export default function SubjectsPage() {
             {data?.total ?? 0} subjects available
           </p>
         </div>
-        {(user?.role === 'admin' || user?.role === 'lecturer') && (
+        {canCreate && (
           <Button
             onClick={() => navigate('/admin/subjects')}
             className="bg-zinc-50 text-zinc-950 hover:bg-zinc-200 h-8 px-3 text-sm font-medium rounded-md"
@@ -97,7 +97,7 @@ export default function SubjectsPage() {
                 </p>
               )}
 
-              {isStudent && (
+              {canEnroll && (
                 <div className="mt-auto pt-1" onClick={e => e.stopPropagation()}>
                   <EnrollButton subjectId={subject.id} isEnrolled={!!subject.isEnrolled} />
                 </div>

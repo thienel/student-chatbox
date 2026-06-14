@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { useSubjectDocuments, useUploadDocument, useDeleteDocument } from './queries'
-import { useAuthStore } from '@/store/useAuthStore'
+import { usePermission } from '@/store/useAuthStore'
 import { useSubjectClass } from '@/features/classes/ClassContext'
 import { cn } from '@/lib/utils'
 
@@ -33,13 +33,13 @@ const statusColor: Record<string, string> = {
 
 export default function SubjectDocumentsPage() {
   const { id: subjectId = '' } = useParams<{ id: string }>()
-  const user = useAuthStore(s => s.user)
-  const canManage = user?.role === 'admin' || user?.role === 'lecturer'
+  const canUploadDocs = usePermission('document:upload')
+  const canDelete = usePermission('document:delete')
   const fileRef = useRef<HTMLInputElement>(null)
   const [confirmId, setConfirmId] = useState<string | null>(null)
 
   const { classId, isLecturer, needsClass } = useSubjectClass()
-  const canUpload = canManage && !!classId
+  const canUpload = canUploadDocs && !!classId
   const { data: documents = [], isLoading } = useSubjectDocuments(subjectId, classId)
   const upload = useUploadDocument(subjectId, classId)
   const remove = useDeleteDocument(subjectId)
@@ -120,7 +120,7 @@ export default function SubjectDocumentsPage() {
                 <th className="text-left py-3 px-4 text-xs font-medium text-zinc-500 uppercase tracking-wide hidden sm:table-cell">Size</th>
                 <th className="text-left py-3 px-4 text-xs font-medium text-zinc-500 uppercase tracking-wide hidden md:table-cell">Status</th>
                 <th className="text-left py-3 px-4 text-xs font-medium text-zinc-500 uppercase tracking-wide hidden lg:table-cell">Uploaded by</th>
-                {canUpload && <th className="py-3 px-4 w-10" />}
+                {canDelete && <th className="py-3 px-4 w-10" />}
               </tr>
             </thead>
             <tbody>
@@ -144,7 +144,7 @@ export default function SubjectDocumentsPage() {
                   <td className="py-3 px-4 text-zinc-500 text-xs hidden lg:table-cell">
                     {doc.uploadedBy.fullName}
                   </td>
-                  {canUpload && (
+                  {canDelete && (
                     <td className="py-3 px-4">
                       <Button
                         variant="ghost"

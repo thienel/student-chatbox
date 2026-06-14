@@ -48,3 +48,10 @@ export const useAuthStore = create<AuthState>()(
     }
   )
 );
+
+/**
+ * Subscribe to whether the current user holds a permission. Re-renders when the
+ * user (and thus their permissions) changes, unlike calling hasPermission().
+ */
+export const usePermission = (permission: string): boolean =>
+  useAuthStore((s) => !!s.user?.permissions.includes(permission));

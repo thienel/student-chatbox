@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, type ReactNode } from 'react'
-import { useAuthStore } from '@/store/useAuthStore'
+import { usePermission } from '@/store/useAuthStore'
 import { useActiveClassStore } from '@/store/useActiveClassStore'
 import { useClasses, useMyClass } from './queries'
 import type { Class } from '@/types'
@@ -30,9 +30,10 @@ export function SubjectClassProvider({
   subjectId: string
   children: ReactNode
 }) {
-  const role = useAuthStore(s => s.user?.role)
-  const isStudent = role === 'student'
-  const isLecturer = role === 'lecturer' || role === 'admin'
+  // Class managers (lecturers/admins) work inside a class they pick; everyone
+  // else accesses the single class they enrolled in.
+  const isLecturer = usePermission('class:manage')
+  const isStudent = !isLecturer
 
   const myClassQ = useMyClass(subjectId, isStudent)
   const classesQ = useClasses(subjectId, isLecturer)

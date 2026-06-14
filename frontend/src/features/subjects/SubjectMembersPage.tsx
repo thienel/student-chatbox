@@ -13,12 +13,11 @@ import {
 } from '@/components/ui/dialog'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { useSubject, useAssignLecturer, useRemoveLecturer, useLecturers } from './queries'
-import { useAuthStore } from '@/store/useAuthStore'
+import { usePermission } from '@/store/useAuthStore'
 
 export default function SubjectMembersPage() {
   const { id = '' } = useParams<{ id: string }>()
-  const user = useAuthStore(s => s.user)
-  const isAdmin = user?.role === 'admin'
+  const isAdmin = usePermission('subject:assign-lecturer')
 
   const { data: subject, isLoading } = useSubject(id)
   const { data: allLecturers } = useLecturers()
