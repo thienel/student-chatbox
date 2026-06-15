@@ -4,6 +4,7 @@ import { DataSource, Repository } from 'typeorm';
 import {
   IClassRepository,
   ISubjectLecturer,
+  IClassStudent,
 } from '../../../../domain/class/repositories/class.repository.interface';
 import { Class } from '../../../../domain/class/entities/class.entity';
 import { ClassOrmEntity } from '../orm-entities/class.orm-entity';
@@ -85,6 +86,24 @@ export class ClassTypeOrmRepository implements IClassRepository {
     await this.dataSource.query(
       `INSERT INTO class_enrollments (class_id, student_id) VALUES ($1, $2)
        ON CONFLICT (class_id, student_id) DO NOTHING`,
+      [classId, studentId],
+    );
+  }
+
+  async listStudents(classId: string): Promise<IClassStudent[]> {
+    const rows = await this.dataSource.query(
+      `SELECT u.id, u.full_name AS "fullName", u.email, ce.enrolled_at AS "enrolledAt"
+       FROM class_enrollments ce JOIN users u ON u.id = ce.student_id
+       WHERE ce.class_id = $1
+       ORDER BY u.full_name ASC`,
+      [classId],
+    );
+    return rows as IClassStudent[];
+  }
+
+  async removeStudent(classId: string, studentId: string): Promise<void> {
+    await this.dataSource.query(
+      `DELETE FROM class_enrollments WHERE class_id = $1 AND student_id = $2`,
       [classId, studentId],
     );
   }
