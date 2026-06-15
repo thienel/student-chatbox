@@ -21,6 +21,8 @@ import { ListSubjectLecturersUseCase } from '../../../application/class/use-case
 import { EnrollByPasswordUseCase } from '../../../application/class/use-cases/enroll-by-password.use-case';
 import { UnenrollClassUseCase } from '../../../application/class/use-cases/unenroll-class.use-case';
 import { GetMyClassUseCase } from '../../../application/class/use-cases/get-my-class.use-case';
+import { ListClassStudentsUseCase } from '../../../application/class/use-cases/list-class-students.use-case';
+import { RemoveClassStudentUseCase } from '../../../application/class/use-cases/remove-class-student.use-case';
 import { CreateClassDto, EnrollByPasswordDto } from '../../../application/class/dtos/class.dto';
 import { User } from '../../../domain/user/entities/user.entity';
 
@@ -35,6 +37,8 @@ export class ClassController {
     private readonly enrollByPasswordUseCase: EnrollByPasswordUseCase,
     private readonly unenrollClassUseCase: UnenrollClassUseCase,
     private readonly getMyClassUseCase: GetMyClassUseCase,
+    private readonly listClassStudentsUseCase: ListClassStudentsUseCase,
+    private readonly removeClassStudentUseCase: RemoveClassStudentUseCase,
   ) {}
 
   @Post('classes')
@@ -52,6 +56,28 @@ export class ClassController {
   @RequirePermission('class:manage')
   async listClasses(@Param('id') subjectId: string, @CurrentUser() user: User) {
     return this.listSubjectClassesUseCase.execute(subjectId, user);
+  }
+
+  @Get('classes/:classId/students')
+  @RequirePermission('class:manage')
+  async listClassStudents(
+    @Param('id') subjectId: string,
+    @Param('classId') classId: string,
+    @CurrentUser() user: User,
+  ) {
+    return this.listClassStudentsUseCase.execute(subjectId, classId, user);
+  }
+
+  @Delete('classes/:classId/students/:studentId')
+  @RequirePermission('class:manage')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async removeClassStudent(
+    @Param('id') subjectId: string,
+    @Param('classId') classId: string,
+    @Param('studentId') studentId: string,
+    @CurrentUser() user: User,
+  ) {
+    await this.removeClassStudentUseCase.execute(subjectId, classId, studentId, user);
   }
 
   @Get('lecturers')
