@@ -60,23 +60,15 @@ export class SubjectExamController {
 
   @Get(':examId')
   @RequirePermission('exam:read')
-  async getExam(
-    @Param('subjectId') subjectId: string,
-    @Param('examId') examId: string,
-    @CurrentUser() user: User,
-  ) {
-    return this.getExamUseCase.execute(subjectId, examId, user);
+  async getExam(@Param('examId') examId: string, @CurrentUser() user: User) {
+    return this.getExamUseCase.execute(examId, user);
   }
 
   @Post(':examId/attempts')
   @RequirePermission('exam:take')
   @HttpCode(HttpStatus.CREATED)
-  async startAttempt(
-    @Param('subjectId') subjectId: string,
-    @Param('examId') examId: string,
-    @CurrentUser() user: User,
-  ) {
-    return this.startAttemptUseCase.execute(subjectId, examId, user);
+  async startAttempt(@Param('examId') examId: string, @CurrentUser() user: User) {
+    return this.startAttemptUseCase.execute(examId, user);
   }
 
   @Post(':examId/attempts/:attemptId')

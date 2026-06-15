@@ -46,7 +46,7 @@ export class FlashcardController {
     @CurrentUser() user: User,
   ) {
     const resolvedClassId = await this.classContext.resolveClassId(subjectId, user, classId);
-    return this.listFlashcardSetsUseCase.execute(resolvedClassId);
+    return this.listFlashcardSetsUseCase.execute(resolvedClassId, user);
   }
 
   @Post('generate')
@@ -65,12 +65,8 @@ export class FlashcardController {
 
   @Get(':id')
   @RequirePermission('flashcard:read')
-  async getSet(
-    @Param('subjectId') subjectId: string,
-    @Param('id') id: string,
-    @CurrentUser() user: User,
-  ) {
-    return this.getFlashcardSetUseCase.execute(subjectId, id, user);
+  async getSet(@Param('id') id: string, @CurrentUser() user: User) {
+    return this.getFlashcardSetUseCase.execute(id, user);
   }
 
   @Delete(':id')
