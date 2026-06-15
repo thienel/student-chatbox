@@ -9,18 +9,25 @@ interface SubjectTabsProps {
 
 export function SubjectTabs({ subjectId }: SubjectTabsProps) {
   const { pathname } = useLocation()
-  const canManageClasses = usePermission('class:manage')
+
+  // Each tab is shown only if the user holds the permission that backs it.
+  const perms = {
+    documents: usePermission('document:read'),
+    chat: usePermission('chat:create'),
+    flashcards: usePermission('flashcard:read'),
+    exams: usePermission('exam:read'),
+    members: usePermission('subject:read'),
+    classes: usePermission('class:manage'),
+  }
 
   const tabs = [
-    { label: 'Documents', href: `/subjects/${subjectId}/documents`, icon: FileText },
-    { label: 'Chat', href: `/subjects/${subjectId}/chat`, icon: MessageSquare },
-    { label: 'Flashcards', href: `/subjects/${subjectId}/flashcards`, icon: Layers },
-    { label: 'Exams', href: `/subjects/${subjectId}/exams`, icon: ClipboardList },
-    { label: 'Members', href: `/subjects/${subjectId}/members`, icon: Users },
-    ...(canManageClasses
-      ? [{ label: 'Classes', href: `/subjects/${subjectId}/classes`, icon: GraduationCap }]
-      : []),
-  ]
+    perms.documents && { label: 'Documents', href: `/subjects/${subjectId}/documents`, icon: FileText },
+    perms.chat && { label: 'Chat', href: `/subjects/${subjectId}/chat`, icon: MessageSquare },
+    perms.flashcards && { label: 'Flashcards', href: `/subjects/${subjectId}/flashcards`, icon: Layers },
+    perms.exams && { label: 'Exams', href: `/subjects/${subjectId}/exams`, icon: ClipboardList },
+    perms.members && { label: 'Members', href: `/subjects/${subjectId}/members`, icon: Users },
+    perms.classes && { label: 'Classes', href: `/subjects/${subjectId}/classes`, icon: GraduationCap },
+  ].filter(Boolean) as { label: string; href: string; icon: typeof FileText }[]
 
   return (
     <div className="flex items-center gap-0 border-b border-zinc-900 px-5 bg-zinc-950">

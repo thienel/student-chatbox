@@ -30,10 +30,13 @@ export function SubjectClassProvider({
   subjectId: string
   children: ReactNode
 }) {
-  // Class managers (lecturers/admins) work inside a class they pick; everyone
-  // else accesses the single class they enrolled in.
+  // Class managers (class:manage) work inside a class they pick. Enrollers
+  // (subject:enroll, i.e. students) access the single class they joined and are
+  // gated until they do. Anyone else (e.g. a scoped admin) is neither — they
+  // browse without a class context and are never gated.
   const isLecturer = usePermission('class:manage')
-  const isStudent = !isLecturer
+  const canEnroll = usePermission('subject:enroll')
+  const isStudent = canEnroll && !isLecturer
 
   const myClassQ = useMyClass(subjectId, isStudent)
   const classesQ = useClasses(subjectId, isLecturer)
