@@ -39,7 +39,7 @@ export default function SubjectDocumentsPage() {
   const fileRef = useRef<HTMLInputElement>(null)
   const [confirmId, setConfirmId] = useState<string | null>(null)
 
-  const { classId, isLecturer, needsClass } = useSubjectClass()
+  const { classId, isLecturer, needsClass, loading: classLoading } = useSubjectClass()
   const canUpload = canUploadDocs && !!classId
   const { data: documents = [], isLoading } = useSubjectDocuments(subjectId, classId)
   const upload = useUploadDocument(subjectId, classId)
@@ -85,14 +85,20 @@ export default function SubjectDocumentsPage() {
         )}
       </div>
 
-      {isLecturer && needsClass ? (
-        <NeedClassNotice noun="Documents" />
-      ) : isLoading || !classId ? (
+      {classLoading || (!!classId && isLoading) ? (
         <div className="space-y-2">
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-14 rounded-lg bg-zinc-900" />
           ))}
         </div>
+      ) : isLecturer && needsClass ? (
+        <NeedClassNotice noun="Documents" />
+      ) : !classId ? (
+        <EmptyState
+          icon={FileText}
+          title="No class selected"
+          description="There is no class to show documents for in this subject."
+        />
       ) : documents.length === 0 ? (
         <EmptyState
           icon={FileText}
