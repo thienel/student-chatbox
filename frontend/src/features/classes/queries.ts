@@ -8,6 +8,8 @@ export const classKeys = {
   myClass: (subjectId: string) => ['classes', subjectId, 'my-class'] as const,
   students: (subjectId: string, classId: string) =>
     ['classes', subjectId, classId, 'students'] as const,
+  stats: (subjectId: string, classId: string) =>
+    ['classes', subjectId, classId, 'stats'] as const,
 }
 
 export function useClasses(subjectId: string, enabled = true) {
@@ -42,12 +44,21 @@ export function useClassStudents(subjectId: string, classId?: string) {
   })
 }
 
+export function useClassStats(subjectId: string, classId?: string) {
+  return useQuery({
+    queryKey: classKeys.stats(subjectId, classId ?? ''),
+    queryFn: () => classesApi.stats(subjectId, classId!),
+    enabled: !!subjectId && !!classId,
+  })
+}
+
 export function useRemoveClassStudent(subjectId: string, classId?: string) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (studentId: string) => classesApi.removeStudent(subjectId, classId!, studentId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: classKeys.students(subjectId, classId ?? '') })
+      qc.invalidateQueries({ queryKey: classKeys.stats(subjectId, classId ?? '') })
       qc.invalidateQueries({ queryKey: classKeys.list(subjectId) })
     },
   })
