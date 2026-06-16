@@ -1,5 +1,5 @@
 import axiosInstance from '@/api/axiosInstance'
-import type { ApiResponse, Class, SubjectLecturer, ClassStudent } from '@/types'
+import type { ApiResponse, Class, SubjectLecturer, ClassStudent, ClassStats } from '@/types'
 
 export const classesApi = {
   // Lecturer/admin: classes in a subject (own classes for lecturers).
@@ -21,6 +21,11 @@ export const classesApi = {
 
   removeStudent: (subjectId: string, classId: string, studentId: string) =>
     axiosInstance.delete(`/subjects/${subjectId}/classes/${classId}/students/${studentId}`),
+
+  stats: (subjectId: string, classId: string) =>
+    axiosInstance
+      .get<ApiResponse<ClassStats>>(`/subjects/${subjectId}/classes/${classId}/stats`)
+      .then(r => r.data.data),
 
   // Student: lecturers that have at least one class (for the enroll dropdown).
   lecturers: (subjectId: string) =>

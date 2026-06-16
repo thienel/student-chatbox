@@ -41,6 +41,28 @@ export interface ClassStudent {
   enrolledAt: string;
 }
 
+export interface ClassStudentStat {
+  id: string;
+  fullName: string;
+  email: string;
+  examAttempts: number;
+  avgScore: number | null;
+  lastActiveAt: string | null;
+}
+
+export interface ClassStats {
+  overview: {
+    studentCount: number;
+    documentCount: number;
+    documentsReady: number;
+    examCount: number;
+    flashcardSetCount: number;
+    totalAttempts: number;
+    avgScore: number | null;
+  };
+  students: ClassStudentStat[];
+}
+
 export interface Document {
   id: string;
   originalName: string;
