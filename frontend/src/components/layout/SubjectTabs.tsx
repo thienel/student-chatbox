@@ -16,8 +16,8 @@ export function SubjectTabs({ subjectId }: SubjectTabsProps) {
     chat: usePermission('chat:create'),
     flashcards: usePermission('flashcard:read'),
     exams: usePermission('exam:read'),
-    members: usePermission('subject:read'),
     classes: usePermission('class:manage'),
+    members: usePermission('subject:assign-lecturer'),
   }
 
   const tabs = [
@@ -25,8 +25,10 @@ export function SubjectTabs({ subjectId }: SubjectTabsProps) {
     perms.chat && { label: 'Chat', href: `/subjects/${subjectId}/chat`, icon: MessageSquare },
     perms.flashcards && { label: 'Flashcards', href: `/subjects/${subjectId}/flashcards`, icon: Layers },
     perms.exams && { label: 'Exams', href: `/subjects/${subjectId}/exams`, icon: ClipboardList },
-    perms.members && { label: 'Members', href: `/subjects/${subjectId}/members`, icon: Users },
+    // Lecturers manage their class roster; admins manage subject lecturers.
+    perms.classes && { label: 'Students', href: `/subjects/${subjectId}/students`, icon: Users },
     perms.classes && { label: 'Classes', href: `/subjects/${subjectId}/classes`, icon: GraduationCap },
+    perms.members && { label: 'Members', href: `/subjects/${subjectId}/members`, icon: Users },
   ].filter(Boolean) as { label: string; href: string; icon: typeof FileText }[]
 
   return (

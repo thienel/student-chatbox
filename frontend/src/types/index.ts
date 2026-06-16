@@ -34,6 +34,13 @@ export interface Class {
   createdAt: string;
 }
 
+export interface ClassStudent {
+  id: string;
+  fullName: string;
+  email: string;
+  enrolledAt: string;
+}
+
 export interface Document {
   id: string;
   originalName: string;
