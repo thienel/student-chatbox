@@ -5,6 +5,7 @@ import {
   IClassRepository,
   ISubjectLecturer,
   IClassStudent,
+  IClassStats,
 } from '../../../../domain/class/repositories/class.repository.interface';
 import { Class } from '../../../../domain/class/entities/class.entity';
 import { ClassOrmEntity } from '../orm-entities/class.orm-entity';
@@ -106,6 +107,53 @@ export class ClassTypeOrmRepository implements IClassRepository {
       `DELETE FROM class_enrollments WHERE class_id = $1 AND student_id = $2`,
       [classId, studentId],
     );
+  }
+
+  async getClassStats(classId: string): Promise<IClassStats> {
+    const [overviewRow] = await this.dataSource.query(
+      `SELECT
+         (SELECT COUNT(*) FROM class_enrollments WHERE class_id = $1)::int AS "studentCount",
+         (SELECT COUNT(*) FROM documents WHERE class_id = $1)::int AS "documentCount",
+         (SELECT COUNT(*) FROM documents WHERE class_id = $1 AND status = 'ready')::int AS "documentsReady",
+         (SELECT COUNT(*) FROM exams WHERE class_id = $1)::int AS "examCount",
+         (SELECT COUNT(*) FROM flashcard_sets WHERE class_id = $1)::int AS "flashcardSetCount",
+         (SELECT COUNT(*) FROM exam_attempts ea JOIN exams e ON e.id = ea.exam_id
+            WHERE e.class_id = $1 AND ea.status = 'completed')::int AS "totalAttempts",
+         (SELECT AVG(ea.score) FROM exam_attempts ea JOIN exams e ON e.id = ea.exam_id
+            WHERE e.class_id = $1 AND ea.status = 'completed') AS "avgScore"`,
+      [classId],
+    );
+
+    const students = await this.dataSource.query(
+      `SELECT u.id, u.full_name AS "fullName", u.email,
+         COUNT(ea.id) FILTER (WHERE ea.status = 'completed')::int AS "examAttempts",
+         AVG(ea.score) FILTER (WHERE ea.status = 'completed') AS "avgScore",
+         MAX(COALESCE(ea.completed_at, ea.started_at)) AS "lastActiveAt"
+       FROM class_enrollments ce
+       JOIN users u ON u.id = ce.student_id
+       LEFT JOIN exams e ON e.class_id = ce.class_id AND e.created_by = u.id
+       LEFT JOIN exam_attempts ea ON ea.exam_id = e.id AND ea.user_id = u.id
+       WHERE ce.class_id = $1
+       GROUP BY u.id, u.full_name, u.email
+       ORDER BY u.full_name ASC`,
+      [classId],
+    );
+
+    return {
+      overview: {
+        studentCount: overviewRow.studentCount,
+        documentCount: overviewRow.documentCount,
+        documentsReady: overviewRow.documentsReady,
+        examCount: overviewRow.examCount,
+        flashcardSetCount: overviewRow.flashcardSetCount,
+        totalAttempts: overviewRow.totalAttempts,
+        avgScore: overviewRow.avgScore === null ? null : Number(overviewRow.avgScore),
+      },
+      students: students.map((s: IClassStats['students'][number]) => ({
+        ...s,
+        avgScore: s.avgScore === null ? null : Number(s.avgScore),
+      })),
+    };
   }
 
   async unenrollStudentFromSubject(subjectId: string, studentId: string): Promise<void> {

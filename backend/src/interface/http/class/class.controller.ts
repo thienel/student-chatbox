@@ -23,6 +23,7 @@ import { UnenrollClassUseCase } from '../../../application/class/use-cases/unenr
 import { GetMyClassUseCase } from '../../../application/class/use-cases/get-my-class.use-case';
 import { ListClassStudentsUseCase } from '../../../application/class/use-cases/list-class-students.use-case';
 import { RemoveClassStudentUseCase } from '../../../application/class/use-cases/remove-class-student.use-case';
+import { GetClassStatsUseCase } from '../../../application/class/use-cases/get-class-stats.use-case';
 import { CreateClassDto, EnrollByPasswordDto } from '../../../application/class/dtos/class.dto';
 import { User } from '../../../domain/user/entities/user.entity';
 
@@ -39,6 +40,7 @@ export class ClassController {
     private readonly getMyClassUseCase: GetMyClassUseCase,
     private readonly listClassStudentsUseCase: ListClassStudentsUseCase,
     private readonly removeClassStudentUseCase: RemoveClassStudentUseCase,
+    private readonly getClassStatsUseCase: GetClassStatsUseCase,
   ) {}
 
   @Post('classes')
@@ -78,6 +80,16 @@ export class ClassController {
     @CurrentUser() user: User,
   ) {
     await this.removeClassStudentUseCase.execute(subjectId, classId, studentId, user);
+  }
+
+  @Get('classes/:classId/stats')
+  @RequirePermission('class:manage')
+  async classStats(
+    @Param('id') subjectId: string,
+    @Param('classId') classId: string,
+    @CurrentUser() user: User,
+  ) {
+    return this.getClassStatsUseCase.execute(subjectId, classId, user);
   }
 
   @Get('lecturers')
