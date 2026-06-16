@@ -12,6 +12,28 @@ export interface IClassStudent {
   enrolledAt: Date;
 }
 
+export interface IClassStudentStat {
+  id: string;
+  fullName: string;
+  email: string;
+  examAttempts: number;
+  avgScore: number | null;
+  lastActiveAt: Date | null;
+}
+
+export interface IClassStats {
+  overview: {
+    studentCount: number;
+    documentCount: number;
+    documentsReady: number;
+    examCount: number;
+    flashcardSetCount: number;
+    totalAttempts: number;
+    avgScore: number | null;
+  };
+  students: IClassStudentStat[];
+}
+
 export interface IClassRepository {
   create(data: { subjectId: string; lecturerId: string; name: string; passwordHash: string }): Promise<Class>;
   findById(id: string): Promise<Class | null>;
@@ -24,6 +46,7 @@ export interface IClassRepository {
   enrollStudent(classId: string, studentId: string): Promise<void>;
   listStudents(classId: string): Promise<IClassStudent[]>;
   removeStudent(classId: string, studentId: string): Promise<void>;
+  getClassStats(classId: string): Promise<IClassStats>;
   /** Remove the student's membership from whatever class they belong to in the subject. */
   unenrollStudentFromSubject(subjectId: string, studentId: string): Promise<void>;
   /** The class a student belongs to within a subject, if any. */
