@@ -67,6 +67,8 @@ export interface IStudyRepository {
   /** Due cards (review now) plus up to `newCardLimit` brand new cards for a set. */
   getStudyQueue(userId: string, setId: string, newCardLimit: number): Promise<StudyQueue>;
   cardBelongsToSet(flashcardId: string, setId: string): Promise<boolean>;
+  /** Total cards due for review now across all of a student's studied sets. */
+  countDueCards(userId: string): Promise<number>;
 
   getProgress(userId: string, flashcardId: string): Promise<CardProgress | null>;
   upsertProgress(input: UpsertProgressInput): Promise<void>;

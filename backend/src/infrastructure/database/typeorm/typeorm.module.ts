@@ -41,6 +41,8 @@ import { StudentStudySettingsOrmEntity } from './orm-entities/student-study-sett
 import { StudyTypeOrmRepository } from './repositories/study.typeorm-repository';
 import { StudentWeakTopicOrmEntity } from './orm-entities/student-weak-topic.orm-entity';
 import { WeakTopicTypeOrmRepository } from './repositories/weak-topic.typeorm-repository';
+import { StudentStudyPlanOrmEntity } from './orm-entities/student-study-plan.orm-entity';
+import { StudyPlanTypeOrmRepository } from './repositories/study-plan.typeorm-repository';
 import { DatabaseSeederService } from './seeds/seed.service';
 import { TOKENS } from '../../../shared/constants/tokens';
 
@@ -70,6 +72,7 @@ const ormEntities = [
   StudentStudyStatsOrmEntity,
   StudentStudySettingsOrmEntity,
   StudentWeakTopicOrmEntity,
+  StudentStudyPlanOrmEntity,
 ];
 
 @Module({
@@ -103,6 +106,7 @@ const ormEntities = [
     ClassTypeOrmRepository,
     StudyTypeOrmRepository,
     WeakTopicTypeOrmRepository,
+    StudyPlanTypeOrmRepository,
     DatabaseSeederService,
     { provide: TOKENS.USER_REPO, useClass: UserTypeOrmRepository },
     { provide: TOKENS.ROLE_REPO, useClass: RoleTypeOrmRepository },
@@ -119,6 +123,7 @@ const ormEntities = [
     { provide: TOKENS.CLASS_REPO, useClass: ClassTypeOrmRepository },
     { provide: TOKENS.STUDY_REPO, useClass: StudyTypeOrmRepository },
     { provide: TOKENS.WEAK_TOPIC_REPO, useClass: WeakTopicTypeOrmRepository },
+    { provide: TOKENS.STUDY_PLAN_REPO, useClass: StudyPlanTypeOrmRepository },
   ],
   exports: [
     TypeOrmModule,
@@ -152,6 +157,7 @@ const ormEntities = [
     ClassTypeOrmRepository,
     StudyTypeOrmRepository,
     WeakTopicTypeOrmRepository,
+    StudyPlanTypeOrmRepository,
   ],
 })
 export class TypeOrmDatabaseModule {}

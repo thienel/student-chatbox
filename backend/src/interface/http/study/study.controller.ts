@@ -1,6 +1,6 @@
 import {
-  Controller, Get, Post, Patch, Param, Body,
-  UseGuards, UsePipes, ValidationPipe, HttpCode, HttpStatus,
+  Controller, Get, Post, Patch, Param, Body, Query,
+  UseGuards, UsePipes, ValidationPipe, HttpCode, HttpStatus, ParseIntPipe,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { PermissionGuard } from '../../guards/permission.guard';
@@ -13,6 +13,8 @@ import { GetStudySessionUseCase } from '../../../application/study/use-cases/get
 import { GetStudySettingsUseCase } from '../../../application/study/use-cases/get-study-settings.use-case';
 import { UpdateStudySettingsUseCase } from '../../../application/study/use-cases/update-study-settings.use-case';
 import { GetStudyStatsUseCase } from '../../../application/study/use-cases/get-study-stats.use-case';
+import { GetCurrentStudyPlanUseCase } from '../../../application/study/use-cases/get-current-study-plan.use-case';
+import { GetStudyPlanHistoryUseCase } from '../../../application/study/use-cases/get-study-plan-history.use-case';
 import { ReviewCardDto, UpdateStudySettingsDto } from '../../../application/study/dtos/study.dto';
 import { User } from '../../../domain/user/entities/user.entity';
 
@@ -28,6 +30,8 @@ export class StudyController {
     private readonly getStudySettingsUseCase: GetStudySettingsUseCase,
     private readonly updateStudySettingsUseCase: UpdateStudySettingsUseCase,
     private readonly getStudyStatsUseCase: GetStudyStatsUseCase,
+    private readonly getCurrentStudyPlanUseCase: GetCurrentStudyPlanUseCase,
+    private readonly getStudyPlanHistoryUseCase: GetStudyPlanHistoryUseCase,
   ) {}
 
   @Get('flashcard-sets/:setId/study-queue')
@@ -75,5 +79,20 @@ export class StudyController {
   @RequirePermission('flashcard:study')
   async stats(@CurrentUser() user: User) {
     return this.getStudyStatsUseCase.execute(user);
+  }
+
+  @Get('study-plan/current')
+  @RequirePermission('flashcard:study')
+  async currentPlan(@CurrentUser() user: User) {
+    return this.getCurrentStudyPlanUseCase.execute(user);
+  }
+
+  @Get('study-plan/history')
+  @RequirePermission('flashcard:study')
+  async planHistory(
+    @CurrentUser() user: User,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+  ) {
+    return this.getStudyPlanHistoryUseCase.execute(user, limit);
   }
 }
