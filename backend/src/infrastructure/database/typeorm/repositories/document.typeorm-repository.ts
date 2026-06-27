@@ -24,6 +24,8 @@ export class DocumentTypeOrmRepository implements IDocumentRepository {
     doc.chunkCount = orm.chunkCount;
     doc.errorMessage = orm.errorMessage;
     doc.uploadedBy = orm.uploadedBy;
+    doc.summary = orm.summary ?? undefined;
+    doc.summaryGeneratedAt = orm.summaryGeneratedAt ?? undefined;
     doc.createdAt = orm.createdAt;
     doc.updatedAt = orm.updatedAt;
     if (orm.uploader) {
@@ -74,6 +76,10 @@ export class DocumentTypeOrmRepository implements IDocumentRepository {
     if (chunkCount !== undefined) updateData.chunkCount = chunkCount;
     if (errorMessage !== undefined) updateData.errorMessage = errorMessage;
     await this.repo.update(id, updateData);
+  }
+
+  async updateSummary(id: string, summary: string): Promise<void> {
+    await this.repo.update(id, { summary, summaryGeneratedAt: new Date() });
   }
 
   async delete(id: string): Promise<void> {

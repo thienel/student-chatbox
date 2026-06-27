@@ -19,11 +19,14 @@ import { Request } from 'express';
 import { memoryStorage } from 'multer';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { PermissionGuard } from '../../guards/permission.guard';
+import { AiRateLimitGuard } from '../../guards/ai-rate-limit.guard';
 import { RequirePermission } from '../../decorators/require-permission.decorator';
+import { AiFeature } from '../../decorators/ai-feature.decorator';
 import { CurrentUser } from '../../decorators/current-user.decorator';
 import { UploadDocumentUseCase } from '../../../application/document/use-cases/upload-document.use-case';
 import { ListDocumentsUseCase } from '../../../application/document/use-cases/list-documents.use-case';
 import { DeleteDocumentUseCase } from '../../../application/document/use-cases/delete-document.use-case';
+import { SummarizeDocumentUseCase } from '../../../application/document/use-cases/summarize-document.use-case';
 import { AuditLogService } from '../../../application/system/services/audit-log.service';
 import { ClassContextService } from '../../../application/class/services/class-context.service';
 import { User } from '../../../domain/user/entities/user.entity';
@@ -36,6 +39,7 @@ export class DocumentController {
     private readonly uploadDocumentUseCase: UploadDocumentUseCase,
     private readonly listDocumentsUseCase: ListDocumentsUseCase,
     private readonly deleteDocumentUseCase: DeleteDocumentUseCase,
+    private readonly summarizeDocumentUseCase: SummarizeDocumentUseCase,
     private readonly auditLogService: AuditLogService,
     private readonly classContext: ClassContextService,
   ) {}
@@ -80,6 +84,18 @@ export class DocumentController {
     const lecturerId = await this.classContext.resolveLecturerId(subjectId, user);
     const documents = await this.listDocumentsUseCase.execute(subjectId, lecturerId);
     return { items: documents, total: documents.length };
+  }
+
+  @Get(':id/summary')
+  @RequirePermission('ai:summarize-document')
+  @AiFeature('summarize_document')
+  @UseGuards(AiRateLimitGuard)
+  async getSummary(
+    @Param('subjectId') subjectId: string,
+    @Param('id') id: string,
+    @CurrentUser() user: User,
+  ) {
+    return this.summarizeDocumentUseCase.execute(subjectId, id, user);
   }
 
   @Delete(':id')

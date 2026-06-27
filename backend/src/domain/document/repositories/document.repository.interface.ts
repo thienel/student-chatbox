@@ -7,5 +7,6 @@ export interface IDocumentRepository {
   findBySubjectAndUploader(subjectId: string, uploaderId: string): Promise<Document[]>;
   create(document: Partial<Document>): Promise<Document>;
   updateStatus(id: string, status: DocumentStatus, chunkCount?: number, errorMessage?: string): Promise<void>;
+  updateSummary(id: string, summary: string): Promise<void>;
   delete(id: string): Promise<void>;
 }

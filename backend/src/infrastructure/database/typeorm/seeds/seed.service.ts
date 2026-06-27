@@ -61,6 +61,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
         { name: 'document:upload', description: 'Upload documents' },
         { name: 'document:delete', description: 'Delete documents' },
         { name: 'document:read', description: 'View document list' },
+        { name: 'ai:summarize-document', description: 'AI summarize a document' },
         { name: 'chat:create', description: 'Create chat session' },
         { name: 'chat:read-own', description: 'View own chats' },
         { name: 'ai:chat-rag', description: 'Use AI RAG chat' },
@@ -115,6 +116,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
       const lecturerPerms = [
         'subject:read', 'class:manage',
         'document:upload', 'document:delete', 'document:read',
+        'ai:summarize-document',
         'exam:read', 'exam:create-official',
         'analytics:read-own',
       ];
@@ -129,6 +131,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
       // creates their own private flashcards & exams from the class content.
       const studentPerms = [
         'subject:read', 'subject:enroll', 'document:read',
+        'ai:summarize-document',
         'chat:create', 'chat:read-own', 'ai:chat-rag',
         'flashcard:create', 'flashcard:delete', 'flashcard:read',
         'flashcard:manage-own', 'flashcard:study', 'ai:generate-flashcard',
@@ -155,6 +158,9 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
         { key: 'ai_daily_limit.student.generate_exam', value: 3, description: 'Daily exam generation limit for students' },
         { key: 'ai_daily_limit.lecturer.generate_exam', value: 10, description: 'Daily exam generation limit for lecturers' },
         { key: 'ai_daily_limit.admin.generate_exam', value: -1, description: 'unlimited' },
+        { key: 'ai_daily_limit.student.summarize_document', value: 10, description: 'Daily document summary limit for students' },
+        { key: 'ai_daily_limit.lecturer.summarize_document', value: 30, description: 'Daily document summary limit for lecturers' },
+        { key: 'ai_daily_limit.admin.summarize_document', value: -1, description: 'unlimited' },
       ];
 
       for (const s of settingsDefaults) {

@@ -42,6 +42,12 @@ export class DocumentOrmEntity {
   @Column({ name: 'uploaded_by' })
   uploadedBy: string;
 
+  @Column({ type: 'text', nullable: true })
+  summary: string | null;
+
+  @Column({ name: 'summary_generated_at', type: 'timestamptz', nullable: true })
+  summaryGeneratedAt: Date | null;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

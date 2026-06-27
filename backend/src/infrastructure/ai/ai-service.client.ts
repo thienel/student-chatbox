@@ -96,6 +96,24 @@ export class AiServiceClient {
     this.logger.log(`Document processing queued: ${documentId}`);
   }
 
+  async summarizeDocument(documentId: string): Promise<string> {
+    const url = `${this.aiServiceUrl}/documents/summarize`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-internal-key': this.aiServiceSecret,
+      },
+      body: JSON.stringify({ documentId }),
+    });
+    if (!response.ok) {
+      const body = await response.text().catch(() => '');
+      throw new Error(`AI service /documents/summarize failed: ${response.status} ${body}`);
+    }
+    const data = (await response.json()) as { summary: string };
+    return data.summary;
+  }
+
   async deleteDocumentVectors(documentId: string): Promise<void> {
     const url = `${this.aiServiceUrl}/documents/${documentId}`;
     const response = await fetch(url, {
