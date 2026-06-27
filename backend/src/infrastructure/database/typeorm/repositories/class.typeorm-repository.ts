@@ -6,6 +6,8 @@ import {
   ISubjectLecturer,
   IClassStudent,
   IClassStats,
+  IStudentEngagement,
+  IStudentExamAttempt,
 } from '../../../../domain/class/repositories/class.repository.interface';
 import { Class } from '../../../../domain/class/entities/class.entity';
 import { ClassOrmEntity } from '../orm-entities/class.orm-entity';
@@ -156,6 +158,75 @@ export class ClassTypeOrmRepository implements IClassRepository {
         avgScore: s.avgScore === null ? null : Number(s.avgScore),
       })),
     };
+  }
+
+  async getClassEngagement(subjectId: string, classId: string): Promise<IStudentEngagement[]> {
+    const rows = await this.dataSource.query(
+      `SELECT u.id AS "userId", u.full_name AS "fullName", u.email,
+         ce.enrolled_at AS "enrolledAt",
+         COALESCE(st.current_streak, 0) AS "currentStreak",
+         COALESCE(st.total_sessions, 0) AS "totalStudySessions",
+         COALESCE(st.total_cards_reviewed, 0) AS "totalCardsReviewed",
+         (SELECT COALESCE(SUM(star_count), 0)::int FROM flashcard_sets fs
+            WHERE fs.created_by = u.id AND fs.is_public) AS "totalStarsReceived",
+         (SELECT COUNT(*)::int FROM board_questions bq
+            WHERE bq.author_id = u.id AND bq.class_id = ce.class_id) AS "questionsPosted",
+         (SELECT COUNT(*)::int FROM board_answers ba
+            JOIN board_questions bq2 ON bq2.id = ba.question_id
+            WHERE ba.author_id = u.id AND bq2.class_id = ce.class_id) AS "answersPosted",
+         (SELECT COUNT(*)::int FROM exam_attempts ea JOIN exams e ON e.id = ea.exam_id
+            WHERE ea.user_id = u.id AND e.subject_id = $1 AND ea.status = 'completed') AS "examAttemptCount",
+         (SELECT AVG(ea.score) FROM exam_attempts ea JOIN exams e ON e.id = ea.exam_id
+            WHERE ea.user_id = u.id AND e.subject_id = $1 AND ea.status = 'completed') AS "avgExamScore",
+         GREATEST(
+           (SELECT MAX(s.completed_at) FROM flashcard_study_sessions s WHERE s.user_id = u.id),
+           (SELECT MAX(COALESCE(ea.completed_at, ea.started_at)) FROM exam_attempts ea WHERE ea.user_id = u.id),
+           (SELECT MAX(bq.created_at) FROM board_questions bq WHERE bq.author_id = u.id),
+           (SELECT MAX(ba.created_at) FROM board_answers ba WHERE ba.author_id = u.id)
+         ) AS "lastActiveAt"
+       FROM class_enrollments ce
+       JOIN users u ON u.id = ce.student_id
+       LEFT JOIN student_study_stats st ON st.user_id = u.id
+       WHERE ce.class_id = $2
+       ORDER BY u.full_name ASC`,
+      [subjectId, classId],
+    );
+
+    return rows.map((r: Record<string, unknown>) => ({
+      userId: r.userId as string,
+      fullName: r.fullName as string,
+      email: r.email as string,
+      enrolledAt: r.enrolledAt as Date,
+      stats: {
+        lastActiveAt: (r.lastActiveAt as Date) ?? null,
+        currentStreak: Number(r.currentStreak),
+        totalStudySessions: Number(r.totalStudySessions),
+        totalCardsReviewed: Number(r.totalCardsReviewed),
+        totalStarsReceived: Number(r.totalStarsReceived),
+        questionsPosted: Number(r.questionsPosted),
+        answersPosted: Number(r.answersPosted),
+        examAttemptCount: Number(r.examAttemptCount),
+        avgExamScore: r.avgExamScore === null ? null : Number(r.avgExamScore),
+      },
+    }));
+  }
+
+  async getStudentExamAttempts(subjectId: string, studentId: string): Promise<IStudentExamAttempt[]> {
+    const rows = await this.dataSource.query(
+      `SELECT e.id AS "examId", e.title AS "examTitle", ea.score AS "score",
+         COALESCE(ea.completed_at, ea.started_at) AS "attemptedAt"
+       FROM exam_attempts ea
+       JOIN exams e ON e.id = ea.exam_id
+       WHERE ea.user_id = $1 AND e.subject_id = $2 AND ea.status = 'completed'
+       ORDER BY COALESCE(ea.completed_at, ea.started_at) DESC`,
+      [studentId, subjectId],
+    );
+    return rows.map((r: Record<string, unknown>) => ({
+      examId: r.examId as string,
+      examTitle: r.examTitle as string,
+      score: r.score === null ? null : Number(r.score),
+      attemptedAt: r.attemptedAt as Date,
+    }));
   }
 
   async unenrollStudentFromSubject(subjectId: string, studentId: string): Promise<void> {
