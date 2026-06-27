@@ -1,5 +1,6 @@
 import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { IExamRepository } from '../../../domain/exam/repositories/exam.repository.interface';
+import { IWeakTopicRepository } from '../../../domain/exam/repositories/weak-topic.repository.interface';
 import { TOKENS } from '../../../shared/constants/tokens';
 import { User } from '../../../domain/user/entities/user.entity';
 import { SubmitAttemptDto } from '../dtos/exam.dto';
@@ -8,6 +9,7 @@ import { SubmitAttemptDto } from '../dtos/exam.dto';
 export class SubmitAttemptUseCase {
   constructor(
     @Inject(TOKENS.EXAM_REPO) private readonly examRepo: IExamRepository,
+    @Inject(TOKENS.WEAK_TOPIC_REPO) private readonly weakTopicRepo: IWeakTopicRepository,
   ) {}
 
   async execute(examId: string, attemptId: string, dto: SubmitAttemptDto, user: User) {
@@ -31,7 +33,7 @@ export class SubmitAttemptUseCase {
     const total = questions.length;
     const score = total > 0 ? parseFloat(((correctCount / total) * 10).toFixed(2)) : 0;
 
-    return this.examRepo.updateAttempt(attemptId, {
+    const result = await this.examRepo.updateAttempt(attemptId, {
       answers: dto.answers,
       score,
       totalQuestions: total,
@@ -40,5 +42,13 @@ export class SubmitAttemptUseCase {
       completedAt: new Date(),
       timeSpentSecs: dto.timeSpentSecs,
     });
+
+    // Refresh the student's weak-topic profile from all completed attempts.
+    const exam = await this.examRepo.findExamById(examId);
+    if (exam) {
+      await this.weakTopicRepo.recompute(user.id, exam.subjectId);
+    }
+
+    return result;
   }
 }

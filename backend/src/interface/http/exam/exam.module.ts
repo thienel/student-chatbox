@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { SubjectExamController, ExamAttemptController } from './exam.controller';
+import { WeakTopicController } from './weak-topic.controller';
+import { GetMyWeakTopicsUseCase } from '../../../application/exam/use-cases/get-my-weak-topics.use-case';
 import { GenerateExamUseCase } from '../../../application/exam/use-cases/generate-exam.use-case';
 import { ListExamsUseCase } from '../../../application/exam/use-cases/list-exams.use-case';
 import { GetExamUseCase } from '../../../application/exam/use-cases/get-exam.use-case';
@@ -15,7 +17,7 @@ import { ClassModule } from '../class/class.module';
 
 @Module({
   imports: [TypeOrmDatabaseModule, AiModule, ClassModule],
-  controllers: [SubjectExamController, ExamAttemptController],
+  controllers: [SubjectExamController, ExamAttemptController, WeakTopicController],
   providers: [
     GenerateExamUseCase,
     ListExamsUseCase,
@@ -26,6 +28,7 @@ import { ClassModule } from '../class/class.module';
     ListMyAttemptsUseCase,
     CreateOfficialExamUseCase,
     UpdateOfficialExamUseCase,
+    GetMyWeakTopicsUseCase,
   ],
 })
 export class ExamModule {}
