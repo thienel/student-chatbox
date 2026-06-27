@@ -7,7 +7,6 @@ export enum DocumentStatus {
 export class Document {
   id: string;
   subjectId: string;
-  classId?: string;
   originalName: string;
   storedPath: string;
   mimeType: string;

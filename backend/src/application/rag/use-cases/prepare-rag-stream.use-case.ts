@@ -4,6 +4,7 @@ import { IChatRepository } from '../../../domain/chat/repositories/chat.reposito
 import { ISystemSettingRepository } from '../../../domain/system/repositories/system-setting.repository.interface';
 import { TOKENS } from '../../../shared/constants/tokens';
 import { AiServiceClient } from '../../../infrastructure/ai/ai-service.client';
+import { ClassContextService } from '../../class/services/class-context.service';
 import { User } from '../../../domain/user/entities/user.entity';
 import { SendMessageDto } from '../dtos/chat.dto';
 
@@ -13,6 +14,7 @@ export class PrepareRagStreamUseCase {
     @Inject(TOKENS.CHAT_REPO) private readonly chatRepo: IChatRepository,
     @Inject(TOKENS.SYSTEM_SETTING_REPO) private readonly settingRepo: ISystemSettingRepository,
     private readonly aiServiceClient: AiServiceClient,
+    private readonly classContext: ClassContextService,
     private readonly config: ConfigService,
   ) {}
 
@@ -24,6 +26,10 @@ export class PrepareRagStreamUseCase {
     const chat = await this.chatRepo.findById(chatId);
     if (!chat) throw new NotFoundException('Chat not found');
     if (chat.userId !== user.id && user.roleName !== 'admin') throw new ForbiddenException();
+
+    const lecturerId = chat.classId
+      ? await this.classContext.getLecturerIdForClass(chat.classId)
+      : '';
 
     const topK = Number((await this.settingRepo.findByKey('rag.top_k'))?.value ?? 5);
     const minScore = Number((await this.settingRepo.findByKey('rag.min_score'))?.value ?? 0.4);
@@ -43,7 +49,7 @@ export class PrepareRagStreamUseCase {
     const streamToken = this.aiServiceClient.issueStreamToken({
       chatId,
       subjectId: chat.subjectId,
-      classId: chat.classId ?? '',
+      lecturerId,
       content: dto.content,
       chatHistory,
       topK,
@@ -59,7 +65,7 @@ export class PrepareRagStreamUseCase {
       streamPayload: {
         content: dto.content,
         subjectId: chat.subjectId,
-        classId: chat.classId ?? '',
+        lecturerId,
         chatHistory,
         topK,
         minScore,

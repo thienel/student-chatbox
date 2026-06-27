@@ -51,13 +51,11 @@ export class DocumentController {
   )
   async uploadDocument(
     @Param('subjectId') subjectId: string,
-    @Query('classId') classId: string,
     @UploadedFile() file: Express.Multer.File,
     @CurrentUser() user: User,
     @Req() req: Request,
   ) {
-    const resolvedClassId = await this.classContext.resolveClassId(subjectId, user, classId);
-    const document = await this.uploadDocumentUseCase.execute(subjectId, resolvedClassId, file, user);
+    const document = await this.uploadDocumentUseCase.execute(subjectId, file, user);
     await this.auditLogService.log(
       user.id,
       'DOCUMENT_UPLOADED',
@@ -77,11 +75,10 @@ export class DocumentController {
   @RequirePermission('document:read')
   async listDocuments(
     @Param('subjectId') subjectId: string,
-    @Query('classId') classId: string,
     @CurrentUser() user: User,
   ) {
-    const resolvedClassId = await this.classContext.resolveClassId(subjectId, user, classId);
-    const documents = await this.listDocumentsUseCase.execute(resolvedClassId);
+    const lecturerId = await this.classContext.resolveLecturerId(subjectId, user);
+    const documents = await this.listDocumentsUseCase.execute(subjectId, lecturerId);
     return { items: documents, total: documents.length };
   }
 

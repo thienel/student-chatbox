@@ -5,7 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 export interface StreamTokenPayload {
   chatId: string;
   subjectId: string;
-  classId: string;
+  lecturerId: string;
   content: string;
   chatHistory: { role: string; content: string }[];
   topK: number;
@@ -77,7 +77,7 @@ export class AiServiceClient {
     documentId: string,
     filePath: string,
     subjectId: string,
-    classId: string,
+    lecturerId: string,
   ): Promise<void> {
     const url = `${this.aiServiceUrl}/documents/process`;
     const response = await fetch(url, {
@@ -86,7 +86,7 @@ export class AiServiceClient {
         'Content-Type': 'application/json',
         'x-internal-key': this.aiServiceSecret,
       },
-      body: JSON.stringify({ documentId, filePath, subjectId, classId }),
+      body: JSON.stringify({ documentId, filePath, subjectId, lecturerId }),
     });
     if (!response.ok) {
       const body = await response.text().catch(() => '');
@@ -108,7 +108,7 @@ export class AiServiceClient {
 
   async generateFlashcards(
     subjectId: string,
-    classId: string,
+    lecturerId: string,
     cardCount: number,
     topic?: string,
     documentIds?: string[],
@@ -122,7 +122,7 @@ export class AiServiceClient {
       },
       body: JSON.stringify({
         subject_id: subjectId,
-        class_id: classId,
+        lecturer_id: lecturerId,
         card_count: cardCount,
         topic,
         document_ids: documentIds,
@@ -138,7 +138,7 @@ export class AiServiceClient {
 
   async generateExam(
     subjectId: string,
-    classId: string,
+    lecturerId: string,
     questionCount: number,
     difficulty: 'easy' | 'medium' | 'hard',
     topic?: string,
@@ -153,7 +153,7 @@ export class AiServiceClient {
       },
       body: JSON.stringify({
         subject_id: subjectId,
-        class_id: classId,
+        lecturer_id: lecturerId,
         question_count: questionCount,
         difficulty,
         topic,

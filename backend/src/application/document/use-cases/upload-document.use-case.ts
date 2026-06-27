@@ -18,7 +18,6 @@ export class UploadDocumentUseCase {
 
   async execute(
     subjectId: string,
-    classId: string,
     file: Express.Multer.File,
     uploadedBy: User,
   ): Promise<Document> {
@@ -43,7 +42,6 @@ export class UploadDocumentUseCase {
 
     const document = await this.documentRepo.create({
       subjectId,
-      classId,
       originalName: file.originalname,
       storedPath,
       mimeType,
@@ -51,10 +49,13 @@ export class UploadDocumentUseCase {
       uploadedBy: uploadedBy.id,
     });
 
-    // Kick off async processing in Python AI service (fire and forget)
-    this.aiServiceClient.processDocument(document.id, storedPath, subjectId, classId).catch((err) => {
-      console.error(`Failed to queue document ${document.id} for processing:`, err);
-    });
+    // Kick off async processing in Python AI service (fire and forget). The
+    // uploader is the lecturer who owns the subject knowledge base.
+    this.aiServiceClient
+      .processDocument(document.id, storedPath, subjectId, uploadedBy.id)
+      .catch((err) => {
+        console.error(`Failed to queue document ${document.id} for processing:`, err);
+      });
 
     return document;
   }
