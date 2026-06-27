@@ -69,6 +69,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
         { name: 'flashcard:create', description: 'Create flashcard sets' },
         { name: 'flashcard:delete', description: 'Delete flashcard sets' },
         { name: 'flashcard:read', description: 'View flashcards' },
+        { name: 'flashcard:manage-own', description: 'Share, clone, and manage own flashcard sets' },
         { name: 'ai:generate-flashcard', description: 'AI generate flashcards' },
         { name: 'exam:read', description: 'View exams' },
         { name: 'exam:take', description: 'Take exams' },
@@ -128,7 +129,8 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
       const studentPerms = [
         'subject:read', 'subject:enroll', 'document:read',
         'chat:create', 'chat:read-own', 'ai:chat-rag',
-        'flashcard:create', 'flashcard:delete', 'flashcard:read', 'ai:generate-flashcard',
+        'flashcard:create', 'flashcard:delete', 'flashcard:read',
+        'flashcard:manage-own', 'ai:generate-flashcard',
         'exam:read', 'exam:take', 'ai:generate-exam',
         'bookmark:manage',
       ];
