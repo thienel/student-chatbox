@@ -11,6 +11,8 @@ export interface BadgeMetrics {
   totalStarsReceived: number;
   hasPerfectExam: boolean;
   examsScored80Plus: number;
+  hasPostedQuestion: boolean;
+  hasPinnedAnswer: boolean;
 }
 
 export interface BadgeDefinition {
@@ -87,5 +89,15 @@ export const BADGE_CATALOGUE: BadgeDefinition[] = [
     description: 'Score 80% or higher on 5 different exams',
     earned: (m) => m.examsScored80Plus >= 5,
     progress: (m) => `${Math.min(m.examsScored80Plus, 5)} / 5 exams`,
+  },
+  {
+    id: 'first_question', name: 'Curious Mind', iconKey: 'help-circle',
+    description: 'Post your first question on the board',
+    earned: (m) => m.hasPostedQuestion,
+  },
+  {
+    id: 'answer_pinned', name: 'Peer Expert', iconKey: 'pin',
+    description: 'Have an answer pinned by a lecturer',
+    earned: (m) => m.hasPinnedAnswer,
   },
 ];

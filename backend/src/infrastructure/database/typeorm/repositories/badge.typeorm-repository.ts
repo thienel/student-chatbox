@@ -56,6 +56,13 @@ export class BadgeTypeOrmRepository implements IBadgeRepository {
       [userId, PERFECT_SCORE, SCORE_80],
     );
 
+    const [board] = await this.dataSource.query(
+      `SELECT
+         EXISTS(SELECT 1 FROM board_questions WHERE author_id = $1) AS "hasPostedQuestion",
+         EXISTS(SELECT 1 FROM board_answers WHERE author_id = $1 AND is_pinned = true) AS "hasPinnedAnswer"`,
+      [userId],
+    );
+
     return {
       totalSessions: study?.totalSessions ?? 0,
       longestStreak: study?.longestStreak ?? 0,
@@ -65,6 +72,8 @@ export class BadgeTypeOrmRepository implements IBadgeRepository {
       totalStarsReceived: sets?.totalStarsReceived ?? 0,
       hasPerfectExam: exams?.hasPerfectExam ?? false,
       examsScored80Plus: exams?.examsScored80Plus ?? 0,
+      hasPostedQuestion: board?.hasPostedQuestion ?? false,
+      hasPinnedAnswer: board?.hasPinnedAnswer ?? false,
     };
   }
 }
