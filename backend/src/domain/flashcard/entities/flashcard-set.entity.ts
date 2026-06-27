@@ -5,6 +5,9 @@ export class FlashcardSet {
   title: string;
   description?: string;
   isPublic: boolean;
+  starCount: number;
+  clonedFromId?: string;
+  publishedAt?: Date;
   createdBy: string;
   createdAt: Date;
   updatedAt: Date;

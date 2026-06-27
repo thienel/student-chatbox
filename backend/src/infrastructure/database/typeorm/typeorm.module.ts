@@ -13,6 +13,7 @@ import { AiUsageLogOrmEntity } from './orm-entities/ai-usage-log.orm-entity';
 import { SystemSettingOrmEntity } from './orm-entities/system-setting.orm-entity';
 import { AuditLogOrmEntity } from './orm-entities/audit-log.orm-entity';
 import { FlashcardSetOrmEntity } from './orm-entities/flashcard-set.orm-entity';
+import { FlashcardSetStarOrmEntity } from './orm-entities/flashcard-set-star.orm-entity';
 import { FlashcardOrmEntity } from './orm-entities/flashcard.orm-entity';
 import { ExamOrmEntity } from './orm-entities/exam.orm-entity';
 import { QuestionOrmEntity } from './orm-entities/question.orm-entity';
@@ -49,6 +50,7 @@ const ormEntities = [
   SystemSettingOrmEntity,
   AuditLogOrmEntity,
   FlashcardSetOrmEntity,
+  FlashcardSetStarOrmEntity,
   FlashcardOrmEntity,
   ExamOrmEntity,
   QuestionOrmEntity,

@@ -29,8 +29,17 @@ export class FlashcardSetOrmEntity {
   @Column({ type: 'text', nullable: true })
   description: string | null;
 
-  @Column({ name: 'is_public', default: true })
+  @Column({ name: 'is_public', default: false })
   isPublic: boolean;
+
+  @Column({ name: 'star_count', default: 0 })
+  starCount: number;
+
+  @Column({ name: 'cloned_from_id', type: 'uuid', nullable: true })
+  clonedFromId: string | null;
+
+  @Column({ name: 'published_at', type: 'timestamptz', nullable: true })
+  publishedAt: Date | null;
 
   @Column({ name: 'created_by' })
   createdBy: string;
