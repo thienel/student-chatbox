@@ -34,6 +34,11 @@ import { BookmarkTypeOrmRepository } from './repositories/bookmark.typeorm-repos
 import { ClassOrmEntity } from './orm-entities/class.orm-entity';
 import { ClassEnrollmentOrmEntity } from './orm-entities/class-enrollment.orm-entity';
 import { ClassTypeOrmRepository } from './repositories/class.typeorm-repository';
+import { FlashcardProgressOrmEntity } from './orm-entities/flashcard-progress.orm-entity';
+import { FlashcardStudySessionOrmEntity } from './orm-entities/flashcard-study-session.orm-entity';
+import { StudentStudyStatsOrmEntity } from './orm-entities/student-study-stats.orm-entity';
+import { StudentStudySettingsOrmEntity } from './orm-entities/student-study-settings.orm-entity';
+import { StudyTypeOrmRepository } from './repositories/study.typeorm-repository';
 import { DatabaseSeederService } from './seeds/seed.service';
 import { TOKENS } from '../../../shared/constants/tokens';
 
@@ -58,6 +63,10 @@ const ormEntities = [
   BookmarkOrmEntity,
   ClassOrmEntity,
   ClassEnrollmentOrmEntity,
+  FlashcardProgressOrmEntity,
+  FlashcardStudySessionOrmEntity,
+  StudentStudyStatsOrmEntity,
+  StudentStudySettingsOrmEntity,
 ];
 
 @Module({
@@ -89,6 +98,7 @@ const ormEntities = [
     ExamTypeOrmRepository,
     BookmarkTypeOrmRepository,
     ClassTypeOrmRepository,
+    StudyTypeOrmRepository,
     DatabaseSeederService,
     { provide: TOKENS.USER_REPO, useClass: UserTypeOrmRepository },
     { provide: TOKENS.ROLE_REPO, useClass: RoleTypeOrmRepository },
@@ -103,6 +113,7 @@ const ormEntities = [
     { provide: TOKENS.EXAM_REPO, useClass: ExamTypeOrmRepository },
     { provide: TOKENS.BOOKMARK_REPO, useClass: BookmarkTypeOrmRepository },
     { provide: TOKENS.CLASS_REPO, useClass: ClassTypeOrmRepository },
+    { provide: TOKENS.STUDY_REPO, useClass: StudyTypeOrmRepository },
   ],
   exports: [
     TypeOrmModule,
@@ -119,6 +130,7 @@ const ormEntities = [
     { provide: TOKENS.EXAM_REPO, useClass: ExamTypeOrmRepository },
     { provide: TOKENS.BOOKMARK_REPO, useClass: BookmarkTypeOrmRepository },
     { provide: TOKENS.CLASS_REPO, useClass: ClassTypeOrmRepository },
+    { provide: TOKENS.STUDY_REPO, useClass: StudyTypeOrmRepository },
     UserTypeOrmRepository,
     RoleTypeOrmRepository,
     RefreshTokenTypeOrmRepository,
@@ -132,6 +144,7 @@ const ormEntities = [
     ExamTypeOrmRepository,
     BookmarkTypeOrmRepository,
     ClassTypeOrmRepository,
+    StudyTypeOrmRepository,
   ],
 })
 export class TypeOrmDatabaseModule {}
