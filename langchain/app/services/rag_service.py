@@ -33,7 +33,7 @@ def _get_openai_client() -> AsyncOpenAI:
 async def stream_rag_response(
     query: str,
     subject_id: str,
-    class_id: str,
+    lecturer_id: str,
     chat_history: list[dict],
     top_k: int,
     min_score: float,
@@ -41,9 +41,12 @@ async def stream_rag_response(
     embeddings = _get_embeddings()
     query_vector: list[float] = await asyncio.to_thread(embeddings.embed_query, query)
 
-    logger.info("[RAG] Searching class_id=%s top_k=%d min_score=%.2f", class_id, top_k, min_score)
+    logger.info(
+        "[RAG] Searching lecturer_id=%s subject_id=%s top_k=%d min_score=%.2f",
+        lecturer_id, subject_id, top_k, min_score,
+    )
     all_results = await asyncio.to_thread(
-        qdrant_service.search_similar, query_vector, class_id, top_k, 0.0
+        qdrant_service.search_similar, query_vector, lecturer_id, subject_id, top_k, 0.0
     )
     logger.info(
         "[RAG] Qdrant returned %d results: %s",

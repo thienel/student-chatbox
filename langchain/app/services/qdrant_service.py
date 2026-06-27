@@ -47,10 +47,14 @@ class QdrantService:
             )
 
     def _scope_filter(
-        self, class_id: str, document_ids: Optional[list[str]] = None
+        self, lecturer_id: str, subject_id: str, document_ids: Optional[list[str]] = None
     ) -> Filter:
-        # Content is isolated per class; optionally narrow to specific documents.
-        must = [FieldCondition(key="class_id", match=MatchValue(value=class_id))]
+        # Content is isolated per lecturer+subject knowledge base; optionally
+        # narrow to specific documents.
+        must = [
+            FieldCondition(key="lecturer_id", match=MatchValue(value=lecturer_id)),
+            FieldCondition(key="subject_id", match=MatchValue(value=subject_id)),
+        ]
         if document_ids:
             must.append(FieldCondition(key="document_id", match=MatchAny(any=document_ids)))
         return Filter(must=must)
@@ -58,7 +62,8 @@ class QdrantService:
     def search_similar(
         self,
         vector: list[float],
-        class_id: str,
+        lecturer_id: str,
+        subject_id: str,
         top_k: int,
         min_score: float,
         document_ids: Optional[list[str]] = None,
@@ -68,7 +73,7 @@ class QdrantService:
             query_vector=vector,
             limit=top_k,
             score_threshold=min_score if min_score > 0.0 else None,
-            query_filter=self._scope_filter(class_id, document_ids),
+            query_filter=self._scope_filter(lecturer_id, subject_id, document_ids),
             with_payload=True,
         )
         return [
@@ -83,13 +88,14 @@ class QdrantService:
 
     def get_random_chunks(
         self,
-        class_id: str,
+        lecturer_id: str,
+        subject_id: str,
         limit: int = 20,
         document_ids: Optional[list[str]] = None,
     ) -> list[dict]:
         results, _ = self._client.scroll(
             self._collection,
-            scroll_filter=self._scope_filter(class_id, document_ids),
+            scroll_filter=self._scope_filter(lecturer_id, subject_id, document_ids),
             limit=200,
             with_payload=True,
             with_vectors=False,

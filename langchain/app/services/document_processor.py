@@ -78,7 +78,7 @@ async def _notify_nestjs(document_id: str, status: str, chunk_count: int = 0, er
 
 
 async def process_document(
-    document_id: str, file_path: str, subject_id: str, class_id: str
+    document_id: str, file_path: str, subject_id: str, lecturer_id: str
 ) -> None:
     try:
         logger.info(f"Processing document {document_id} at {file_path}")
@@ -113,7 +113,7 @@ async def process_document(
                 "payload": {
                     "document_id": document_id,
                     "subject_id": subject_id,
-                    "class_id": class_id,
+                    "lecturer_id": lecturer_id,
                     "chunk_index": i,
                     "text": chunk,
                     "original_name": original_name,

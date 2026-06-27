@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 async def generate_flashcards(
     subject_id: str,
-    class_id: str,
+    lecturer_id: str,
     card_count: int = 10,
     topic: Optional[str] = None,
     document_ids: Optional[list[str]] = None,
@@ -27,11 +27,11 @@ async def generate_flashcards(
         query_vector: list[float] = await asyncio.to_thread(embeddings.embed_query, topic)
         chunks = await asyncio.to_thread(
             qdrant_service.search_similar,
-            query_vector, class_id, min(20, card_count * 2), 0.3, document_ids,
+            query_vector, lecturer_id, subject_id, min(20, card_count * 2), 0.3, document_ids,
         )
     else:
         chunks = await asyncio.to_thread(
-            qdrant_service.get_random_chunks, class_id, 20, document_ids
+            qdrant_service.get_random_chunks, lecturer_id, subject_id, 20, document_ids
         )
 
     if not chunks:
