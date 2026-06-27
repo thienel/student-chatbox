@@ -38,6 +38,7 @@ export class ExamTypeOrmRepository implements IExamRepository {
     q.options = o.options as Question['options'];
     q.correctAnswer = o.correctAnswer;
     q.explanation = o.explanation ?? undefined;
+    q.topic = o.topic ?? undefined;
     q.position = o.position;
     return q;
   }
@@ -87,7 +88,7 @@ export class ExamTypeOrmRepository implements IExamRepository {
       questions.map((q) => ({
         examId: q.examId, content: q.content, options: q.options as object,
         correctAnswer: q.correctAnswer, explanation: q.explanation ?? null,
-        position: q.position ?? 0,
+        topic: q.topic ?? null, position: q.position ?? 0,
       })),
     );
     const saved = await this.questionRepo.save(orms);

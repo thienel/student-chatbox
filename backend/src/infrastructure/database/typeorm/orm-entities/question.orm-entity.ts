@@ -27,6 +27,9 @@ export class QuestionOrmEntity {
   @Column({ type: 'text', nullable: true })
   explanation: string | null;
 
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  topic: string | null;
+
   @Column({ default: 0 })
   position: number;
 

@@ -23,6 +23,7 @@ export interface GeneratedQuestion {
   options: { key: string; text: string }[];
   correct_answer: string;
   explanation?: string;
+  topic?: string;
 }
 
 @Injectable()
