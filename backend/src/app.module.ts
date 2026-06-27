@@ -10,6 +10,7 @@ import { SystemModule } from './interface/http/system/system.module';
 import { InternalModule } from './interface/http/internal/internal.module';
 import { FlashcardModule } from './interface/http/flashcard/flashcard.module';
 import { StudyModule } from './interface/http/study/study.module';
+import { BadgeModule } from './interface/http/badge/badge.module';
 import { ExamModule } from './interface/http/exam/exam.module';
 import { BookmarkModule } from './interface/http/bookmark/bookmark.module';
 import { AnalyticsModule } from './interface/http/analytics/analytics.module';
@@ -32,6 +33,7 @@ import { HealthController } from './interface/http/health/health.controller';
     InternalModule,
     FlashcardModule,
     StudyModule,
+    BadgeModule,
     ExamModule,
     BookmarkModule,
     AnalyticsModule,
