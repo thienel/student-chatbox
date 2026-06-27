@@ -68,6 +68,17 @@ export class ExamTypeOrmRepository implements IExamRepository {
     return this.toExam(saved);
   }
 
+  async updateExam(id: string, data: Partial<Exam>): Promise<Exam> {
+    const updateData: Partial<ExamOrmEntity> = {};
+    if (data.title !== undefined) updateData.title = data.title;
+    if (data.description !== undefined) updateData.description = data.description ?? null;
+    if (data.durationMinutes !== undefined) updateData.durationMinutes = data.durationMinutes;
+    if (data.questionCount !== undefined) updateData.questionCount = data.questionCount;
+    await this.examRepo.update(id, updateData);
+    const updated = await this.examRepo.findOneOrFail({ where: { id } });
+    return this.toExam(updated);
+  }
+
   async findExamById(id: string): Promise<Exam | null> {
     const o = await this.examRepo.findOne({ where: { id } });
     return o ? this.toExam(o) : null;
@@ -98,6 +109,14 @@ export class ExamTypeOrmRepository implements IExamRepository {
   async findQuestionsByExamId(examId: string): Promise<Question[]> {
     const orms = await this.questionRepo.find({ where: { examId }, order: { position: 'ASC' } });
     return orms.map((o) => this.toQuestion(o));
+  }
+
+  async deleteQuestionsByExamId(examId: string): Promise<void> {
+    await this.questionRepo.delete({ examId });
+  }
+
+  async countAttemptsByExamId(examId: string): Promise<number> {
+    return this.attemptRepo.count({ where: { examId } });
   }
 
   async createAttempt(data: Partial<ExamAttempt>): Promise<ExamAttempt> {

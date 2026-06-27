@@ -1,5 +1,5 @@
 import {
-  Controller, Post, Get, Body, Param, Query,
+  Controller, Post, Get, Patch, Body, Param, Query,
   UseGuards, UsePipes, ValidationPipe,
   HttpCode, HttpStatus,
 } from '@nestjs/common';
@@ -16,7 +16,11 @@ import { StartAttemptUseCase } from '../../../application/exam/use-cases/start-a
 import { SubmitAttemptUseCase } from '../../../application/exam/use-cases/submit-attempt.use-case';
 import { GetAttemptResultUseCase } from '../../../application/exam/use-cases/get-attempt-result.use-case';
 import { ListMyAttemptsUseCase } from '../../../application/exam/use-cases/list-my-attempts.use-case';
-import { GenerateExamDto, SubmitAttemptDto } from '../../../application/exam/dtos/exam.dto';
+import { CreateOfficialExamUseCase } from '../../../application/exam/use-cases/create-official-exam.use-case';
+import { UpdateOfficialExamUseCase } from '../../../application/exam/use-cases/update-official-exam.use-case';
+import {
+  GenerateExamDto, SubmitAttemptDto, CreateOfficialExamDto, UpdateOfficialExamDto,
+} from '../../../application/exam/dtos/exam.dto';
 import { ClassContextService } from '../../../application/class/services/class-context.service';
 import { User } from '../../../domain/user/entities/user.entity';
 
@@ -30,6 +34,8 @@ export class SubjectExamController {
     private readonly getExamUseCase: GetExamUseCase,
     private readonly startAttemptUseCase: StartAttemptUseCase,
     private readonly submitAttemptUseCase: SubmitAttemptUseCase,
+    private readonly createOfficialExamUseCase: CreateOfficialExamUseCase,
+    private readonly updateOfficialExamUseCase: UpdateOfficialExamUseCase,
     private readonly classContext: ClassContextService,
   ) {}
 
@@ -56,6 +62,28 @@ export class SubjectExamController {
   ) {
     const resolvedClassId = await this.classContext.resolveClassId(subjectId, user, dto.classId);
     return this.generateExamUseCase.execute(subjectId, resolvedClassId, dto, user);
+  }
+
+  @Post()
+  @RequirePermission('exam:create-official')
+  @HttpCode(HttpStatus.CREATED)
+  async createOfficial(
+    @Param('subjectId') subjectId: string,
+    @Body() dto: CreateOfficialExamDto,
+    @CurrentUser() user: User,
+  ) {
+    return this.createOfficialExamUseCase.execute(subjectId, dto, user);
+  }
+
+  @Patch(':examId')
+  @RequirePermission('exam:create-official')
+  async updateOfficial(
+    @Param('subjectId') subjectId: string,
+    @Param('examId') examId: string,
+    @Body() dto: UpdateOfficialExamDto,
+    @CurrentUser() user: User,
+  ) {
+    return this.updateOfficialExamUseCase.execute(subjectId, examId, dto, user);
   }
 
   @Get(':examId')

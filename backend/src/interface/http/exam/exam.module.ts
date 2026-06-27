@@ -7,6 +7,8 @@ import { StartAttemptUseCase } from '../../../application/exam/use-cases/start-a
 import { SubmitAttemptUseCase } from '../../../application/exam/use-cases/submit-attempt.use-case';
 import { GetAttemptResultUseCase } from '../../../application/exam/use-cases/get-attempt-result.use-case';
 import { ListMyAttemptsUseCase } from '../../../application/exam/use-cases/list-my-attempts.use-case';
+import { CreateOfficialExamUseCase } from '../../../application/exam/use-cases/create-official-exam.use-case';
+import { UpdateOfficialExamUseCase } from '../../../application/exam/use-cases/update-official-exam.use-case';
 import { TypeOrmDatabaseModule } from '../../../infrastructure/database/typeorm/typeorm.module';
 import { AiModule } from '../../../infrastructure/ai/ai.module';
 import { ClassModule } from '../class/class.module';
@@ -22,6 +24,8 @@ import { ClassModule } from '../class/class.module';
     SubmitAttemptUseCase,
     GetAttemptResultUseCase,
     ListMyAttemptsUseCase,
+    CreateOfficialExamUseCase,
+    UpdateOfficialExamUseCase,
   ],
 })
 export class ExamModule {}
