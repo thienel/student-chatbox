@@ -45,6 +45,10 @@ import { StudentStudyPlanOrmEntity } from './orm-entities/student-study-plan.orm
 import { StudyPlanTypeOrmRepository } from './repositories/study-plan.typeorm-repository';
 import { UserBadgeOrmEntity } from './orm-entities/user-badge.orm-entity';
 import { BadgeTypeOrmRepository } from './repositories/badge.typeorm-repository';
+import { BoardQuestionOrmEntity } from './orm-entities/board-question.orm-entity';
+import { BoardAnswerOrmEntity } from './orm-entities/board-answer.orm-entity';
+import { BoardUpvoteOrmEntity } from './orm-entities/board-upvote.orm-entity';
+import { BoardTypeOrmRepository } from './repositories/board.typeorm-repository';
 import { DatabaseSeederService } from './seeds/seed.service';
 import { TOKENS } from '../../../shared/constants/tokens';
 
@@ -76,6 +80,9 @@ const ormEntities = [
   StudentWeakTopicOrmEntity,
   StudentStudyPlanOrmEntity,
   UserBadgeOrmEntity,
+  BoardQuestionOrmEntity,
+  BoardAnswerOrmEntity,
+  BoardUpvoteOrmEntity,
 ];
 
 @Module({
@@ -111,6 +118,7 @@ const ormEntities = [
     WeakTopicTypeOrmRepository,
     StudyPlanTypeOrmRepository,
     BadgeTypeOrmRepository,
+    BoardTypeOrmRepository,
     DatabaseSeederService,
     { provide: TOKENS.USER_REPO, useClass: UserTypeOrmRepository },
     { provide: TOKENS.ROLE_REPO, useClass: RoleTypeOrmRepository },
@@ -129,6 +137,7 @@ const ormEntities = [
     { provide: TOKENS.WEAK_TOPIC_REPO, useClass: WeakTopicTypeOrmRepository },
     { provide: TOKENS.STUDY_PLAN_REPO, useClass: StudyPlanTypeOrmRepository },
     { provide: TOKENS.BADGE_REPO, useClass: BadgeTypeOrmRepository },
+    { provide: TOKENS.BOARD_REPO, useClass: BoardTypeOrmRepository },
   ],
   exports: [
     TypeOrmModule,
@@ -164,6 +173,7 @@ const ormEntities = [
     WeakTopicTypeOrmRepository,
     StudyPlanTypeOrmRepository,
     BadgeTypeOrmRepository,
+    BoardTypeOrmRepository,
   ],
 })
 export class TypeOrmDatabaseModule {}
