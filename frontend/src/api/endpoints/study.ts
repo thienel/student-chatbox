@@ -1,6 +1,6 @@
 import axiosInstance from '@/api/axiosInstance'
 import type {
-  ApiResponse, StudyQueue, StudySessionStart, ReviewResult, StudySettings, StudyStats, CardRating,
+  ApiResponse, StudyQueue, StudySessionStart, ReviewResult, StudySettings, StudyStats, CardRating, StudyPlan,
 } from '@/types'
 
 export const studyApi = {
@@ -29,4 +29,12 @@ export const studyApi = {
 
   getStats: () =>
     axiosInstance.get<ApiResponse<StudyStats>>('/study-stats').then(r => r.data.data),
+
+  getCurrentPlan: () =>
+    axiosInstance.get<ApiResponse<StudyPlan>>('/study-plan/current').then(r => r.data.data),
+
+  getPlanHistory: (limit?: number) =>
+    axiosInstance
+      .get<ApiResponse<StudyPlan[]>>('/study-plan/history', { params: limit ? { limit } : undefined })
+      .then(r => r.data.data),
 }

@@ -42,3 +42,8 @@ export function useUpdateStudySettings() {
 export function useStudyStats() {
   return useQuery({ queryKey: studyKeys.stats(), queryFn: () => studyApi.getStats() })
 }
+
+export function useCurrentStudyPlan() {
+  return useQuery({ queryKey: ['study-plan', 'current'], queryFn: () => studyApi.getCurrentPlan() })
+}
+

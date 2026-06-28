@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Home, BookOpen, MessageSquare, Bookmark, ShieldCheck, Settings, Users } from 'lucide-react'
+import { Home, BookOpen, MessageSquare, Bookmark, ShieldCheck, Settings, Users, CalendarCheck } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 import { useAuthStore, usePermission } from '@/store/useAuthStore'
@@ -45,6 +45,7 @@ export function Dock() {
   const user = useAuthStore(s => s.user)
   const isAdmin = user?.role === 'admin'
   const canCommunity = usePermission('flashcard:read')
+  const canStudyPlan = usePermission('flashcard:study')
 
   return (
     <TooltipProvider delayDuration={300}>
@@ -53,6 +54,7 @@ export function Dock() {
         <DockItem to="/subjects" icon={BookOpen} label="Subjects" />
         <DockItem to="/chats" icon={MessageSquare} label="My Chats" />
         <DockItem to="/bookmarks" icon={Bookmark} label="Bookmarks" />
+        {canStudyPlan && <DockItem to="/study-plan" icon={CalendarCheck} label="Study Plan" />}
         {canCommunity && <DockItem to="/community" icon={Users} label="Community" />}
         {isAdmin && (
           <>

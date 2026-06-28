@@ -201,6 +201,34 @@ export interface LeaderboardResult {
   myRank: { rank: number; totalStars: number; totalPublicSets: number } | null;
 }
 
+// Study plan
+export type StudyTaskType = 'review_flashcards' | 'study_topic' | 'take_exam';
+
+export interface StudyPlanTask {
+  type: StudyTaskType;
+  title: string;
+  description: string;
+  resourceType?: string;
+  resourceId?: string;
+  estimatedMinutes: number;
+}
+
+export interface StudyPlanDay {
+  date: string;
+  dayName: string;
+  tasks: StudyPlanTask[];
+  totalEstimatedMinutes: number;
+}
+
+export interface StudyPlan {
+  id: string;
+  userId: string;
+  weekStartDate: string;
+  planVersion: number;
+  planData: { days: StudyPlanDay[] };
+  generatedAt: string;
+}
+
 // Weak topics
 export type TopicClassification = 'weak' | 'developing' | 'strong';
 
