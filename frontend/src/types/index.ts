@@ -181,7 +181,24 @@ export interface Question {
   options: QuestionOption[];
   correctAnswer?: string;  // only in results
   explanation?: string;    // only in results
+  topic?: string;
   position: number;
+}
+
+export interface OfficialQuestionInput {
+  content: string;
+  options: QuestionOption[];
+  correctAnswer: string;
+  explanation?: string;
+  topic?: string;
+}
+
+export interface CreateOfficialExamInput {
+  classId: string;
+  title: string;
+  description?: string;
+  durationMinutes?: number;
+  questions: OfficialQuestionInput[];
 }
 
 export interface Exam {
