@@ -1,8 +1,8 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Home, BookOpen, MessageSquare, Bookmark, ShieldCheck, Settings } from 'lucide-react'
+import { Home, BookOpen, MessageSquare, Bookmark, ShieldCheck, Settings, Users } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
-import { useAuthStore } from '@/store/useAuthStore'
+import { useAuthStore, usePermission } from '@/store/useAuthStore'
 
 interface DockItemProps {
   to: string
@@ -44,6 +44,7 @@ function DockItem({ to, icon: Icon, label, exact }: DockItemProps) {
 export function Dock() {
   const user = useAuthStore(s => s.user)
   const isAdmin = user?.role === 'admin'
+  const canCommunity = usePermission('flashcard:read')
 
   return (
     <TooltipProvider delayDuration={300}>
@@ -52,6 +53,7 @@ export function Dock() {
         <DockItem to="/subjects" icon={BookOpen} label="Subjects" />
         <DockItem to="/chats" icon={MessageSquare} label="My Chats" />
         <DockItem to="/bookmarks" icon={Bookmark} label="Bookmarks" />
+        {canCommunity && <DockItem to="/community" icon={Users} label="Community" />}
         {isAdmin && (
           <>
             <div className="w-px h-5 bg-zinc-800 mx-1" />
