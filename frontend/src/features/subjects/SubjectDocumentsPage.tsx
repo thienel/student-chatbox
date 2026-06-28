@@ -1,6 +1,8 @@
 import { useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { FileText, Upload, Trash2, Loader2 } from 'lucide-react'
+import { FileText, Upload, Trash2, Loader2, Sparkles } from 'lucide-react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -13,9 +15,11 @@ import {
   AlertDialogFooter,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { EmptyState } from '@/components/shared/EmptyState'
-import { useSubjectDocuments, useUploadDocument, useDeleteDocument } from './queries'
+import { useSubjectDocuments, useUploadDocument, useDeleteDocument, useDocumentSummary } from './queries'
 import { usePermission } from '@/store/useAuthStore'
+import { getErrorMessage } from '@/lib/errors'
 import { cn } from '@/lib/utils'
 
 function formatBytes(bytes: number) {
@@ -34,13 +38,17 @@ export default function SubjectDocumentsPage() {
   const { id: subjectId = '' } = useParams<{ id: string }>()
   const canUploadDocs = usePermission('document:upload')
   const canDelete = usePermission('document:delete')
+  const canSummarize = usePermission('ai:summarize-document')
   const fileRef = useRef<HTMLInputElement>(null)
   const [confirmId, setConfirmId] = useState<string | null>(null)
+  const [summaryDoc, setSummaryDoc] = useState<{ id: string; name: string } | null>(null)
 
   const canUpload = canUploadDocs
   const { data: documents = [], isLoading } = useSubjectDocuments(subjectId)
   const upload = useUploadDocument(subjectId)
   const remove = useDeleteDocument(subjectId)
+  const summary = useDocumentSummary(subjectId, summaryDoc?.id ?? null)
+  const hasActions = canDelete || canSummarize
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -112,7 +120,7 @@ export default function SubjectDocumentsPage() {
                 <th className="text-left py-3 px-4 text-xs font-medium text-zinc-500 uppercase tracking-wide hidden sm:table-cell">Size</th>
                 <th className="text-left py-3 px-4 text-xs font-medium text-zinc-500 uppercase tracking-wide hidden md:table-cell">Status</th>
                 <th className="text-left py-3 px-4 text-xs font-medium text-zinc-500 uppercase tracking-wide hidden lg:table-cell">Uploaded by</th>
-                {canDelete && <th className="py-3 px-4 w-10" />}
+                {hasActions && <th className="py-3 px-4 w-24" />}
               </tr>
             </thead>
             <tbody>
@@ -136,17 +144,32 @@ export default function SubjectDocumentsPage() {
                   <td className="py-3 px-4 text-zinc-500 text-xs hidden lg:table-cell">
                     {doc.uploadedBy.fullName}
                   </td>
-                  {canDelete && (
+                  {hasActions && (
                     <td className="py-3 px-4">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        disabled={remove.isPending && confirmId === doc.id}
-                        onClick={() => setConfirmId(doc.id)}
-                        className="h-7 w-7 rounded-md text-zinc-600 hover:text-red-400 hover:bg-zinc-800"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
+                      <div className="flex items-center justify-end gap-1">
+                        {canSummarize && doc.status === 'ready' && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setSummaryDoc({ id: doc.id, name: doc.originalName })}
+                            title="AI summary"
+                            className="h-7 w-7 rounded-md text-zinc-600 hover:text-zinc-200 hover:bg-zinc-800"
+                          >
+                            <Sparkles className="h-3.5 w-3.5" />
+                          </Button>
+                        )}
+                        {canDelete && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            disabled={remove.isPending && confirmId === doc.id}
+                            onClick={() => setConfirmId(doc.id)}
+                            className="h-7 w-7 rounded-md text-zinc-600 hover:text-red-400 hover:bg-zinc-800"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        )}
+                      </div>
                     </td>
                   )}
                 </tr>
@@ -182,6 +205,30 @@ export default function SubjectDocumentsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={!!summaryDoc} onOpenChange={open => { if (!open) setSummaryDoc(null) }}>
+        <DialogContent className="bg-zinc-900 border border-zinc-800 rounded-lg shadow-none p-0 max-w-lg">
+          <div className="px-5 py-4 border-b border-zinc-800">
+            <DialogTitle className="text-base font-semibold text-zinc-50 flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-zinc-400" /> Document Summary
+            </DialogTitle>
+            <DialogDescription className="text-sm text-zinc-400 mt-0.5 truncate">{summaryDoc?.name}</DialogDescription>
+          </div>
+          <div className="p-5 max-h-[60vh] overflow-y-auto">
+            {summary.isLoading ? (
+              <div className="flex items-center gap-2 text-sm text-zinc-500">
+                <Loader2 className="h-4 w-4 animate-spin" /> Generating summary…
+              </div>
+            ) : summary.isError ? (
+              <p className="text-sm text-red-400">{getErrorMessage(summary.error, 'Failed to load summary.')}</p>
+            ) : summary.data ? (
+              <div className="prose prose-invert prose-sm max-w-none text-zinc-300 prose-headings:text-zinc-100 prose-strong:text-zinc-100">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{summary.data.summary}</ReactMarkdown>
+              </div>
+            ) : null}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

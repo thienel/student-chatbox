@@ -74,6 +74,13 @@ export interface Document {
   createdAt: string;
 }
 
+export interface DocumentSummary {
+  documentId: string;
+  summary: string;
+  generatedAt: string | null;
+  cached: boolean;
+}
+
 export interface Chat {
   id: string;
   title: string;

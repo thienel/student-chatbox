@@ -1,5 +1,5 @@
 import axiosInstance from '@/api/axiosInstance'
-import type { ApiResponse, PaginatedResponse, Subject, Document } from '@/types'
+import type { ApiResponse, PaginatedResponse, Subject, Document, DocumentSummary } from '@/types'
 
 export const subjectsApi = {
   list: (params?: { page?: number; limit?: number; search?: string; status?: string }) =>
@@ -39,4 +39,12 @@ export const subjectsApi = {
 
   deleteDocument: (subjectId: string, documentId: string) =>
     axiosInstance.delete(`/subjects/${subjectId}/documents/${documentId}`),
+
+  getDocumentSummary: (subjectId: string, documentId: string) =>
+    axiosInstance
+      // First generation runs an LLM call — override the short global timeout.
+      .get<ApiResponse<DocumentSummary>>(`/subjects/${subjectId}/documents/${documentId}/summary`, {
+        timeout: 120000,
+      })
+      .then(r => r.data.data),
 }
