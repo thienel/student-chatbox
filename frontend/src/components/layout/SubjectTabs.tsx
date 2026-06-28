@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { FileText, MessageSquare, Users, Layers, ClipboardList, GraduationCap } from 'lucide-react'
+import { FileText, MessageSquare, Users, Layers, ClipboardList, GraduationCap, Target, MessagesSquare, Activity } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { usePermission } from '@/store/useAuthStore'
 
@@ -16,6 +16,8 @@ export function SubjectTabs({ subjectId }: SubjectTabsProps) {
     chat: usePermission('chat:create'),
     flashcards: usePermission('flashcard:read'),
     exams: usePermission('exam:read'),
+    weakTopics: usePermission('exam:take'),
+    board: usePermission('subject:read'),
     classes: usePermission('class:manage'),
     members: usePermission('subject:assign-lecturer'),
   }
@@ -25,8 +27,11 @@ export function SubjectTabs({ subjectId }: SubjectTabsProps) {
     perms.chat && { label: 'Chat', href: `/subjects/${subjectId}/chat`, icon: MessageSquare },
     perms.flashcards && { label: 'Flashcards', href: `/subjects/${subjectId}/flashcards`, icon: Layers },
     perms.exams && { label: 'Exams', href: `/subjects/${subjectId}/exams`, icon: ClipboardList },
+    perms.weakTopics && { label: 'Weak Topics', href: `/subjects/${subjectId}/weak-topics`, icon: Target },
+    perms.board && { label: 'Board', href: `/subjects/${subjectId}/board`, icon: MessagesSquare },
     // Lecturers manage their class roster; admins manage subject lecturers.
     perms.classes && { label: 'Students', href: `/subjects/${subjectId}/students`, icon: Users },
+    perms.classes && { label: 'Engagement', href: `/subjects/${subjectId}/engagement`, icon: Activity },
     perms.classes && { label: 'Classes', href: `/subjects/${subjectId}/classes`, icon: GraduationCap },
     perms.members && { label: 'Members', href: `/subjects/${subjectId}/members`, icon: Users },
   ].filter(Boolean) as { label: string; href: string; icon: typeof FileText }[]

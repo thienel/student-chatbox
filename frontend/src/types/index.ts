@@ -50,6 +50,46 @@ export interface ClassStudentStat {
   lastActiveAt: string | null;
 }
 
+export interface StudentEngagementStats {
+  lastActiveAt: string | null;
+  currentStreak: number;
+  totalStudySessions: number;
+  totalCardsReviewed: number;
+  totalStarsReceived: number;
+  questionsPosted: number;
+  answersPosted: number;
+  examAttemptCount: number;
+  avgExamScore: number | null;
+}
+
+export interface StudentEngagement {
+  userId: string;
+  fullName: string;
+  email: string;
+  enrolledAt: string;
+  stats: StudentEngagementStats;
+}
+
+export interface StudentExamAttemptSummary {
+  examId: string;
+  examTitle: string;
+  score: number | null;
+  attemptedAt: string;
+}
+
+export interface EngagementWeakTopic {
+  topic: string;
+  classification: 'weak' | 'developing' | 'strong';
+  totalQuestions: number;
+  correctCount: number;
+  correctRate: number;
+}
+
+export interface StudentEngagementDetail extends StudentEngagement {
+  examAttempts: StudentExamAttemptSummary[];
+  weakTopics: EngagementWeakTopic[];
+}
+
 export interface ClassStats {
   overview: {
     studentCount: number;
@@ -72,6 +112,13 @@ export interface Document {
   chunkCount: number;
   uploadedBy: { id: string; fullName: string };
   createdAt: string;
+}
+
+export interface DocumentSummary {
+  documentId: string;
+  summary: string;
+  generatedAt: string | null;
+  cached: boolean;
 }
 
 export interface Chat {
@@ -147,6 +194,9 @@ export interface FlashcardSet {
   title: string;
   description?: string;
   isPublic: boolean;
+  starCount: number;
+  clonedFromId?: string;
+  publishedAt?: string;
   createdBy: string;
   createdAt: string;
   updatedAt: string;
@@ -165,6 +215,206 @@ export interface FlashcardSetWithCards extends FlashcardSet {
   cards: Flashcard[];
 }
 
+// Community flashcards
+export interface DiscoverSetItem {
+  id: string;
+  title: string;
+  subjectName: string;
+  creatorName: string;
+  cardCount: number;
+  starCount: number;
+  isStarredByMe: boolean;
+  publishedAt: string | null;
+}
+
+export interface DiscoverSetsResult {
+  items: DiscoverSetItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+export interface LeaderboardEntry {
+  rank: number;
+  userId: string;
+  fullName: string;
+  totalStars: number;
+  totalPublicSets: number;
+}
+
+export interface LeaderboardResult {
+  scope: 'global' | 'subject';
+  items: LeaderboardEntry[];
+  myRank: { rank: number; totalStars: number; totalPublicSets: number } | null;
+}
+
+// Question board
+export type BoardQuestionStatus = 'open' | 'answered' | 'closed';
+
+export interface BoardQuestion {
+  id: string;
+  classId: string;
+  authorId: string;
+  title: string;
+  body: string;
+  status: BoardQuestionStatus;
+  upvoteCount: number;
+  answerCount: number;
+  createdAt: string;
+  updatedAt: string;
+  isUpvotedByMe?: boolean;
+}
+
+export interface BoardAnswer {
+  id: string;
+  questionId: string;
+  authorId: string;
+  body: string;
+  isPinned: boolean;
+  upvoteCount: number;
+  createdAt: string;
+  updatedAt: string;
+  isUpvotedByMe?: boolean;
+}
+
+export interface BoardQuestionList {
+  items: BoardQuestion[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+// Badges
+export interface BadgeDef {
+  id: string;
+  name: string;
+  description: string;
+  iconKey: string;
+}
+
+export interface EarnedBadge {
+  badgeId: string;
+  name: string;
+  iconKey: string;
+  awardedAt: string;
+}
+
+export interface LockedBadge {
+  badgeId: string;
+  name: string;
+  iconKey: string;
+  description: string;
+  progress?: string;
+}
+
+export interface MyBadges {
+  earned: EarnedBadge[];
+  locked: LockedBadge[];
+}
+
+// Study plan
+export type StudyTaskType = 'review_flashcards' | 'study_topic' | 'take_exam';
+
+export interface StudyPlanTask {
+  type: StudyTaskType;
+  title: string;
+  description: string;
+  resourceType?: string;
+  resourceId?: string;
+  estimatedMinutes: number;
+}
+
+export interface StudyPlanDay {
+  date: string;
+  dayName: string;
+  tasks: StudyPlanTask[];
+  totalEstimatedMinutes: number;
+}
+
+export interface StudyPlan {
+  id: string;
+  userId: string;
+  weekStartDate: string;
+  planVersion: number;
+  planData: { days: StudyPlanDay[] };
+  generatedAt: string;
+}
+
+// Weak topics
+export type TopicClassification = 'weak' | 'developing' | 'strong';
+
+export interface SuggestedSet {
+  id: string;
+  title: string;
+  starCount: number;
+}
+
+export interface WeakTopic {
+  topic: string;
+  classification: TopicClassification;
+  totalQuestions: number;
+  correctCount: number;
+  correctRate: number;
+  suggestedFlashcardSets: SuggestedSet[];
+}
+
+export interface MyWeakTopics {
+  subjectId: string;
+  topics: WeakTopic[];
+}
+
+// Study (FSRS)
+export interface StudyQueueCard {
+  flashcardId: string;
+  front: string;
+  back: string;
+  position: number;
+  isNew: boolean;
+  currentStability: number | null;
+  currentDifficulty: number | null;
+}
+
+export interface StudyQueue {
+  sessionId: string | null;
+  dueCards: number;
+  newCards: number;
+  totalQueue: number;
+  nextDueAt: string | null;
+  cards: StudyQueueCard[];
+}
+
+export interface StudySessionStart {
+  sessionId: string;
+  status: 'active' | 'completed' | 'abandoned';
+  cardsRemaining: number;
+}
+
+export type CardRating = 1 | 2 | 3 | 4; // again | hard | good | easy
+
+export interface ReviewResult {
+  nextReviewAt: string;
+  interval: number;
+  stability: number;
+  difficulty: number;
+  sessionComplete: boolean;
+}
+
+export interface StudySettings {
+  userId: string;
+  newCardsPerDay: number;
+}
+
+export interface StudyStats {
+  userId: string;
+  currentStreak: number;
+  longestStreak: number;
+  totalSessions: number;
+  totalCardsReviewed: number;
+  lastStudiedDate: string | null;
+  newCardsStudiedToday: number;
+  newCardsTodayDate: string | null;
+}
+
 // Exams
 export type ExamDifficulty = 'easy' | 'medium' | 'hard';
 export type ExamType = 'official' | 'ai_generated';
@@ -181,7 +431,24 @@ export interface Question {
   options: QuestionOption[];
   correctAnswer?: string;  // only in results
   explanation?: string;    // only in results
+  topic?: string;
   position: number;
+}
+
+export interface OfficialQuestionInput {
+  content: string;
+  options: QuestionOption[];
+  correctAnswer: string;
+  explanation?: string;
+  topic?: string;
+}
+
+export interface CreateOfficialExamInput {
+  classId: string;
+  title: string;
+  description?: string;
+  durationMinutes?: number;
+  questions: OfficialQuestionInput[];
 }
 
 export interface Exam {

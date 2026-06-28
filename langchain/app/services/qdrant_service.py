@@ -106,6 +106,26 @@ class QdrantService:
             for p in sample
         ]
 
+    def get_chunks_by_document(self, document_id: str, limit: int = 100) -> list[dict]:
+        results, _ = self._client.scroll(
+            self._collection,
+            scroll_filter=Filter(
+                must=[FieldCondition(key="document_id", match=MatchValue(value=document_id))]
+            ),
+            limit=limit,
+            with_payload=True,
+            with_vectors=False,
+        )
+        chunks = [
+            {
+                "chunk_index": (p.payload or {}).get("chunk_index", 0),
+                "text": (p.payload or {}).get("text", ""),
+            }
+            for p in results
+        ]
+        chunks.sort(key=lambda c: c["chunk_index"])
+        return chunks
+
     def delete_by_document_id(self, document_id: str) -> None:
         self._client.delete(
             self._collection,

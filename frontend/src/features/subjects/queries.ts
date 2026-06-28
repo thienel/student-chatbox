@@ -31,11 +31,11 @@ export function useSubject(id: string) {
   })
 }
 
-export function useSubjectDocuments(subjectId: string, classId?: string) {
+export function useSubjectDocuments(subjectId: string) {
   return useQuery({
-    queryKey: [...subjectKeys.documents(subjectId), classId ?? null],
-    queryFn: () => subjectsApi.getDocuments(subjectId, classId),
-    enabled: !!subjectId && !!classId,
+    queryKey: subjectKeys.documents(subjectId),
+    queryFn: () => subjectsApi.getDocuments(subjectId),
+    enabled: !!subjectId,
     refetchInterval: (query) =>
       query.state.data?.some(d => d.status === 'processing') ? 3000 : false,
   })
@@ -77,10 +77,20 @@ export function useDeleteSubject() {
   })
 }
 
-export function useUploadDocument(subjectId: string, classId?: string) {
+export function useDocumentSummary(subjectId: string, documentId: string | null) {
+  return useQuery({
+    queryKey: [...subjectKeys.documents(subjectId), documentId, 'summary'],
+    queryFn: () => subjectsApi.getDocumentSummary(subjectId, documentId!),
+    enabled: !!subjectId && !!documentId,
+    staleTime: Infinity, // summaries are cached server-side; no need to refetch
+    retry: false,
+  })
+}
+
+export function useUploadDocument(subjectId: string) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (file: File) => subjectsApi.uploadDocument(subjectId, file, classId),
+    mutationFn: (file: File) => subjectsApi.uploadDocument(subjectId, file),
     onSuccess: () => qc.invalidateQueries({ queryKey: subjectKeys.documents(subjectId) }),
   })
 }

@@ -12,14 +12,22 @@ import SubjectChatPage from '@/features/subjects/SubjectChatPage'
 import SubjectMembersPage from '@/features/subjects/SubjectMembersPage'
 import SubjectFlashcardsPage from '@/features/flashcards/SubjectFlashcardsPage'
 import FlashcardStudyPage from '@/features/flashcards/FlashcardStudyPage'
+import StudySessionPage from '@/features/flashcards/StudySessionPage'
 import SubjectExamsPage from '@/features/exams/SubjectExamsPage'
+import CreateOfficialExamPage from '@/features/exams/CreateOfficialExamPage'
+import WeakTopicsPage from '@/features/exams/WeakTopicsPage'
+import BoardPage from '@/features/board/BoardPage'
 import ClassesPage from '@/features/classes/ClassesPage'
 import StudentsPage from '@/features/classes/StudentsPage'
+import EngagementPage from '@/features/classes/EngagementPage'
 import ExamDetailPage from '@/features/exams/ExamDetailPage'
 import TakeExamPage from '@/features/exams/TakeExamPage'
 import ExamResultPage from '@/features/exams/ExamResultPage'
 import ExamHistoryPage from '@/features/exams/ExamHistoryPage'
 import BookmarksPage from '@/features/bookmarks/BookmarksPage'
+import CommunityPage from '@/features/community/CommunityPage'
+import StudyPlanPage from '@/features/plan/StudyPlanPage'
+import MyBadgesPage from '@/features/badges/MyBadgesPage'
 import ChatsPage from '@/features/chat/ChatsPage'
 import AdminDashboardPage from '@/features/admin/AdminDashboardPage'
 import AdminUsersPage from '@/features/admin/AdminUsersPage'
@@ -59,6 +67,9 @@ export default function AppRoutes() {
         <Route path="/subjects" element={<SubjectsPage />} />
         <Route path="/chats" element={<ChatsPage />} />
         <Route path="/bookmarks" element={<BookmarksPage />} />
+        <Route path="/community" element={<CommunityPage />} />
+        <Route path="/study-plan" element={<StudyPlanPage />} />
+        <Route path="/badges" element={<MyBadgesPage />} />
         <Route path="/exam-history" element={<ExamHistoryPage />} />
         <Route path="/exam-attempts/:attemptId" element={<ExamResultPage />} />
         <Route path="/settings" element={<SettingsPage />} />
@@ -73,10 +84,15 @@ export default function AppRoutes() {
         <Route path="/subjects/:id/members" element={<SubjectMembersPage />} />
         <Route path="/subjects/:id/classes" element={<ClassesPage />} />
         <Route path="/subjects/:id/students" element={<StudentsPage />} />
+        <Route path="/subjects/:id/engagement" element={<EngagementPage />} />
         <Route path="/subjects/:id/flashcards" element={<SubjectFlashcardsPage />} />
         <Route path="/subjects/:id/flashcards/:setId" element={<FlashcardStudyPage />} />
+        <Route path="/subjects/:id/flashcards/:setId/study" element={<StudySessionPage />} />
         <Route path="/subjects/:id/exams" element={<SubjectExamsPage />} />
+        <Route path="/subjects/:id/exams/new" element={<CreateOfficialExamPage />} />
         <Route path="/subjects/:id/exam-history" element={<ExamHistoryPage />} />
+        <Route path="/subjects/:id/weak-topics" element={<WeakTopicsPage />} />
+        <Route path="/subjects/:id/board" element={<BoardPage />} />
         <Route path="/subjects/:id/exams/:examId" element={<ExamDetailPage />} />
         <Route path="/subjects/:id/exams/:examId/attempt/:attemptId" element={<TakeExamPage />} />
         <Route path="/subjects/:id/exams/:examId/result/:attemptId" element={<ExamResultPage />} />

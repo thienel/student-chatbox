@@ -54,11 +54,13 @@ async def generate_exam(
         f"You are an exam creator. Generate exactly {question_count} multiple-choice questions "
         f"at {diff_label} difficulty{topic_hint}, based only on the document content below.\n"
         f"Each question has exactly 4 options A/B/C/D, with only 1 correct answer.\n"
+        f'Tag each question with a concise "topic" label (2-4 words) naming the specific '
+        f"concept it tests, so weak-topic analysis can group questions.\n"
         f"Return a JSON array:\n"
         f'[{{"content": "question text", '
         f'"options": [{{"key": "A", "text": "..."}}, {{"key": "B", "text": "..."}}, '
         f'{{"key": "C", "text": "..."}}, {{"key": "D", "text": "..."}}], '
-        f'"correct_answer": "A", "explanation": "brief explanation"}}]\n'
+        f'"correct_answer": "A", "explanation": "brief explanation", "topic": "concept label"}}]\n'
         f"Return ONLY the JSON, no other text."
     )
 

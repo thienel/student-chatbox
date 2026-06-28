@@ -1,5 +1,5 @@
 import axiosInstance from '@/api/axiosInstance'
-import type { ApiResponse, PaginatedResponse, Subject, Document } from '@/types'
+import type { ApiResponse, PaginatedResponse, Subject, Document, DocumentSummary } from '@/types'
 
 export const subjectsApi = {
   list: (params?: { page?: number; limit?: number; search?: string; status?: string }) =>
@@ -23,20 +23,28 @@ export const subjectsApi = {
   removeLecturer: (subjectId: string, lecturerId: string) =>
     axiosInstance.delete(`/subjects/${subjectId}/lecturers/${lecturerId}`),
 
-  getDocuments: (subjectId: string, classId?: string) =>
-    axiosInstance.get<ApiResponse<{ items: Document[]; total: number }>>(`/subjects/${subjectId}/documents`, {
-      params: classId ? { classId } : undefined,
-    }).then(r => r.data.data.items),
+  // Documents form a per lecturer+subject knowledge base; the backend resolves
+  // the lecturer from the caller (students via their enrolled class).
+  getDocuments: (subjectId: string) =>
+    axiosInstance.get<ApiResponse<{ items: Document[]; total: number }>>(`/subjects/${subjectId}/documents`)
+      .then(r => r.data.data.items),
 
-  uploadDocument: (subjectId: string, file: File, classId?: string) => {
+  uploadDocument: (subjectId: string, file: File) => {
     const form = new FormData()
     form.append('file', file)
     return axiosInstance.post<ApiResponse<Document>>(`/subjects/${subjectId}/documents`, form, {
       headers: { 'Content-Type': 'multipart/form-data' },
-      params: classId ? { classId } : undefined,
     }).then(r => r.data.data)
   },
 
   deleteDocument: (subjectId: string, documentId: string) =>
     axiosInstance.delete(`/subjects/${subjectId}/documents/${documentId}`),
+
+  getDocumentSummary: (subjectId: string, documentId: string) =>
+    axiosInstance
+      // First generation runs an LLM call — override the short global timeout.
+      .get<ApiResponse<DocumentSummary>>(`/subjects/${subjectId}/documents/${documentId}/summary`, {
+        timeout: 120000,
+      })
+      .then(r => r.data.data),
 }

@@ -24,6 +24,8 @@ import { GetMyClassUseCase } from '../../../application/class/use-cases/get-my-c
 import { ListClassStudentsUseCase } from '../../../application/class/use-cases/list-class-students.use-case';
 import { RemoveClassStudentUseCase } from '../../../application/class/use-cases/remove-class-student.use-case';
 import { GetClassStatsUseCase } from '../../../application/class/use-cases/get-class-stats.use-case';
+import { GetClassEngagementUseCase } from '../../../application/class/use-cases/get-class-engagement.use-case';
+import { GetStudentEngagementUseCase } from '../../../application/class/use-cases/get-student-engagement.use-case';
 import { CreateClassDto, EnrollByPasswordDto } from '../../../application/class/dtos/class.dto';
 import { User } from '../../../domain/user/entities/user.entity';
 
@@ -41,6 +43,8 @@ export class ClassController {
     private readonly listClassStudentsUseCase: ListClassStudentsUseCase,
     private readonly removeClassStudentUseCase: RemoveClassStudentUseCase,
     private readonly getClassStatsUseCase: GetClassStatsUseCase,
+    private readonly getClassEngagementUseCase: GetClassEngagementUseCase,
+    private readonly getStudentEngagementUseCase: GetStudentEngagementUseCase,
   ) {}
 
   @Post('classes')
@@ -68,6 +72,27 @@ export class ClassController {
     @CurrentUser() user: User,
   ) {
     return this.listClassStudentsUseCase.execute(subjectId, classId, user);
+  }
+
+  @Get('classes/:classId/engagement')
+  @RequirePermission('class:manage')
+  async classEngagement(
+    @Param('id') subjectId: string,
+    @Param('classId') classId: string,
+    @CurrentUser() user: User,
+  ) {
+    return this.getClassEngagementUseCase.execute(subjectId, classId, user);
+  }
+
+  @Get('classes/:classId/students/:studentId/stats')
+  @RequirePermission('class:manage')
+  async studentEngagement(
+    @Param('id') subjectId: string,
+    @Param('classId') classId: string,
+    @Param('studentId') studentId: string,
+    @CurrentUser() user: User,
+  ) {
+    return this.getStudentEngagementUseCase.execute(subjectId, classId, studentId, user);
   }
 
   @Delete('classes/:classId/students/:studentId')

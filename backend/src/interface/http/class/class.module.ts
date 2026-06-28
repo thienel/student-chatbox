@@ -9,6 +9,8 @@ import { GetMyClassUseCase } from '../../../application/class/use-cases/get-my-c
 import { ListClassStudentsUseCase } from '../../../application/class/use-cases/list-class-students.use-case';
 import { RemoveClassStudentUseCase } from '../../../application/class/use-cases/remove-class-student.use-case';
 import { GetClassStatsUseCase } from '../../../application/class/use-cases/get-class-stats.use-case';
+import { GetClassEngagementUseCase } from '../../../application/class/use-cases/get-class-engagement.use-case';
+import { GetStudentEngagementUseCase } from '../../../application/class/use-cases/get-student-engagement.use-case';
 import { ClassContextService } from '../../../application/class/services/class-context.service';
 import { TypeOrmDatabaseModule } from '../../../infrastructure/database/typeorm/typeorm.module';
 
@@ -25,6 +27,8 @@ import { TypeOrmDatabaseModule } from '../../../infrastructure/database/typeorm/
     ListClassStudentsUseCase,
     RemoveClassStudentUseCase,
     GetClassStatsUseCase,
+    GetClassEngagementUseCase,
+    GetStudentEngagementUseCase,
     ClassContextService,
   ],
   exports: [ClassContextService],

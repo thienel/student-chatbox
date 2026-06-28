@@ -12,8 +12,10 @@ export class GetFlashcardSetUseCase {
   async execute(setId: string, user: User) {
     const set = await this.flashcardRepo.findSetById(setId);
     if (!set) throw new NotFoundException('Flashcard set not found');
-    // Flashcard sets are private to their creator.
-    if (set.createdBy !== user.id) throw new ForbiddenException('You do not have access to this set');
+    // The creator can always see their set; everyone else only public sets.
+    if (set.createdBy !== user.id && !set.isPublic) {
+      throw new ForbiddenException('You do not have access to this set');
+    }
     const cards = await this.flashcardRepo.findCardsBySetId(setId);
     return { set, cards };
   }

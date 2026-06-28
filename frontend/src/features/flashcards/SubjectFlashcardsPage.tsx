@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { Layers, Sparkles, Trash2, Loader2, ChevronRight } from 'lucide-react'
+import { Layers, Sparkles, Trash2, Loader2, ChevronRight, Star, Globe, Lock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -14,13 +14,15 @@ import { useSubjectClass } from '@/features/classes/ClassContext'
 import { DocumentPicker } from '@/components/shared/DocumentPicker'
 import { NeedClassNotice } from '@/features/classes/NeedClassNotice'
 import { getErrorMessage } from '@/lib/errors'
-import { useFlashcardSets, useGenerateFlashcards, useDeleteFlashcardSet } from './queries'
+import { cn } from '@/lib/utils'
+import { useFlashcardSets, useGenerateFlashcards, useDeleteFlashcardSet, useSetFlashcardVisibility } from './queries'
 
 export default function SubjectFlashcardsPage() {
   const { id: subjectId = '' } = useParams<{ id: string }>()
   const user = useAuthStore(s => s.user)
   const canGenerate = user?.permissions?.includes('ai:generate-flashcard')
   const canDelete = user?.permissions?.includes('flashcard:delete')
+  const canShare = user?.permissions?.includes('flashcard:manage-own')
   const { toast } = useToast()
 
   const [genOpen, setGenOpen] = useState(false)
@@ -32,6 +34,16 @@ export default function SubjectFlashcardsPage() {
   const { data: sets = [], isLoading } = useFlashcardSets(subjectId, classId)
   const generate = useGenerateFlashcards(subjectId, classId)
   const remove = useDeleteFlashcardSet(subjectId)
+  const setVisibility = useSetFlashcardVisibility(subjectId)
+
+  const handleToggleVisibility = async (setId: string, isPublic: boolean) => {
+    try {
+      await setVisibility.mutateAsync({ setId, isPublic: !isPublic })
+      toast({ description: isPublic ? 'Set is now private.' : 'Set published to the community.' })
+    } catch (err) {
+      toast({ variant: 'destructive', description: getErrorMessage(err, 'Failed to update visibility.') })
+    }
+  }
 
   const handleGenerate = async () => {
     try {
@@ -113,6 +125,27 @@ export default function SubjectFlashcardsPage() {
                 </div>
                 <ChevronRight className="h-4 w-4 text-zinc-600 ml-auto shrink-0 group-hover:text-zinc-400 transition-colors duration-150" />
               </Link>
+              {set.isPublic && (
+                <span className="flex items-center gap-1 text-xs text-amber-400 ml-2 shrink-0 tabular-nums">
+                  <Star className="h-3.5 w-3.5 fill-amber-400" />
+                  {set.starCount}
+                </span>
+              )}
+              {canShare && set.createdBy === user?.id && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleToggleVisibility(set.id, set.isPublic)}
+                  disabled={setVisibility.isPending}
+                  title={set.isPublic ? 'Make private' : 'Publish to community'}
+                  className={cn(
+                    'h-7 w-7 rounded-md ml-2 shrink-0 hover:bg-zinc-800',
+                    set.isPublic ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300',
+                  )}
+                >
+                  {set.isPublic ? <Globe className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+                </Button>
+              )}
               {canDelete && (
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
@@ -178,7 +211,6 @@ export default function SubjectFlashcardsPage() {
             </div>
             <DocumentPicker
               subjectId={subjectId}
-              classId={classId}
               value={documentIds}
               onChange={setDocumentIds}
             />

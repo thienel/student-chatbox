@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsInt, Min, Max, IsArray, IsUUID } from 'class-validator';
+import { IsString, IsOptional, IsInt, Min, Max, IsArray, IsUUID, IsBoolean } from 'class-validator';
 
 export class GenerateFlashcardsDto {
   @IsOptional()
@@ -21,4 +21,9 @@ export class GenerateFlashcardsDto {
   @IsArray()
   @IsUUID('all', { each: true })
   documentIds?: string[];
+}
+
+export class SetVisibilityDto {
+  @IsBoolean()
+  isPublic: boolean;
 }

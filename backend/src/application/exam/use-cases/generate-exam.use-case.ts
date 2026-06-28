@@ -45,7 +45,7 @@ export class GenerateExamUseCase {
       generatedQuestions.map((q, i) => ({
         examId: exam.id, content: q.content, options: q.options,
         correctAnswer: q.correct_answer, explanation: q.explanation,
-        position: i,
+        topic: q.topic, position: i,
       })),
     );
 

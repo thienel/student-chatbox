@@ -16,6 +16,8 @@ export class Document {
   errorMessage?: string;
   uploadedBy: string;
   uploadedByUser?: { id: string; fullName: string };
+  summary?: string;
+  summaryGeneratedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }

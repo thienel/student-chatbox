@@ -13,6 +13,7 @@ import { AiUsageLogOrmEntity } from './orm-entities/ai-usage-log.orm-entity';
 import { SystemSettingOrmEntity } from './orm-entities/system-setting.orm-entity';
 import { AuditLogOrmEntity } from './orm-entities/audit-log.orm-entity';
 import { FlashcardSetOrmEntity } from './orm-entities/flashcard-set.orm-entity';
+import { FlashcardSetStarOrmEntity } from './orm-entities/flashcard-set-star.orm-entity';
 import { FlashcardOrmEntity } from './orm-entities/flashcard.orm-entity';
 import { ExamOrmEntity } from './orm-entities/exam.orm-entity';
 import { QuestionOrmEntity } from './orm-entities/question.orm-entity';
@@ -33,6 +34,21 @@ import { BookmarkTypeOrmRepository } from './repositories/bookmark.typeorm-repos
 import { ClassOrmEntity } from './orm-entities/class.orm-entity';
 import { ClassEnrollmentOrmEntity } from './orm-entities/class-enrollment.orm-entity';
 import { ClassTypeOrmRepository } from './repositories/class.typeorm-repository';
+import { FlashcardProgressOrmEntity } from './orm-entities/flashcard-progress.orm-entity';
+import { FlashcardStudySessionOrmEntity } from './orm-entities/flashcard-study-session.orm-entity';
+import { StudentStudyStatsOrmEntity } from './orm-entities/student-study-stats.orm-entity';
+import { StudentStudySettingsOrmEntity } from './orm-entities/student-study-settings.orm-entity';
+import { StudyTypeOrmRepository } from './repositories/study.typeorm-repository';
+import { StudentWeakTopicOrmEntity } from './orm-entities/student-weak-topic.orm-entity';
+import { WeakTopicTypeOrmRepository } from './repositories/weak-topic.typeorm-repository';
+import { StudentStudyPlanOrmEntity } from './orm-entities/student-study-plan.orm-entity';
+import { StudyPlanTypeOrmRepository } from './repositories/study-plan.typeorm-repository';
+import { UserBadgeOrmEntity } from './orm-entities/user-badge.orm-entity';
+import { BadgeTypeOrmRepository } from './repositories/badge.typeorm-repository';
+import { BoardQuestionOrmEntity } from './orm-entities/board-question.orm-entity';
+import { BoardAnswerOrmEntity } from './orm-entities/board-answer.orm-entity';
+import { BoardUpvoteOrmEntity } from './orm-entities/board-upvote.orm-entity';
+import { BoardTypeOrmRepository } from './repositories/board.typeorm-repository';
 import { DatabaseSeederService } from './seeds/seed.service';
 import { TOKENS } from '../../../shared/constants/tokens';
 
@@ -49,6 +65,7 @@ const ormEntities = [
   SystemSettingOrmEntity,
   AuditLogOrmEntity,
   FlashcardSetOrmEntity,
+  FlashcardSetStarOrmEntity,
   FlashcardOrmEntity,
   ExamOrmEntity,
   QuestionOrmEntity,
@@ -56,6 +73,16 @@ const ormEntities = [
   BookmarkOrmEntity,
   ClassOrmEntity,
   ClassEnrollmentOrmEntity,
+  FlashcardProgressOrmEntity,
+  FlashcardStudySessionOrmEntity,
+  StudentStudyStatsOrmEntity,
+  StudentStudySettingsOrmEntity,
+  StudentWeakTopicOrmEntity,
+  StudentStudyPlanOrmEntity,
+  UserBadgeOrmEntity,
+  BoardQuestionOrmEntity,
+  BoardAnswerOrmEntity,
+  BoardUpvoteOrmEntity,
 ];
 
 @Module({
@@ -87,6 +114,11 @@ const ormEntities = [
     ExamTypeOrmRepository,
     BookmarkTypeOrmRepository,
     ClassTypeOrmRepository,
+    StudyTypeOrmRepository,
+    WeakTopicTypeOrmRepository,
+    StudyPlanTypeOrmRepository,
+    BadgeTypeOrmRepository,
+    BoardTypeOrmRepository,
     DatabaseSeederService,
     { provide: TOKENS.USER_REPO, useClass: UserTypeOrmRepository },
     { provide: TOKENS.ROLE_REPO, useClass: RoleTypeOrmRepository },
@@ -101,6 +133,11 @@ const ormEntities = [
     { provide: TOKENS.EXAM_REPO, useClass: ExamTypeOrmRepository },
     { provide: TOKENS.BOOKMARK_REPO, useClass: BookmarkTypeOrmRepository },
     { provide: TOKENS.CLASS_REPO, useClass: ClassTypeOrmRepository },
+    { provide: TOKENS.STUDY_REPO, useClass: StudyTypeOrmRepository },
+    { provide: TOKENS.WEAK_TOPIC_REPO, useClass: WeakTopicTypeOrmRepository },
+    { provide: TOKENS.STUDY_PLAN_REPO, useClass: StudyPlanTypeOrmRepository },
+    { provide: TOKENS.BADGE_REPO, useClass: BadgeTypeOrmRepository },
+    { provide: TOKENS.BOARD_REPO, useClass: BoardTypeOrmRepository },
   ],
   exports: [
     TypeOrmModule,
@@ -117,6 +154,8 @@ const ormEntities = [
     { provide: TOKENS.EXAM_REPO, useClass: ExamTypeOrmRepository },
     { provide: TOKENS.BOOKMARK_REPO, useClass: BookmarkTypeOrmRepository },
     { provide: TOKENS.CLASS_REPO, useClass: ClassTypeOrmRepository },
+    { provide: TOKENS.STUDY_REPO, useClass: StudyTypeOrmRepository },
+    { provide: TOKENS.WEAK_TOPIC_REPO, useClass: WeakTopicTypeOrmRepository },
     UserTypeOrmRepository,
     RoleTypeOrmRepository,
     RefreshTokenTypeOrmRepository,
@@ -130,6 +169,11 @@ const ormEntities = [
     ExamTypeOrmRepository,
     BookmarkTypeOrmRepository,
     ClassTypeOrmRepository,
+    StudyTypeOrmRepository,
+    WeakTopicTypeOrmRepository,
+    StudyPlanTypeOrmRepository,
+    BadgeTypeOrmRepository,
+    BoardTypeOrmRepository,
   ],
 })
 export class TypeOrmDatabaseModule {}

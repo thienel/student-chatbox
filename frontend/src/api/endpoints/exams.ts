@@ -1,5 +1,7 @@
 import axiosInstance from '@/api/axiosInstance'
-import type { ApiResponse, Exam, ExamDifficulty, ExamAttempt, Question } from '@/types'
+import type {
+  ApiResponse, Exam, ExamDifficulty, ExamAttempt, Question, CreateOfficialExamInput, MyWeakTopics,
+} from '@/types'
 
 export const examsApi = {
   list: (subjectId: string, classId?: string) =>
@@ -12,6 +14,26 @@ export const examsApi = {
   get: (subjectId: string, examId: string) =>
     axiosInstance
       .get<ApiResponse<Exam>>(`/subjects/${subjectId}/exams/${examId}`)
+      .then(r => r.data.data),
+
+  createOfficial: (subjectId: string, data: CreateOfficialExamInput) =>
+    axiosInstance
+      .post<ApiResponse<{ exam: Exam; questions: Question[] }>>(
+        `/subjects/${subjectId}/exams`,
+        data,
+      )
+      .then(r => r.data.data),
+
+  updateOfficial: (
+    subjectId: string,
+    examId: string,
+    data: Partial<Omit<CreateOfficialExamInput, 'classId'>>,
+  ) =>
+    axiosInstance
+      .patch<ApiResponse<{ exam: Exam; questions: Question[] }>>(
+        `/subjects/${subjectId}/exams/${examId}`,
+        data,
+      )
       .then(r => r.data.data),
 
   generate: (
@@ -52,6 +74,11 @@ export const examsApi = {
         `/subjects/${subjectId}/exams/${examId}/attempts/${attemptId}`,
         data,
       )
+      .then(r => r.data.data),
+
+  getMyWeakTopics: (subjectId: string) =>
+    axiosInstance
+      .get<ApiResponse<MyWeakTopics>>(`/subjects/${subjectId}/my-weak-topics`)
       .then(r => r.data.data),
 
   listMyAttempts: () =>

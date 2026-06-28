@@ -61,6 +61,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
         { name: 'document:upload', description: 'Upload documents' },
         { name: 'document:delete', description: 'Delete documents' },
         { name: 'document:read', description: 'View document list' },
+        { name: 'ai:summarize-document', description: 'AI summarize a document' },
         { name: 'chat:create', description: 'Create chat session' },
         { name: 'chat:read-own', description: 'View own chats' },
         { name: 'ai:chat-rag', description: 'Use AI RAG chat' },
@@ -69,9 +70,12 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
         { name: 'flashcard:create', description: 'Create flashcard sets' },
         { name: 'flashcard:delete', description: 'Delete flashcard sets' },
         { name: 'flashcard:read', description: 'View flashcards' },
+        { name: 'flashcard:manage-own', description: 'Share, clone, and manage own flashcard sets' },
+        { name: 'flashcard:study', description: 'Study flashcards with spaced repetition' },
         { name: 'ai:generate-flashcard', description: 'AI generate flashcards' },
         { name: 'exam:read', description: 'View exams' },
         { name: 'exam:take', description: 'Take exams' },
+        { name: 'exam:create-official', description: 'Create and edit official exams' },
         { name: 'ai:generate-exam', description: 'AI generate exams' },
         { name: 'bookmark:manage', description: 'Manage bookmarks' },
         { name: 'analytics:read-own', description: 'View own subject analytics' },
@@ -97,6 +101,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
         'rbac:manage', 'system:manage-settings', 'system:read-audit-log',
         'subject:create', 'subject:update', 'subject:delete', 'subject:read',
         'subject:assign-lecturer', 'analytics:read-all',
+        'exam:read', 'exam:create-official',
       ];
       const adminRole = await roleRepo.findOne({
         where: { id: roles['admin'].id },
@@ -111,6 +116,8 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
       const lecturerPerms = [
         'subject:read', 'class:manage',
         'document:upload', 'document:delete', 'document:read',
+        'ai:summarize-document',
+        'exam:read', 'exam:create-official',
         'analytics:read-own',
       ];
       const lecturerRole = await roleRepo.findOne({
@@ -124,8 +131,10 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
       // creates their own private flashcards & exams from the class content.
       const studentPerms = [
         'subject:read', 'subject:enroll', 'document:read',
+        'ai:summarize-document',
         'chat:create', 'chat:read-own', 'ai:chat-rag',
-        'flashcard:create', 'flashcard:delete', 'flashcard:read', 'ai:generate-flashcard',
+        'flashcard:create', 'flashcard:delete', 'flashcard:read',
+        'flashcard:manage-own', 'flashcard:study', 'ai:generate-flashcard',
         'exam:read', 'exam:take', 'ai:generate-exam',
         'bookmark:manage',
       ];
@@ -149,6 +158,9 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
         { key: 'ai_daily_limit.student.generate_exam', value: 3, description: 'Daily exam generation limit for students' },
         { key: 'ai_daily_limit.lecturer.generate_exam', value: 10, description: 'Daily exam generation limit for lecturers' },
         { key: 'ai_daily_limit.admin.generate_exam', value: -1, description: 'unlimited' },
+        { key: 'ai_daily_limit.student.summarize_document', value: 10, description: 'Daily document summary limit for students' },
+        { key: 'ai_daily_limit.lecturer.summarize_document', value: 30, description: 'Daily document summary limit for lecturers' },
+        { key: 'ai_daily_limit.admin.summarize_document', value: -1, description: 'unlimited' },
       ];
 
       for (const s of settingsDefaults) {

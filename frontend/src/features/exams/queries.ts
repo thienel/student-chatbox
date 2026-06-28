@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { examsApi } from '@/api/endpoints/exams'
-import type { ExamDifficulty } from '@/types'
+import type { ExamDifficulty, CreateOfficialExamInput } from '@/types'
 
 export const examKeys = {
   list: (subjectId: string) => ['exams', subjectId] as const,
@@ -38,6 +38,14 @@ export function useGenerateExam(subjectId: string, classId?: string) {
   })
 }
 
+export function useCreateOfficialExam(subjectId: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (data: CreateOfficialExamInput) => examsApi.createOfficial(subjectId, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: examKeys.list(subjectId) }),
+  })
+}
+
 export function useStartAttempt(subjectId: string) {
   return useMutation({
     mutationFn: (examId: string) => examsApi.startAttempt(subjectId, examId),
@@ -64,6 +72,14 @@ export function useSubmitAttempt(subjectId: string, examId: string) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: examKeys.attempts() })
     },
+  })
+}
+
+export function useMyWeakTopics(subjectId: string) {
+  return useQuery({
+    queryKey: ['weak-topics', subjectId],
+    queryFn: () => examsApi.getMyWeakTopics(subjectId),
+    enabled: !!subjectId,
   })
 }
 

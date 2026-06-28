@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, ArrowRight, RotateCcw, Shuffle, ChevronLeft } from 'lucide-react'
+import { useParams, useNavigate, Link } from 'react-router-dom'
+import { ArrowLeft, ArrowRight, RotateCcw, Shuffle, ChevronLeft, Brain } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { usePermission } from '@/store/useAuthStore'
 import type { Flashcard } from '@/types'
 import { useFlashcardSet } from './queries'
 
@@ -18,6 +19,7 @@ function shuffle<T>(arr: T[]): T[] {
 export default function FlashcardStudyPage() {
   const { id: subjectId = '', setId = '' } = useParams<{ id: string; setId: string }>()
   const navigate = useNavigate()
+  const canStudy = usePermission('flashcard:study')
   const { data, isLoading } = useFlashcardSet(subjectId, setId)
 
   const [cards, setCards] = useState<Flashcard[]>([])
@@ -96,6 +98,17 @@ export default function FlashcardStudyPage() {
           {data.set.title}
         </button>
         <div className="flex items-center gap-2">
+          {canStudy && (
+            <Button
+              asChild
+              className="bg-zinc-50 text-zinc-950 hover:bg-zinc-200 h-7 px-2.5 text-xs font-medium rounded-md"
+            >
+              <Link to={`/subjects/${subjectId}/flashcards/${setId}/study`}>
+                <Brain className="h-3.5 w-3.5 mr-1.5" />
+                Study (SRS)
+              </Link>
+            </Button>
+          )}
           <button
             onClick={doShuffle}
             className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 transition-colors duration-150 px-2 py-1 rounded-md hover:bg-zinc-800"
