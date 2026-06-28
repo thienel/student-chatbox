@@ -39,6 +39,8 @@ import { FlashcardStudySessionOrmEntity } from './orm-entities/flashcard-study-s
 import { StudentStudyStatsOrmEntity } from './orm-entities/student-study-stats.orm-entity';
 import { StudentStudySettingsOrmEntity } from './orm-entities/student-study-settings.orm-entity';
 import { StudyTypeOrmRepository } from './repositories/study.typeorm-repository';
+import { StudentWeakTopicOrmEntity } from './orm-entities/student-weak-topic.orm-entity';
+import { WeakTopicTypeOrmRepository } from './repositories/weak-topic.typeorm-repository';
 import { DatabaseSeederService } from './seeds/seed.service';
 import { TOKENS } from '../../../shared/constants/tokens';
 
@@ -67,6 +69,7 @@ const ormEntities = [
   FlashcardStudySessionOrmEntity,
   StudentStudyStatsOrmEntity,
   StudentStudySettingsOrmEntity,
+  StudentWeakTopicOrmEntity,
 ];
 
 @Module({
@@ -99,6 +102,7 @@ const ormEntities = [
     BookmarkTypeOrmRepository,
     ClassTypeOrmRepository,
     StudyTypeOrmRepository,
+    WeakTopicTypeOrmRepository,
     DatabaseSeederService,
     { provide: TOKENS.USER_REPO, useClass: UserTypeOrmRepository },
     { provide: TOKENS.ROLE_REPO, useClass: RoleTypeOrmRepository },
@@ -114,6 +118,7 @@ const ormEntities = [
     { provide: TOKENS.BOOKMARK_REPO, useClass: BookmarkTypeOrmRepository },
     { provide: TOKENS.CLASS_REPO, useClass: ClassTypeOrmRepository },
     { provide: TOKENS.STUDY_REPO, useClass: StudyTypeOrmRepository },
+    { provide: TOKENS.WEAK_TOPIC_REPO, useClass: WeakTopicTypeOrmRepository },
   ],
   exports: [
     TypeOrmModule,
@@ -131,6 +136,7 @@ const ormEntities = [
     { provide: TOKENS.BOOKMARK_REPO, useClass: BookmarkTypeOrmRepository },
     { provide: TOKENS.CLASS_REPO, useClass: ClassTypeOrmRepository },
     { provide: TOKENS.STUDY_REPO, useClass: StudyTypeOrmRepository },
+    { provide: TOKENS.WEAK_TOPIC_REPO, useClass: WeakTopicTypeOrmRepository },
     UserTypeOrmRepository,
     RoleTypeOrmRepository,
     RefreshTokenTypeOrmRepository,
@@ -145,6 +151,7 @@ const ormEntities = [
     BookmarkTypeOrmRepository,
     ClassTypeOrmRepository,
     StudyTypeOrmRepository,
+    WeakTopicTypeOrmRepository,
   ],
 })
 export class TypeOrmDatabaseModule {}
