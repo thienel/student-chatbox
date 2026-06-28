@@ -178,7 +178,6 @@ export default function SubjectFlashcardsPage() {
             </div>
             <DocumentPicker
               subjectId={subjectId}
-              classId={classId}
               value={documentIds}
               onChange={setDocumentIds}
             />

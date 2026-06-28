@@ -213,7 +213,6 @@ export default function SubjectExamsPage() {
             </div>
             <DocumentPicker
               subjectId={subjectId}
-              classId={classId}
               value={documentIds}
               onChange={setDocumentIds}
             />

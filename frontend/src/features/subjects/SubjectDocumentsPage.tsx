@@ -16,8 +16,6 @@ import {
 import { EmptyState } from '@/components/shared/EmptyState'
 import { useSubjectDocuments, useUploadDocument, useDeleteDocument } from './queries'
 import { usePermission } from '@/store/useAuthStore'
-import { useSubjectClass } from '@/features/classes/ClassContext'
-import { NeedClassNotice } from '@/features/classes/NeedClassNotice'
 import { cn } from '@/lib/utils'
 
 function formatBytes(bytes: number) {
@@ -39,10 +37,9 @@ export default function SubjectDocumentsPage() {
   const fileRef = useRef<HTMLInputElement>(null)
   const [confirmId, setConfirmId] = useState<string | null>(null)
 
-  const { classId, isLecturer, needsClass, loading: classLoading } = useSubjectClass()
-  const canUpload = canUploadDocs && !!classId
-  const { data: documents = [], isLoading } = useSubjectDocuments(subjectId, classId)
-  const upload = useUploadDocument(subjectId, classId)
+  const canUpload = canUploadDocs
+  const { data: documents = [], isLoading } = useSubjectDocuments(subjectId)
+  const upload = useUploadDocument(subjectId)
   const remove = useDeleteDocument(subjectId)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,20 +82,12 @@ export default function SubjectDocumentsPage() {
         )}
       </div>
 
-      {classLoading || (!!classId && isLoading) ? (
+      {isLoading ? (
         <div className="space-y-2">
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-14 rounded-lg bg-zinc-900" />
           ))}
         </div>
-      ) : isLecturer && needsClass ? (
-        <NeedClassNotice noun="Documents" />
-      ) : !classId ? (
-        <EmptyState
-          icon={FileText}
-          title="No class selected"
-          description="There is no class to show documents for in this subject."
-        />
       ) : documents.length === 0 ? (
         <EmptyState
           icon={FileText}
