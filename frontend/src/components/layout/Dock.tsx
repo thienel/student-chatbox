@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Home, BookOpen, MessageSquare, Bookmark, ShieldCheck, Settings, Users, CalendarCheck } from 'lucide-react'
+import { Home, BookOpen, MessageSquare, Bookmark, ShieldCheck, Settings, Users, CalendarCheck, Award } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 import { useAuthStore, usePermission } from '@/store/useAuthStore'
@@ -55,6 +55,7 @@ export function Dock() {
         <DockItem to="/chats" icon={MessageSquare} label="My Chats" />
         <DockItem to="/bookmarks" icon={Bookmark} label="Bookmarks" />
         {canStudyPlan && <DockItem to="/study-plan" icon={CalendarCheck} label="Study Plan" />}
+        {canStudyPlan && <DockItem to="/badges" icon={Award} label="Badges" />}
         {canCommunity && <DockItem to="/community" icon={Users} label="Community" />}
         {isAdmin && (
           <>

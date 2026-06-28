@@ -25,6 +25,7 @@ import ExamHistoryPage from '@/features/exams/ExamHistoryPage'
 import BookmarksPage from '@/features/bookmarks/BookmarksPage'
 import CommunityPage from '@/features/community/CommunityPage'
 import StudyPlanPage from '@/features/plan/StudyPlanPage'
+import MyBadgesPage from '@/features/badges/MyBadgesPage'
 import ChatsPage from '@/features/chat/ChatsPage'
 import AdminDashboardPage from '@/features/admin/AdminDashboardPage'
 import AdminUsersPage from '@/features/admin/AdminUsersPage'
@@ -66,6 +67,7 @@ export default function AppRoutes() {
         <Route path="/bookmarks" element={<BookmarksPage />} />
         <Route path="/community" element={<CommunityPage />} />
         <Route path="/study-plan" element={<StudyPlanPage />} />
+        <Route path="/badges" element={<MyBadgesPage />} />
         <Route path="/exam-history" element={<ExamHistoryPage />} />
         <Route path="/exam-attempts/:attemptId" element={<ExamResultPage />} />
         <Route path="/settings" element={<SettingsPage />} />

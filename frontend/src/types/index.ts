@@ -201,6 +201,34 @@ export interface LeaderboardResult {
   myRank: { rank: number; totalStars: number; totalPublicSets: number } | null;
 }
 
+// Badges
+export interface BadgeDef {
+  id: string;
+  name: string;
+  description: string;
+  iconKey: string;
+}
+
+export interface EarnedBadge {
+  badgeId: string;
+  name: string;
+  iconKey: string;
+  awardedAt: string;
+}
+
+export interface LockedBadge {
+  badgeId: string;
+  name: string;
+  iconKey: string;
+  description: string;
+  progress?: string;
+}
+
+export interface MyBadges {
+  earned: EarnedBadge[];
+  locked: LockedBadge[];
+}
+
 // Study plan
 export type StudyTaskType = 'review_flashcards' | 'study_topic' | 'take_exam';
 
