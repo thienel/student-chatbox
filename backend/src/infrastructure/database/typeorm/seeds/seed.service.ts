@@ -72,6 +72,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
         { name: 'ai:generate-flashcard', description: 'AI generate flashcards' },
         { name: 'exam:read', description: 'View exams' },
         { name: 'exam:take', description: 'Take exams' },
+        { name: 'exam:create-official', description: 'Create and edit official exams' },
         { name: 'ai:generate-exam', description: 'AI generate exams' },
         { name: 'bookmark:manage', description: 'Manage bookmarks' },
         { name: 'analytics:read-own', description: 'View own subject analytics' },
@@ -97,6 +98,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
         'rbac:manage', 'system:manage-settings', 'system:read-audit-log',
         'subject:create', 'subject:update', 'subject:delete', 'subject:read',
         'subject:assign-lecturer', 'analytics:read-all',
+        'exam:read', 'exam:create-official',
       ];
       const adminRole = await roleRepo.findOne({
         where: { id: roles['admin'].id },
@@ -111,6 +113,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
       const lecturerPerms = [
         'subject:read', 'class:manage',
         'document:upload', 'document:delete', 'document:read',
+        'exam:read', 'exam:create-official',
         'analytics:read-own',
       ];
       const lecturerRole = await roleRepo.findOne({

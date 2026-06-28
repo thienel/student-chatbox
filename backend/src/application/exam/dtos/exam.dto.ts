@@ -1,4 +1,8 @@
-import { IsString, IsOptional, IsInt, IsIn, Min, Max, IsObject, IsArray, IsUUID } from 'class-validator';
+import {
+  IsString, IsOptional, IsInt, IsIn, Min, Max, IsObject, IsArray, IsUUID,
+  IsNotEmpty, MaxLength, ValidateNested,
+} from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class GenerateExamDto {
   @IsOptional()
@@ -25,6 +29,87 @@ export class GenerateExamDto {
   @IsArray()
   @IsUUID('all', { each: true })
   documentIds?: string[];
+}
+
+export class QuestionOptionDto {
+  @IsString()
+  @IsNotEmpty()
+  key: string;
+
+  @IsString()
+  @IsNotEmpty()
+  text: string;
+}
+
+export class OfficialQuestionDto {
+  @IsString()
+  @IsNotEmpty()
+  content: string;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => QuestionOptionDto)
+  options: QuestionOptionDto[];
+
+  @IsString()
+  @IsNotEmpty()
+  correctAnswer: string;
+
+  @IsOptional()
+  @IsString()
+  explanation?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  topic?: string;
+}
+
+export class CreateOfficialExamDto {
+  @IsUUID()
+  classId: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(500)
+  title: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  durationMinutes?: number;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => OfficialQuestionDto)
+  questions: OfficialQuestionDto[];
+}
+
+export class UpdateOfficialExamDto {
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(500)
+  title?: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  durationMinutes?: number;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => OfficialQuestionDto)
+  questions?: OfficialQuestionDto[];
 }
 
 export class SubmitAttemptDto {

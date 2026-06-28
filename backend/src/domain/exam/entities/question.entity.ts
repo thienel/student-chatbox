@@ -10,5 +10,6 @@ export class Question {
   options: QuestionOption[];
   correctAnswer: string;
   explanation?: string;
+  topic?: string;
   position: number;
 }

@@ -26,6 +26,7 @@ class QuestionItem(BaseModel):
     options: list[QuestionOption]
     correct_answer: str
     explanation: Optional[str] = None
+    topic: Optional[str] = None
 
 
 class GenerateExamResponse(BaseModel):
@@ -53,6 +54,7 @@ async def generate_exam_endpoint(
                     options=[QuestionOption(key=o["key"], text=o["text"]) for o in q["options"]],
                     correct_answer=q["correct_answer"],
                     explanation=q.get("explanation"),
+                    topic=q.get("topic"),
                 )
                 for q in questions
             ]
