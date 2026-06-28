@@ -1,4 +1,4 @@
-export type AiFeature = 'chat_rag' | 'generate_flashcard' | 'generate_exam';
+export type AiFeature = 'chat_rag' | 'generate_flashcard' | 'generate_exam' | 'summarize_document';
 
 export class AiUsageLog {
   id: string;
