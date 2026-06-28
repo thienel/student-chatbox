@@ -3,21 +3,19 @@ import { useSubjectDocuments } from '@/features/subjects/queries'
 import { cn } from '@/lib/utils'
 
 /**
- * Multi-select over a class's ready documents. An empty selection means
- * "use the whole class" (the backend treats documentIds=[] as no filter).
+ * Multi-select over the subject's ready documents. An empty selection means
+ * "use the whole knowledge base" (the backend treats documentIds=[] as no filter).
  */
 export function DocumentPicker({
   subjectId,
-  classId,
   value,
   onChange,
 }: {
   subjectId: string
-  classId?: string
   value: string[]
   onChange: (ids: string[]) => void
 }) {
-  const { data: documents = [] } = useSubjectDocuments(subjectId, classId)
+  const { data: documents = [] } = useSubjectDocuments(subjectId)
   const ready = documents.filter(d => d.status === 'ready')
 
   if (ready.length === 0) return null
