@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import {
-  IWeakTopicRepository, WeakTopic, SuggestedSet, TopicClassification,
+  IWeakTopicRepository, WeakTopic, WeakTopicWithSubject, SuggestedSet, TopicClassification,
 } from '../../../../domain/exam/repositories/weak-topic.repository.interface';
 
 const MIN_QUESTIONS = 5; // below this a topic has insufficient data (BR-F8-07)
@@ -62,6 +62,19 @@ export class WeakTopicTypeOrmRepository implements IWeakTopicRepository {
        WHERE user_id = $1 AND subject_id = $2
        ORDER BY correct_rate ASC`,
       [userId, subjectId],
+    );
+  }
+
+  async findAllByUser(userId: string): Promise<WeakTopicWithSubject[]> {
+    return this.dataSource.query(
+      `SELECT subject_id AS "subjectId", topic, classification,
+         total_questions AS "totalQuestions",
+         correct_count AS "correctCount",
+         correct_rate AS "correctRate"
+       FROM student_weak_topics
+       WHERE user_id = $1
+       ORDER BY correct_rate ASC`,
+      [userId],
     );
   }
 

@@ -8,6 +8,10 @@ export interface WeakTopic {
   correctRate: number;
 }
 
+export interface WeakTopicWithSubject extends WeakTopic {
+  subjectId: string;
+}
+
 export interface SuggestedSet {
   id: string;
   title: string;
@@ -22,6 +26,8 @@ export interface IWeakTopicRepository {
    */
   recompute(userId: string, subjectId: string): Promise<void>;
   findByUserSubject(userId: string, subjectId: string): Promise<WeakTopic[]>;
+  /** Every recorded topic for a student across all subjects (for study plans). */
+  findAllByUser(userId: string): Promise<WeakTopicWithSubject[]>;
   /** Up to `limit` public flashcard sets whose title matches the topic, by stars. */
   suggestSets(topic: string, limit: number): Promise<SuggestedSet[]>;
 }

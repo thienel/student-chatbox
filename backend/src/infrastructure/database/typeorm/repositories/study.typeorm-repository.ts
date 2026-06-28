@@ -66,6 +66,15 @@ export class StudyTypeOrmRepository implements IStudyRepository {
     return (await this.cardRepo.count({ where: { id: flashcardId, setId } })) > 0;
   }
 
+  async countDueCards(userId: string): Promise<number> {
+    const [{ count }] = await this.dataSource.query(
+      `SELECT COUNT(*)::int AS count FROM flashcard_progress
+       WHERE user_id = $1 AND next_review_at <= now()`,
+      [userId],
+    );
+    return count;
+  }
+
   async getProgress(userId: string, flashcardId: string): Promise<CardProgress | null> {
     const o = await this.progressRepo.findOne({ where: { userId, flashcardId } });
     if (!o) return null;
