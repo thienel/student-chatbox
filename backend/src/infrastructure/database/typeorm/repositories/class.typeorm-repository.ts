@@ -113,8 +113,10 @@ export class ClassTypeOrmRepository implements IClassRepository {
     const [overviewRow] = await this.dataSource.query(
       `SELECT
          (SELECT COUNT(*) FROM class_enrollments WHERE class_id = $1)::int AS "studentCount",
-         (SELECT COUNT(*) FROM documents WHERE class_id = $1)::int AS "documentCount",
-         (SELECT COUNT(*) FROM documents WHERE class_id = $1 AND status = 'ready')::int AS "documentsReady",
+         (SELECT COUNT(*) FROM documents d JOIN classes c ON c.id = $1
+            WHERE d.subject_id = c.subject_id AND d.uploaded_by = c.lecturer_id)::int AS "documentCount",
+         (SELECT COUNT(*) FROM documents d JOIN classes c ON c.id = $1
+            WHERE d.subject_id = c.subject_id AND d.uploaded_by = c.lecturer_id AND d.status = 'ready')::int AS "documentsReady",
          (SELECT COUNT(*) FROM exams WHERE class_id = $1)::int AS "examCount",
          (SELECT COUNT(*) FROM flashcard_sets WHERE class_id = $1)::int AS "flashcardSetCount",
          (SELECT COUNT(*) FROM exam_attempts ea JOIN exams e ON e.id = ea.exam_id

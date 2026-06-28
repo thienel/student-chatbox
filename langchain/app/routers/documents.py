@@ -17,7 +17,7 @@ class ProcessDocumentRequest(BaseModel):
     documentId: str
     filePath: str
     subjectId: str
-    classId: str
+    lecturerId: str
 
 
 @router.post("/process", status_code=202)
@@ -26,7 +26,7 @@ async def process_document_endpoint(
     _: None = Depends(verify_internal_key),
 ) -> dict:
     asyncio.create_task(
-        process_document(body.documentId, body.filePath, body.subjectId, body.classId)
+        process_document(body.documentId, body.filePath, body.subjectId, body.lecturerId)
     )
     return {"accepted": True}
 

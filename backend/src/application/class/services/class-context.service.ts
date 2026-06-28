@@ -44,6 +44,43 @@ export class ClassContextService {
   }
 
   /**
+   * Resolve which lecturer's knowledge base (lecturer+subject) a content
+   * operation targets:
+   * - lecturers own their knowledge base (their own id);
+   * - students use the knowledge base of the lecturer who teaches their class;
+   * - admins must name a class explicitly (its lecturer's knowledge base).
+   */
+  async resolveLecturerId(subjectId: string, user: User, explicitClassId?: string): Promise<string> {
+    if (user.roleName === 'lecturer') {
+      return user.id;
+    }
+    if (user.roleName === 'student') {
+      const cls = await this.classRepo.findStudentClassInSubject(subjectId, user.id);
+      if (!cls) {
+        throw new ForbiddenException('You are not enrolled in any class for this subject');
+      }
+      return cls.lecturerId;
+    }
+    if (!explicitClassId) {
+      throw new BadRequestException('classId is required');
+    }
+    const cls = await this.classRepo.findById(explicitClassId);
+    if (!cls || cls.subjectId !== subjectId) {
+      throw new NotFoundException('Class not found in this subject');
+    }
+    return cls.lecturerId;
+  }
+
+  /** The lecturer who teaches a class — used to scope an existing chat/set to its knowledge base. */
+  async getLecturerIdForClass(classId: string): Promise<string> {
+    const cls = await this.classRepo.findById(classId);
+    if (!cls) {
+      throw new NotFoundException('Class not found');
+    }
+    return cls.lecturerId;
+  }
+
+  /**
    * Guard access to an existing piece of content that already carries a classId:
    * students must belong to that class, lecturers must own it, admins pass.
    */

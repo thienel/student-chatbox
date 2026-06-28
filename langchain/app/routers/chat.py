@@ -11,7 +11,7 @@ router = APIRouter(prefix="/chat", tags=["chat"])
 class StreamRequest(BaseModel):
     content: str
     subjectId: str
-    classId: str
+    lecturerId: str
     chatHistory: list[dict]
     topK: int = 5
     minScore: float = 0.4
@@ -26,7 +26,7 @@ async def chat_stream(
         stream_rag_response(
             query=body.content,
             subject_id=body.subjectId,
-            class_id=body.classId,
+            lecturer_id=body.lecturerId,
             chat_history=body.chatHistory,
             top_k=body.topK,
             min_score=body.minScore,
