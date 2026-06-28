@@ -1,6 +1,6 @@
 import axiosInstance from '@/api/axiosInstance'
 import type {
-  ApiResponse, Exam, ExamDifficulty, ExamAttempt, Question, CreateOfficialExamInput,
+  ApiResponse, Exam, ExamDifficulty, ExamAttempt, Question, CreateOfficialExamInput, MyWeakTopics,
 } from '@/types'
 
 export const examsApi = {
@@ -74,6 +74,11 @@ export const examsApi = {
         `/subjects/${subjectId}/exams/${examId}/attempts/${attemptId}`,
         data,
       )
+      .then(r => r.data.data),
+
+  getMyWeakTopics: (subjectId: string) =>
+    axiosInstance
+      .get<ApiResponse<MyWeakTopics>>(`/subjects/${subjectId}/my-weak-topics`)
       .then(r => r.data.data),
 
   listMyAttempts: () =>
