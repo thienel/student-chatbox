@@ -1,5 +1,8 @@
 import axiosInstance from '@/api/axiosInstance'
-import type { ApiResponse, Class, SubjectLecturer, ClassStudent, ClassStats } from '@/types'
+import type {
+  ApiResponse, Class, SubjectLecturer, ClassStudent, ClassStats,
+  StudentEngagement, StudentEngagementDetail,
+} from '@/types'
 
 export const classesApi = {
   // Lecturer/admin: classes in a subject (own classes for lecturers).
@@ -25,6 +28,20 @@ export const classesApi = {
   stats: (subjectId: string, classId: string) =>
     axiosInstance
       .get<ApiResponse<ClassStats>>(`/subjects/${subjectId}/classes/${classId}/stats`)
+      .then(r => r.data.data),
+
+  engagement: (subjectId: string, classId: string) =>
+    axiosInstance
+      .get<ApiResponse<{ items: StudentEngagement[]; total: number }>>(
+        `/subjects/${subjectId}/classes/${classId}/engagement`,
+      )
+      .then(r => r.data.data),
+
+  studentEngagement: (subjectId: string, classId: string, studentId: string) =>
+    axiosInstance
+      .get<ApiResponse<StudentEngagementDetail>>(
+        `/subjects/${subjectId}/classes/${classId}/students/${studentId}/stats`,
+      )
       .then(r => r.data.data),
 
   // Student: lecturers that have at least one class (for the enroll dropdown).

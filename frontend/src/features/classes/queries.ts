@@ -52,6 +52,22 @@ export function useClassStats(subjectId: string, classId?: string) {
   })
 }
 
+export function useClassEngagement(subjectId: string, classId?: string) {
+  return useQuery({
+    queryKey: ['class-engagement', subjectId, classId ?? ''],
+    queryFn: () => classesApi.engagement(subjectId, classId!),
+    enabled: !!subjectId && !!classId,
+  })
+}
+
+export function useStudentEngagement(subjectId: string, classId: string | undefined, studentId: string | null) {
+  return useQuery({
+    queryKey: ['student-engagement', subjectId, classId ?? '', studentId],
+    queryFn: () => classesApi.studentEngagement(subjectId, classId!, studentId!),
+    enabled: !!subjectId && !!classId && !!studentId,
+  })
+}
+
 export function useRemoveClassStudent(subjectId: string, classId?: string) {
   const qc = useQueryClient()
   return useMutation({
