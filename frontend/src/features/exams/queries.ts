@@ -75,6 +75,14 @@ export function useSubmitAttempt(subjectId: string, examId: string) {
   })
 }
 
+export function useMyWeakTopics(subjectId: string) {
+  return useQuery({
+    queryKey: ['weak-topics', subjectId],
+    queryFn: () => examsApi.getMyWeakTopics(subjectId),
+    enabled: !!subjectId,
+  })
+}
+
 export function useMyAttempts() {
   return useQuery({
     queryKey: examKeys.attempts(),

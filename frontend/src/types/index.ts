@@ -201,6 +201,29 @@ export interface LeaderboardResult {
   myRank: { rank: number; totalStars: number; totalPublicSets: number } | null;
 }
 
+// Weak topics
+export type TopicClassification = 'weak' | 'developing' | 'strong';
+
+export interface SuggestedSet {
+  id: string;
+  title: string;
+  starCount: number;
+}
+
+export interface WeakTopic {
+  topic: string;
+  classification: TopicClassification;
+  totalQuestions: number;
+  correctCount: number;
+  correctRate: number;
+  suggestedFlashcardSets: SuggestedSet[];
+}
+
+export interface MyWeakTopics {
+  subjectId: string;
+  topics: WeakTopic[];
+}
+
 // Study (FSRS)
 export interface StudyQueueCard {
   flashcardId: string;
