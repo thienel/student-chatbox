@@ -77,6 +77,16 @@ export function useDeleteSubject() {
   })
 }
 
+export function useDocumentSummary(subjectId: string, documentId: string | null) {
+  return useQuery({
+    queryKey: [...subjectKeys.documents(subjectId), documentId, 'summary'],
+    queryFn: () => subjectsApi.getDocumentSummary(subjectId, documentId!),
+    enabled: !!subjectId && !!documentId,
+    staleTime: Infinity, // summaries are cached server-side; no need to refetch
+    retry: false,
+  })
+}
+
 export function useUploadDocument(subjectId: string) {
   const qc = useQueryClient()
   return useMutation({
