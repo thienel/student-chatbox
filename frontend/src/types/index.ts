@@ -201,6 +201,58 @@ export interface LeaderboardResult {
   myRank: { rank: number; totalStars: number; totalPublicSets: number } | null;
 }
 
+// Study (FSRS)
+export interface StudyQueueCard {
+  flashcardId: string;
+  front: string;
+  back: string;
+  position: number;
+  isNew: boolean;
+  currentStability: number | null;
+  currentDifficulty: number | null;
+}
+
+export interface StudyQueue {
+  sessionId: string | null;
+  dueCards: number;
+  newCards: number;
+  totalQueue: number;
+  nextDueAt: string | null;
+  cards: StudyQueueCard[];
+}
+
+export interface StudySessionStart {
+  sessionId: string;
+  status: 'active' | 'completed' | 'abandoned';
+  cardsRemaining: number;
+}
+
+export type CardRating = 1 | 2 | 3 | 4; // again | hard | good | easy
+
+export interface ReviewResult {
+  nextReviewAt: string;
+  interval: number;
+  stability: number;
+  difficulty: number;
+  sessionComplete: boolean;
+}
+
+export interface StudySettings {
+  userId: string;
+  newCardsPerDay: number;
+}
+
+export interface StudyStats {
+  userId: string;
+  currentStreak: number;
+  longestStreak: number;
+  totalSessions: number;
+  totalCardsReviewed: number;
+  lastStudiedDate: string | null;
+  newCardsStudiedToday: number;
+  newCardsTodayDate: string | null;
+}
+
 // Exams
 export type ExamDifficulty = 'easy' | 'medium' | 'hard';
 export type ExamType = 'official' | 'ai_generated';
