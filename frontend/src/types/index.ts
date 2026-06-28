@@ -147,6 +147,9 @@ export interface FlashcardSet {
   title: string;
   description?: string;
   isPublic: boolean;
+  starCount: number;
+  clonedFromId?: string;
+  publishedAt?: string;
   createdBy: string;
   createdAt: string;
   updatedAt: string;
@@ -163,6 +166,39 @@ export interface Flashcard {
 
 export interface FlashcardSetWithCards extends FlashcardSet {
   cards: Flashcard[];
+}
+
+// Community flashcards
+export interface DiscoverSetItem {
+  id: string;
+  title: string;
+  subjectName: string;
+  creatorName: string;
+  cardCount: number;
+  starCount: number;
+  isStarredByMe: boolean;
+  publishedAt: string | null;
+}
+
+export interface DiscoverSetsResult {
+  items: DiscoverSetItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+export interface LeaderboardEntry {
+  rank: number;
+  userId: string;
+  fullName: string;
+  totalStars: number;
+  totalPublicSets: number;
+}
+
+export interface LeaderboardResult {
+  scope: 'global' | 'subject';
+  items: LeaderboardEntry[];
+  myRank: { rank: number; totalStars: number; totalPublicSets: number } | null;
 }
 
 // Exams

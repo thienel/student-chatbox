@@ -21,6 +21,7 @@ import TakeExamPage from '@/features/exams/TakeExamPage'
 import ExamResultPage from '@/features/exams/ExamResultPage'
 import ExamHistoryPage from '@/features/exams/ExamHistoryPage'
 import BookmarksPage from '@/features/bookmarks/BookmarksPage'
+import CommunityPage from '@/features/community/CommunityPage'
 import ChatsPage from '@/features/chat/ChatsPage'
 import AdminDashboardPage from '@/features/admin/AdminDashboardPage'
 import AdminUsersPage from '@/features/admin/AdminUsersPage'
@@ -60,6 +61,7 @@ export default function AppRoutes() {
         <Route path="/subjects" element={<SubjectsPage />} />
         <Route path="/chats" element={<ChatsPage />} />
         <Route path="/bookmarks" element={<BookmarksPage />} />
+        <Route path="/community" element={<CommunityPage />} />
         <Route path="/exam-history" element={<ExamHistoryPage />} />
         <Route path="/exam-attempts/:attemptId" element={<ExamResultPage />} />
         <Route path="/settings" element={<SettingsPage />} />
