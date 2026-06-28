@@ -16,6 +16,7 @@ import StudySessionPage from '@/features/flashcards/StudySessionPage'
 import SubjectExamsPage from '@/features/exams/SubjectExamsPage'
 import CreateOfficialExamPage from '@/features/exams/CreateOfficialExamPage'
 import WeakTopicsPage from '@/features/exams/WeakTopicsPage'
+import BoardPage from '@/features/board/BoardPage'
 import ClassesPage from '@/features/classes/ClassesPage'
 import StudentsPage from '@/features/classes/StudentsPage'
 import ExamDetailPage from '@/features/exams/ExamDetailPage'
@@ -89,6 +90,7 @@ export default function AppRoutes() {
         <Route path="/subjects/:id/exams/new" element={<CreateOfficialExamPage />} />
         <Route path="/subjects/:id/exam-history" element={<ExamHistoryPage />} />
         <Route path="/subjects/:id/weak-topics" element={<WeakTopicsPage />} />
+        <Route path="/subjects/:id/board" element={<BoardPage />} />
         <Route path="/subjects/:id/exams/:examId" element={<ExamDetailPage />} />
         <Route path="/subjects/:id/exams/:examId/attempt/:attemptId" element={<TakeExamPage />} />
         <Route path="/subjects/:id/exams/:examId/result/:attemptId" element={<ExamResultPage />} />
