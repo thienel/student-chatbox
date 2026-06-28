@@ -13,6 +13,7 @@ import SubjectMembersPage from '@/features/subjects/SubjectMembersPage'
 import SubjectFlashcardsPage from '@/features/flashcards/SubjectFlashcardsPage'
 import FlashcardStudyPage from '@/features/flashcards/FlashcardStudyPage'
 import SubjectExamsPage from '@/features/exams/SubjectExamsPage'
+import CreateOfficialExamPage from '@/features/exams/CreateOfficialExamPage'
 import ClassesPage from '@/features/classes/ClassesPage'
 import StudentsPage from '@/features/classes/StudentsPage'
 import ExamDetailPage from '@/features/exams/ExamDetailPage'
@@ -76,6 +77,7 @@ export default function AppRoutes() {
         <Route path="/subjects/:id/flashcards" element={<SubjectFlashcardsPage />} />
         <Route path="/subjects/:id/flashcards/:setId" element={<FlashcardStudyPage />} />
         <Route path="/subjects/:id/exams" element={<SubjectExamsPage />} />
+        <Route path="/subjects/:id/exams/new" element={<CreateOfficialExamPage />} />
         <Route path="/subjects/:id/exam-history" element={<ExamHistoryPage />} />
         <Route path="/subjects/:id/exams/:examId" element={<ExamDetailPage />} />
         <Route path="/subjects/:id/exams/:examId/attempt/:attemptId" element={<TakeExamPage />} />

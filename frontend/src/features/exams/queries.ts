@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { examsApi } from '@/api/endpoints/exams'
-import type { ExamDifficulty } from '@/types'
+import type { ExamDifficulty, CreateOfficialExamInput } from '@/types'
 
 export const examKeys = {
   list: (subjectId: string) => ['exams', subjectId] as const,
@@ -34,6 +34,14 @@ export function useGenerateExam(subjectId: string, classId?: string) {
       topic?: string
       documentIds?: string[]
     }) => examsApi.generate(subjectId, { ...data, classId }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: examKeys.list(subjectId) }),
+  })
+}
+
+export function useCreateOfficialExam(subjectId: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (data: CreateOfficialExamInput) => examsApi.createOfficial(subjectId, data),
     onSuccess: () => qc.invalidateQueries({ queryKey: examKeys.list(subjectId) }),
   })
 }

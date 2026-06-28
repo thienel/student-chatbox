@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ClipboardList, Sparkles, ChevronRight, Loader2, History } from 'lucide-react'
+import { ClipboardList, Sparkles, ChevronRight, Loader2, History, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -27,6 +27,7 @@ export default function SubjectExamsPage() {
   const { id: subjectId = '' } = useParams<{ id: string }>()
   const user = useAuthStore(s => s.user)
   const canGenerate = user?.permissions?.includes('ai:generate-exam')
+  const canCreateOfficial = user?.permissions?.includes('exam:create-official')
   const { toast } = useToast()
 
   const [genOpen, setGenOpen] = useState(false)
@@ -72,15 +73,29 @@ export default function SubjectExamsPage() {
           <h2 className="text-base font-medium text-zinc-50">Exams</h2>
           <p className="text-xs text-zinc-500 mt-0.5">{exams.length} exams</p>
         </div>
-        {canGenerate && (
-          <Button
-            onClick={() => setGenOpen(true)}
-            className="bg-zinc-50 text-zinc-950 hover:bg-zinc-200 h-8 px-3 text-sm font-medium rounded-md"
-          >
-            <Sparkles className="h-3.5 w-3.5 mr-1.5" />
-            Generate
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {canCreateOfficial && (
+            <Button
+              asChild
+              variant="outline"
+              className="border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 h-8 px-3 text-sm rounded-md"
+            >
+              <Link to={`/subjects/${subjectId}/exams/new`}>
+                <Plus className="h-3.5 w-3.5 mr-1.5" />
+                Create exam
+              </Link>
+            </Button>
+          )}
+          {canGenerate && (
+            <Button
+              onClick={() => setGenOpen(true)}
+              className="bg-zinc-50 text-zinc-950 hover:bg-zinc-200 h-8 px-3 text-sm font-medium rounded-md"
+            >
+              <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+              Generate
+            </Button>
+          )}
+        </div>
       </div>
 
       {isLecturer && needsClass ? (
@@ -123,6 +138,15 @@ export default function SubjectExamsPage() {
                   {exam.questionCount} questions · {new Date(exam.createdAt).toLocaleDateString()}
                 </p>
               </div>
+              {exam.type === 'official' ? (
+                <Badge className="shrink-0 text-xs font-medium bg-emerald-950 text-emerald-400 border-emerald-900 rounded-md">
+                  Official
+                </Badge>
+              ) : (
+                <Badge className="shrink-0 text-xs font-medium bg-zinc-800 text-zinc-500 border-zinc-700 rounded-md">
+                  AI
+                </Badge>
+              )}
               {exam.difficulty && (
                 <Badge className="shrink-0 text-xs font-medium bg-zinc-800 text-zinc-400 border-zinc-700 rounded-md">
                   {difficultyLabel[exam.difficulty]}
