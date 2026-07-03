@@ -9,7 +9,9 @@ export default {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
         mono: ['Geist Mono', 'monospace'],
-        serif: ['Lora', 'serif'],
+        display: ['Fraunces', 'serif'],
+        data: ['IBM Plex Mono', 'monospace'],
+        serif: ['Fraunces', 'serif'],
       },
       colors: {
         border: 'hsl(var(--border))',
@@ -44,6 +46,15 @@ export default {
           foreground: 'hsl(var(--accent-foreground))',
         },
         ring: 'hsl(var(--ring))',
+        ink: {
+          DEFAULT: 'hsl(var(--color-ink))',
+          primary: 'hsl(var(--color-primary-ink))',
+        },
+        paper: 'hsl(var(--color-paper))',
+        rule: 'hsl(var(--color-rule))',
+        stamp: {
+          gold: 'hsl(var(--color-stamp-gold))',
+        },
       },
       borderRadius: {
         lg: '0.5rem',

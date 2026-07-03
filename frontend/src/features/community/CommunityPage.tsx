@@ -38,7 +38,7 @@ export default function CommunityPage() {
   return (
     <div className="max-w-4xl mx-auto px-6 py-6">
       <div className="mb-6">
-        <h1 className="text-lg font-semibold text-foreground">Community Flashcards</h1>
+        <h1 className="text-2xl font-display font-medium text-ink tracking-tight">Community Flashcards</h1>
         <p className="text-xs text-muted-foreground mt-0.5">Discover and star sets shared by other students.</p>
       </div>
 

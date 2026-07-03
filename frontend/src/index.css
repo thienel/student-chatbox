@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -36,6 +36,13 @@
     --input: 210 32% 91%;
     --ring: 163 88% 20%;
     
+    /* Gradebook & Library Tokens */
+    --color-primary-ink: 161 88% 13%; /* #043D2E */
+    --color-ink: 140 5% 11%; /* #1A1D1B */
+    --color-paper: 40 33% 96%; /* #F8F6F1 */
+    --color-rule: 40 18% 81%; /* #D8D2C4 */
+    --color-stamp-gold: 38 66% 35%; /* #96691E (Passes WCAG AA 4.56:1) */
+    
     /* Gamification Layer (Lime) */
     --lime-bg: 81 88% 95%; /* #F7FEE7 */
     --lime-border: 81 89% 80%; /* #D9F99D */
@@ -68,6 +75,18 @@
 }
 
 @layer utilities {
+  .ruled-paper-bg {
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 31px,
+      hsl(var(--color-rule)) 31px,
+      hsl(var(--color-rule)) 32px
+    );
+    background-position: 0 80px;
+    opacity: 0.35;
+  }
+
   .synapse-glow {
     border-left: 2px solid;
     border-image: linear-gradient(to bottom, hsl(var(--primary)), hsl(var(--accent))) 1;
