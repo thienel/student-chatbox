@@ -11,7 +11,7 @@ export function AppShell() {
   return (
     <div className="min-h-screen bg-background relative z-0 overflow-hidden">
       {/* Gradebook Background */}
-      <div className="fixed inset-0 pointer-events-none -z-10 ruled-paper-bg" />
+      {!isMinimalPage && <div className="fixed inset-0 pointer-events-none -z-10 ruled-paper-bg" />}
       {!isMinimalPage && (
         <div className="fixed top-0 bottom-0 left-12 w-[1px] bg-primary/20 pointer-events-none -z-10" />
       )}
