@@ -38,10 +38,11 @@ export function Topbar() {
     .toUpperCase() ?? '?'
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-40 h-14 flex items-center justify-between px-6 bg-background border-b-4 border-double border-border">
-      <div className="flex items-center gap-5 min-w-0">
+    <header className="fixed top-0 left-0 right-0 z-40 h-14 bg-background border-b border-border flex justify-center">
+      <div className="w-full max-w-5xl px-6 h-full flex items-center justify-between">
+        <div className="flex items-center gap-5 min-w-0">
         <Link to="/" className="flex-shrink-0 flex items-center hover:opacity-80 transition-opacity duration-150" title="Home">
-          <Logo className="h-8 w-auto" />
+          <Logo className="h-10 w-auto" />
         </Link>
         <div className="w-[1px] h-4 bg-border hidden sm:block" />
         <nav className="flex items-center gap-2 text-sm min-w-0">
@@ -106,6 +107,7 @@ export function Topbar() {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+      </div>
       </div>
     </header>
   )
