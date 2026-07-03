@@ -29,9 +29,9 @@ function formatBytes(bytes: number) {
 }
 
 const statusColor: Record<string, string> = {
-  ready: 'bg-zinc-800 text-zinc-400 border-zinc-700',
-  processing: 'bg-zinc-900 text-zinc-500 border-zinc-800',
-  failed: 'bg-red-950 text-red-400 border-red-900',
+  ready: 'bg-secondary text-muted-foreground border-border',
+  processing: 'bg-muted text-muted-foreground border-border',
+  failed: 'bg-destructive/10 text-destructive border-destructive/20',
 }
 
 export default function SubjectDocumentsPage() {
@@ -62,15 +62,15 @@ export default function SubjectDocumentsPage() {
     <div className="max-w-5xl mx-auto px-6 py-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-base font-medium text-zinc-50">Documents</h2>
-          <p className="text-xs text-zinc-500 mt-0.5">{documents.length} files</p>
+          <h2 className="text-base font-medium text-foreground">Documents</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">{documents.length} files</p>
         </div>
         {canUpload && (
           <>
             <Button
               onClick={() => fileRef.current?.click()}
               disabled={upload.isPending}
-              className="bg-zinc-50 text-zinc-950 hover:bg-zinc-200 h-8 px-3 text-sm font-medium rounded-md"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-3 text-sm font-medium rounded-md"
             >
               {upload.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
@@ -93,7 +93,7 @@ export default function SubjectDocumentsPage() {
       {isLoading ? (
         <div className="space-y-2">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-14 rounded-lg bg-zinc-900" />
+            <Skeleton key={i} className="h-14 rounded-lg bg-muted" />
           ))}
         </div>
       ) : documents.length === 0 ? (
@@ -104,7 +104,7 @@ export default function SubjectDocumentsPage() {
           action={canUpload ? (
             <Button
               onClick={() => fileRef.current?.click()}
-              className="bg-zinc-50 text-zinc-950 hover:bg-zinc-200 h-8 px-3 text-sm font-medium rounded-md"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-3 text-sm font-medium rounded-md"
             >
               <Upload className="h-4 w-4 mr-1.5" />
               Upload first document
@@ -112,36 +112,36 @@ export default function SubjectDocumentsPage() {
           ) : undefined}
         />
       ) : (
-        <div className="border border-zinc-800 rounded-lg overflow-hidden">
+        <div className="bg-card border rounded-lg overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-zinc-800">
-                <th className="text-left py-3 px-4 text-xs font-medium text-zinc-500 uppercase tracking-wide">File</th>
-                <th className="text-left py-3 px-4 text-xs font-medium text-zinc-500 uppercase tracking-wide hidden sm:table-cell">Size</th>
-                <th className="text-left py-3 px-4 text-xs font-medium text-zinc-500 uppercase tracking-wide hidden md:table-cell">Status</th>
-                <th className="text-left py-3 px-4 text-xs font-medium text-zinc-500 uppercase tracking-wide hidden lg:table-cell">Uploaded by</th>
+              <tr className="border-b bg-secondary">
+                <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wide">File</th>
+                <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wide hidden sm:table-cell">Size</th>
+                <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wide hidden md:table-cell">Status</th>
+                <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wide hidden lg:table-cell">Uploaded by</th>
                 {hasActions && <th className="py-3 px-4 w-24" />}
               </tr>
             </thead>
             <tbody>
               {documents.map(doc => (
-                <tr key={doc.id} className="border-b border-zinc-800/50 hover:bg-zinc-900/50 transition-colors duration-150">
+                <tr key={doc.id} className="border-b hover:bg-muted/50 transition-colors duration-150">
                   <td className="py-3 px-4">
                     <div className="flex items-center gap-2.5">
-                      <FileText className="h-4 w-4 text-zinc-500 shrink-0" />
-                      <span className="text-zinc-300 truncate max-w-[200px]">{doc.originalName}</span>
+                      <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <span className="text-foreground truncate max-w-[200px]">{doc.originalName}</span>
                     </div>
                   </td>
-                  <td className="py-3 px-4 text-zinc-500 text-xs hidden sm:table-cell">
+                  <td className="py-3 px-4 text-muted-foreground text-xs hidden sm:table-cell">
                     {formatBytes(doc.fileSizeBytes)}
                   </td>
                   <td className="py-3 px-4 hidden md:table-cell">
-                    <Badge className={cn('text-[10px] rounded capitalize', statusColor[doc.status] ?? statusColor['processing'])}>
+                    <Badge className={cn('text-[10px] rounded capitalize border', statusColor[doc.status] ?? statusColor['processing'])}>
                       {doc.status === 'processing' && <Loader2 className="h-2.5 w-2.5 animate-spin mr-1" />}
                       {doc.status}
                     </Badge>
                   </td>
-                  <td className="py-3 px-4 text-zinc-500 text-xs hidden lg:table-cell">
+                  <td className="py-3 px-4 text-muted-foreground text-xs hidden lg:table-cell">
                     {doc.uploadedBy.fullName}
                   </td>
                   {hasActions && (
@@ -153,7 +153,7 @@ export default function SubjectDocumentsPage() {
                             size="icon"
                             onClick={() => setSummaryDoc({ id: doc.id, name: doc.originalName })}
                             title="AI summary"
-                            className="h-7 w-7 rounded-md text-zinc-600 hover:text-zinc-200 hover:bg-zinc-800"
+                            className="h-7 w-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary"
                           >
                             <Sparkles className="h-3.5 w-3.5" />
                           </Button>
@@ -164,7 +164,7 @@ export default function SubjectDocumentsPage() {
                             size="icon"
                             disabled={remove.isPending && confirmId === doc.id}
                             onClick={() => setConfirmId(doc.id)}
-                            className="h-7 w-7 rounded-md text-zinc-600 hover:text-red-400 hover:bg-zinc-800"
+                            className="h-7 w-7 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                           </Button>
@@ -180,22 +180,22 @@ export default function SubjectDocumentsPage() {
       )}
 
       <AlertDialog open={!!confirmId} onOpenChange={open => { if (!open) setConfirmId(null) }}>
-        <AlertDialogContent className="bg-zinc-900 border border-zinc-800 rounded-lg shadow-none p-0 max-w-md">
-          <div className="px-5 py-4 border-b border-zinc-800">
-            <AlertDialogTitle className="text-base font-semibold text-zinc-50">Delete document?</AlertDialogTitle>
-            <AlertDialogDescription className="text-sm text-zinc-400 mt-0.5">
-              <span className="text-zinc-300 font-medium">{confirmingDoc?.originalName}</span> will be permanently deleted from the knowledge base. This cannot be undone.
+        <AlertDialogContent className="bg-card border rounded-lg shadow-none p-0 max-w-md">
+          <div className="px-5 py-4 border-b">
+            <AlertDialogTitle className="text-base font-semibold text-foreground">Delete document?</AlertDialogTitle>
+            <AlertDialogDescription className="text-sm text-muted-foreground mt-0.5">
+              <span className="text-foreground font-medium">{confirmingDoc?.originalName}</span> will be permanently deleted from the knowledge base. This cannot be undone.
             </AlertDialogDescription>
           </div>
-          <AlertDialogFooter className="px-5 py-4 border-t border-zinc-800 flex justify-end gap-2">
+          <AlertDialogFooter className="px-5 py-4 border-t flex justify-end gap-2">
             <AlertDialogCancel
-              className="border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50 h-8 px-3 text-sm rounded-md"
+              className="border bg-transparent text-muted-foreground hover:bg-secondary hover:text-foreground h-8 px-3 text-sm rounded-md"
               onClick={() => setConfirmId(null)}
             >
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
-              className="bg-red-950 text-red-400 border border-red-900 hover:bg-red-900 hover:text-red-300 h-8 px-3 text-sm rounded-md"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 h-8 px-3 text-sm rounded-md"
               onClick={() => {
                 if (confirmId) remove.mutate(confirmId, { onSettled: () => setConfirmId(null) })
               }}
@@ -207,22 +207,22 @@ export default function SubjectDocumentsPage() {
       </AlertDialog>
 
       <Dialog open={!!summaryDoc} onOpenChange={open => { if (!open) setSummaryDoc(null) }}>
-        <DialogContent className="bg-zinc-900 border border-zinc-800 rounded-lg shadow-none p-0 max-w-lg">
-          <div className="px-5 py-4 border-b border-zinc-800">
-            <DialogTitle className="text-base font-semibold text-zinc-50 flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-zinc-400" /> Document Summary
+        <DialogContent className="bg-card border rounded-lg shadow-none p-0 max-w-lg">
+          <div className="px-5 py-4 border-b">
+            <DialogTitle className="text-base font-semibold text-foreground flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-muted-foreground" /> Document Summary
             </DialogTitle>
-            <DialogDescription className="text-sm text-zinc-400 mt-0.5 truncate">{summaryDoc?.name}</DialogDescription>
+            <DialogDescription className="text-sm text-muted-foreground mt-0.5 truncate">{summaryDoc?.name}</DialogDescription>
           </div>
           <div className="p-5 max-h-[60vh] overflow-y-auto">
             {summary.isLoading ? (
-              <div className="flex items-center gap-2 text-sm text-zinc-500">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" /> Generating summary…
               </div>
             ) : summary.isError ? (
-              <p className="text-sm text-red-400">{getErrorMessage(summary.error, 'Failed to load summary.')}</p>
+              <p className="text-sm text-destructive">{getErrorMessage(summary.error, 'Failed to load summary.')}</p>
             ) : summary.data ? (
-              <div className="prose font-serif prose-invert prose-sm max-w-none text-zinc-300 prose-headings:text-zinc-100 prose-strong:text-zinc-100">
+              <div className="prose font-serif prose-sm max-w-none text-foreground">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{summary.data.summary}</ReactMarkdown>
               </div>
             ) : null}

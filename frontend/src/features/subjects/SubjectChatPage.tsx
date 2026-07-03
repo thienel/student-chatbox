@@ -132,12 +132,12 @@ export default function SubjectChatPage() {
   return (
     <div className="flex h-[calc(100dvh-10.5rem)]">
       {/* Sidebar — chat list */}
-      <div className="w-56 border-r border-zinc-800 flex flex-col shrink-0">
-        <div className="p-3 border-b border-zinc-800">
+      <div className="w-56 border-r flex flex-col shrink-0">
+        <div className="p-3 border-b">
           <Button
             onClick={handleNewChat}
             disabled={createChat.isPending}
-            className="w-full h-8 bg-zinc-50 text-zinc-950 hover:bg-zinc-200 text-xs font-medium rounded-md"
+            className="w-full h-8 bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-medium rounded-md"
           >
             <Plus className="h-3.5 w-3.5 mr-1.5" />
             New chat
@@ -146,10 +146,10 @@ export default function SubjectChatPage() {
         <div className="flex-1 overflow-y-auto p-2 space-y-0.5">
           {chatsLoading ? (
             Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-8 rounded-md bg-zinc-900" />
+              <Skeleton key={i} className="h-8 rounded-md bg-muted" />
             ))
           ) : chats.length === 0 ? (
-            <p className="text-xs text-zinc-600 text-center py-4">No chats yet</p>
+            <p className="text-xs text-muted-foreground text-center py-4">No chats yet</p>
           ) : (
             chats.map(chat => (
               <div
@@ -158,8 +158,8 @@ export default function SubjectChatPage() {
                   'group flex items-center gap-1 h-8 px-2 rounded-md cursor-pointer',
                   'transition-colors duration-150',
                   chat.id === chatId
-                    ? 'bg-zinc-800 text-zinc-50'
-                    : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50'
+                    ? 'bg-secondary text-foreground'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
                 )}
                 onClick={() => navigate(`/subjects/${subjectId}/chat/${chat.id}`)}
               >
@@ -176,7 +176,7 @@ export default function SubjectChatPage() {
                       },
                     })
                   }}
-                  className="h-5 w-5 rounded shrink-0 opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-red-400 hover:bg-transparent"
+                  className="h-5 w-5 rounded shrink-0 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive hover:bg-transparent"
                 >
                   <Trash2 className="h-3 w-3" />
                 </Button>
@@ -195,7 +195,7 @@ export default function SubjectChatPage() {
               {chatLoading ? (
                 <div className="space-y-4">
                   {Array.from({ length: 3 }).map((_, i) => (
-                    <Skeleton key={i} className="h-16 rounded-lg bg-zinc-900" />
+                    <Skeleton key={i} className="h-16 rounded-lg bg-muted" />
                   ))}
                 </div>
               ) : messages.length === 0 ? (
@@ -210,9 +210,9 @@ export default function SubjectChatPage() {
                 messages.map(msg => (
                   msg.role === 'user' ? (
                     <div key={msg.id} className="flex justify-end mb-4">
-                      <div className="max-w-[72%] bg-zinc-800 rounded-lg px-3 py-2">
-                        <p className="text-sm text-zinc-50">{msg.content}</p>
-                        <span className="text-[11px] text-zinc-500 mt-1 block text-right">
+                      <div className="max-w-[72%] bg-secondary rounded-lg px-3 py-2">
+                        <p className="text-sm text-foreground">{msg.content}</p>
+                        <span className="text-[11px] text-muted-foreground mt-1 block text-right">
                           {formatTime(msg.createdAt)}
                         </span>
                       </div>
@@ -220,25 +220,25 @@ export default function SubjectChatPage() {
                   ) : (
                     <div key={msg.id} className="mb-6">
                       <div className="flex items-center gap-2 mb-2">
-                        <div className="h-5 w-5 rounded bg-zinc-800 border border-zinc-700 flex items-center justify-center shrink-0">
-                          <Bot className="h-3 w-3 text-zinc-400" />
+                        <div className="h-5 w-5 rounded bg-secondary border flex items-center justify-center shrink-0">
+                          <Bot className="h-3 w-3 text-muted-foreground" />
                         </div>
-                        <span className="text-xs text-zinc-500">EduChat · {formatTime(msg.createdAt)}</span>
+                        <span className="text-xs text-muted-foreground">EduChat · {formatTime(msg.createdAt)}</span>
                       </div>
                       {msg.isStreaming ? (
                         <div>
-                          <div className="text-sm text-zinc-300 leading-relaxed">
+                          <div className="text-sm text-foreground leading-relaxed">
                             {msg.streamContent || (
                               <div className="flex gap-1 py-2">
-                                <span className="h-1 w-1 rounded-full bg-zinc-500 animate-bounce [animation-delay:0ms]" />
-                                <span className="h-1 w-1 rounded-full bg-zinc-500 animate-bounce [animation-delay:150ms]" />
-                                <span className="h-1 w-1 rounded-full bg-zinc-500 animate-bounce [animation-delay:300ms]" />
+                                <span className="h-1 w-1 rounded-full bg-muted-foreground animate-bounce [animation-delay:0ms]" />
+                                <span className="h-1 w-1 rounded-full bg-muted-foreground animate-bounce [animation-delay:150ms]" />
+                                <span className="h-1 w-1 rounded-full bg-muted-foreground animate-bounce [animation-delay:300ms]" />
                               </div>
                             )}
                           </div>
                         </div>
                       ) : (
-                        <div className="text-sm text-zinc-300 leading-relaxed prose prose-invert prose-sm max-w-none">
+                        <div className="text-sm text-foreground leading-relaxed prose prose-sm max-w-none">
                           <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
                         </div>
                       )}
@@ -250,8 +250,8 @@ export default function SubjectChatPage() {
             </div>
 
             {/* Input */}
-            <div className="border-t border-zinc-800 p-3">
-              <div className="flex items-end gap-2 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 focus-within:border-zinc-700 transition-colors duration-150">
+            <div className="border-t p-3">
+              <div className="flex items-end gap-2 bg-card border rounded-lg px-3 py-2 focus-within:border-primary transition-colors duration-150">
                 <Textarea
                   ref={textareaRef}
                   value={input}
@@ -259,14 +259,14 @@ export default function SubjectChatPage() {
                   onKeyDown={handleKeyDown}
                   placeholder="Ask anything about this subject..."
                   rows={1}
-                  className="flex-1 bg-transparent border-0 text-sm text-zinc-50 placeholder:text-zinc-600 resize-none focus-visible:ring-0 min-h-[20px] max-h-[120px] p-0 overflow-y-hidden"
+                  className="flex-1 bg-transparent border-0 text-sm text-foreground placeholder:text-muted-foreground resize-none focus-visible:ring-0 min-h-[20px] max-h-[120px] p-0 overflow-y-hidden"
                   disabled={isStreaming}
                 />
                 <Button
                   size="icon"
                   onClick={() => void handleSend()}
                   disabled={!input.trim() || isStreaming}
-                  className="h-7 w-7 rounded-md bg-zinc-50 text-zinc-950 hover:bg-zinc-200 shrink-0 disabled:opacity-40"
+                  className="h-7 w-7 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 shrink-0 disabled:opacity-40"
                 >
                   <SendHorizonal className="h-3.5 w-3.5" />
                 </Button>
@@ -275,21 +275,21 @@ export default function SubjectChatPage() {
           </div>
 
           {/* Sources */}
-          <div className="w-72 border-l border-zinc-800 overflow-y-auto p-3 shrink-0">
-            <p className="text-xs font-medium text-zinc-500 uppercase tracking-wide mb-3">Sources</p>
+          <div className="w-72 border-l overflow-y-auto p-3 shrink-0">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">Sources</p>
             {sources.length === 0 ? (
-              <p className="text-xs text-zinc-600">Sources appear here after a response.</p>
+              <p className="text-xs text-muted-foreground">Sources appear here after a response.</p>
             ) : (
               sources.map((src, i) => (
-                <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-md p-3 mb-2 hover:border-zinc-700 transition-colors duration-150 cursor-pointer">
+                <div key={i} className="bg-card border rounded-md p-3 mb-2 hover:border-muted-foreground transition-colors duration-150 cursor-pointer">
                   <div className="flex items-center gap-2 mb-1.5">
-                    <FileText className="h-3.5 w-3.5 text-zinc-500 shrink-0" />
-                    <span className="text-xs font-medium text-zinc-300 truncate">{src.originalName}</span>
-                    <span className="text-[11px] text-zinc-600 ml-auto shrink-0">
+                    <FileText className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                    <span className="text-xs font-medium text-foreground truncate">{src.originalName}</span>
+                    <span className="text-[11px] text-muted-foreground ml-auto shrink-0">
                       {(src.score * 100).toFixed(0)}%
                     </span>
                   </div>
-                  <p className="text-[12px] text-zinc-500 leading-relaxed line-clamp-3">{src.excerpt}</p>
+                  <p className="text-[12px] text-muted-foreground leading-relaxed line-clamp-3">{src.excerpt}</p>
                 </div>
               ))
             )}
@@ -304,7 +304,7 @@ export default function SubjectChatPage() {
             action={
               <Button
                 onClick={handleNewChat}
-                className="bg-zinc-50 text-zinc-950 hover:bg-zinc-200 h-8 px-3 text-sm font-medium rounded-md"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-3 text-sm font-medium rounded-md"
               >
                 <Plus className="h-4 w-4 mr-1.5" />
                 New chat

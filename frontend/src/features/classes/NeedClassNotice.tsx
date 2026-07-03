@@ -13,7 +13,7 @@ export function NeedClassNotice({ noun }: { noun: string }) {
       action={
         <Link
           to={`/subjects/${subjectId}/classes`}
-          className="inline-flex items-center gap-1.5 bg-zinc-50 text-zinc-950 hover:bg-zinc-200 h-8 px-3 text-sm font-medium rounded-md"
+          className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-3 text-sm font-medium rounded-md"
         >
           <GraduationCap className="h-4 w-4" />
           Go to Classes
