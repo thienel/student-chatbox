@@ -80,10 +80,16 @@ export function AchievementStamp({ value, label, className = '' }: AchievementSt
         className="relative flex flex-col items-center justify-center text-stamp-gold"
         style={{ transform: 'rotate(-5deg)' }}
       >
-        <span className="font-data font-bold text-3xl leading-none tracking-tighter">
+        <span 
+          className="font-bold text-3xl leading-none tracking-[-0.05em]"
+          style={{ fontFamily: '"IBM Plex Mono", monospace' }}
+        >
           {value}
         </span>
-        <span className="font-data font-semibold text-[10px] uppercase tracking-widest mt-1">
+        <span 
+          className="font-semibold text-[10px] uppercase tracking-widest mt-1"
+          style={{ fontFamily: '"IBM Plex Mono", monospace' }}
+        >
           {label}
         </span>
       </div>
