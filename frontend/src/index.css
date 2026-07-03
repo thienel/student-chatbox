@@ -72,4 +72,9 @@
     border-left: 2px solid;
     border-image: linear-gradient(to bottom, hsl(var(--primary)), hsl(var(--accent))) 1;
   }
+
+  .hover-lift {
+    @apply transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md;
+  }
 }
+
