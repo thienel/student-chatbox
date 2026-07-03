@@ -20,6 +20,17 @@ import { RefreshTokenDto } from '../../../application/auth/dtos/refresh-token.dt
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { CurrentUser } from '../../decorators/current-user.decorator';
 import { AuditLogService } from '../../../application/system/services/audit-log.service';
+import { RegisterUseCase } from '../../../application/auth/use-cases/register.use-case';
+import { VerifyEmailUseCase } from '../../../application/auth/use-cases/verify-email.use-case';
+import { ResendOtpUseCase } from '../../../application/auth/use-cases/resend-otp.use-case';
+import { ForgotPasswordUseCase } from '../../../application/auth/use-cases/forgot-password.use-case';
+import { ResetPasswordUseCase } from '../../../application/auth/use-cases/reset-password.use-case';
+import { VerifyResetOtpUseCase } from '../../../application/auth/use-cases/verify-reset-otp.use-case';
+import { RegisterDto } from '../../../application/auth/dtos/register.dto';
+import { VerifyOtpDto } from '../../../application/auth/dtos/verify-otp.dto';
+import { ResendOtpDto } from '../../../application/auth/dtos/resend-otp.dto';
+import { ForgotPasswordDto } from '../../../application/auth/dtos/forgot-password.dto';
+import { ResetPasswordDto } from '../../../application/auth/dtos/reset-password.dto';
 
 @Controller('auth')
 @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
@@ -29,6 +40,12 @@ export class AuthController {
     private readonly refreshTokenUseCase: RefreshTokenUseCase,
     private readonly logoutUseCase: LogoutUseCase,
     private readonly getMeUseCase: GetMeUseCase,
+    private readonly registerUseCase: RegisterUseCase,
+    private readonly verifyEmailUseCase: VerifyEmailUseCase,
+    private readonly resendOtpUseCase: ResendOtpUseCase,
+    private readonly forgotPasswordUseCase: ForgotPasswordUseCase,
+    private readonly verifyResetOtpUseCase: VerifyResetOtpUseCase,
+    private readonly resetPasswordUseCase: ResetPasswordUseCase,
     private readonly auditLogService: AuditLogService,
   ) {}
 
@@ -57,6 +74,41 @@ export class AuthController {
       );
       throw error;
     }
+  }
+
+  @Post('register')
+  async register(@Body() dto: RegisterDto) {
+    return this.registerUseCase.execute(dto);
+  }
+
+  @Post('verify-otp')
+  @HttpCode(HttpStatus.OK)
+  async verifyOtp(@Body() dto: VerifyOtpDto) {
+    return this.verifyEmailUseCase.execute(dto);
+  }
+
+  @Post('resend-otp')
+  @HttpCode(HttpStatus.OK)
+  async resendOtp(@Body() dto: ResendOtpDto) {
+    return this.resendOtpUseCase.execute(dto);
+  }
+
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.forgotPasswordUseCase.execute(dto);
+  }
+
+  @Post('verify-reset-otp')
+  @HttpCode(HttpStatus.OK)
+  async verifyResetOtp(@Body() dto: VerifyOtpDto) {
+    return this.verifyResetOtpUseCase.execute(dto);
+  }
+
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.resetPasswordUseCase.execute(dto);
   }
 
   @Post('refresh')

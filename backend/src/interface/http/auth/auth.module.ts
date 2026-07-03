@@ -7,6 +7,12 @@ import { LoginUseCase } from '../../../application/auth/use-cases/login.use-case
 import { RefreshTokenUseCase } from '../../../application/auth/use-cases/refresh-token.use-case';
 import { LogoutUseCase } from '../../../application/auth/use-cases/logout.use-case';
 import { GetMeUseCase } from '../../../application/auth/use-cases/get-me.use-case';
+import { RegisterUseCase } from '../../../application/auth/use-cases/register.use-case';
+import { VerifyEmailUseCase } from '../../../application/auth/use-cases/verify-email.use-case';
+import { ResendOtpUseCase } from '../../../application/auth/use-cases/resend-otp.use-case';
+import { ForgotPasswordUseCase } from '../../../application/auth/use-cases/forgot-password.use-case';
+import { ResetPasswordUseCase } from '../../../application/auth/use-cases/reset-password.use-case';
+import { VerifyResetOtpUseCase } from '../../../application/auth/use-cases/verify-reset-otp.use-case';
 import { JwtStrategy } from '../../guards/jwt.strategy';
 import { TypeOrmDatabaseModule } from '../../../infrastructure/database/typeorm/typeorm.module';
 import { AuditLogService } from '../../../application/system/services/audit-log.service';
@@ -25,7 +31,20 @@ import { AuditLogService } from '../../../application/system/services/audit-log.
     }),
   ],
   controllers: [AuthController],
-  providers: [LoginUseCase, RefreshTokenUseCase, LogoutUseCase, GetMeUseCase, JwtStrategy, AuditLogService],
+  providers: [
+    LoginUseCase,
+    RefreshTokenUseCase,
+    LogoutUseCase,
+    GetMeUseCase,
+    RegisterUseCase,
+    VerifyEmailUseCase,
+    ResendOtpUseCase,
+    ForgotPasswordUseCase,
+    ResetPasswordUseCase,
+    VerifyResetOtpUseCase,
+    JwtStrategy,
+    AuditLogService,
+  ],
   exports: [JwtStrategy, JwtModule, PassportModule],
 })
 export class AuthModule {}

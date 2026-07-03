@@ -39,14 +39,14 @@ services:
       qdrant:
         condition: service_started
     environment:
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-dummy_key}
       OPENAI_CHAT_MODEL: ${OPENAI_CHAT_MODEL:-gpt-4o}
       OPENAI_EMBEDDING_MODEL: ${OPENAI_EMBEDDING_MODEL:-text-embedding-3-small}
       OPENAI_FLASHCARD_MODEL: ${OPENAI_FLASHCARD_MODEL:-gpt-4o-mini}
       OPENAI_EXAM_MODEL: ${OPENAI_EXAM_MODEL:-gpt-4o-mini}
       QDRANT_URL: http://qdrant:6333
       QDRANT_COLLECTION: ${QDRANT_COLLECTION:-documents}
-      AI_SERVICE_SECRET: ${AI_SERVICE_SECRET}
+      AI_SERVICE_SECRET: ${AI_SERVICE_SECRET:-educhat_ai_secret}
       NESTJS_URL: http://backend:3000/api/v1
       PORT: 8000
     volumes:
@@ -70,13 +70,15 @@ services:
         condition: service_healthy
       langchain:
         condition: service_healthy
+    env_file:
+      - ./backend/.env
     environment:
       DATABASE_URL: postgresql://educhat:${POSTGRES_PASSWORD:-educhat_secret}@postgres:5432/educhat
       AI_SERVICE_URL: http://langchain:8000
-      AI_SERVICE_SECRET: ${AI_SERVICE_SECRET}
-      JWT_SECRET: ${JWT_SECRET}
+      AI_SERVICE_SECRET: ${AI_SERVICE_SECRET:-educhat_ai_secret}
+      JWT_SECRET: ${JWT_SECRET:-educhat_jwt_secret}
       JWT_ACCESS_EXPIRES: 15m
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-educhat_jwt_refresh_secret}
       JWT_REFRESH_EXPIRES: 7d
       PORT: 3000
       NODE_ENV: production

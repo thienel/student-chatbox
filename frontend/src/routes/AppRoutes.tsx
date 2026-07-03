@@ -5,6 +5,10 @@ import { SubjectShell } from '@/components/layout/SubjectShell'
 import { AdminShell } from '@/components/layout/AdminShell'
 
 import LoginPage from '@/features/auth/LoginPage'
+import RegisterPage from '@/features/auth/RegisterPage'
+import VerifyOtpPage from '@/features/auth/VerifyOtpPage'
+import ForgotPasswordPage from '@/features/auth/ForgotPasswordPage'
+import ResetPasswordPage from '@/features/auth/ResetPasswordPage'
 import HomePage from '@/features/subjects/HomePage'
 import SubjectsPage from '@/features/subjects/SubjectsPage'
 import SubjectDocumentsPage from '@/features/subjects/SubjectDocumentsPage'
@@ -60,6 +64,10 @@ export default function AppRoutes() {
     <Routes>
       <Route path="/" element={<RootRedirect />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/verify-otp" element={<VerifyOtpPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
 
       {/* Main shell — all authenticated routes */}
       <Route element={<Protected><AppShell /></Protected>}>

@@ -51,6 +51,8 @@ import { BoardUpvoteOrmEntity } from './orm-entities/board-upvote.orm-entity';
 import { BoardTypeOrmRepository } from './repositories/board.typeorm-repository';
 import { DatabaseSeederService } from './seeds/seed.service';
 import { TOKENS } from '../../../shared/constants/tokens';
+import { OtpTokenEntity } from './orm-entities/otp-token.orm-entity';
+import { OtpTokenTypeOrmRepository } from './repositories/otp-token.typeorm-repository';
 
 const ormEntities = [
   RoleOrmEntity,
@@ -83,6 +85,7 @@ const ormEntities = [
   BoardQuestionOrmEntity,
   BoardAnswerOrmEntity,
   BoardUpvoteOrmEntity,
+  OtpTokenEntity,
 ];
 
 @Module({
@@ -138,6 +141,8 @@ const ormEntities = [
     { provide: TOKENS.STUDY_PLAN_REPO, useClass: StudyPlanTypeOrmRepository },
     { provide: TOKENS.BADGE_REPO, useClass: BadgeTypeOrmRepository },
     { provide: TOKENS.BOARD_REPO, useClass: BoardTypeOrmRepository },
+    { provide: TOKENS.OTP_TOKEN_REPO, useClass: OtpTokenTypeOrmRepository },
+    OtpTokenTypeOrmRepository,
   ],
   exports: [
     TypeOrmModule,
@@ -177,6 +182,8 @@ const ormEntities = [
     StudyPlanTypeOrmRepository,
     BadgeTypeOrmRepository,
     BoardTypeOrmRepository,
+    { provide: TOKENS.OTP_TOKEN_REPO, useClass: OtpTokenTypeOrmRepository },
+    OtpTokenTypeOrmRepository,
   ],
 })
 export class TypeOrmDatabaseModule {}
