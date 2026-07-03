@@ -13,7 +13,7 @@ export default function ChatsPage() {
   return (
     <div className="max-w-5xl mx-auto px-6 py-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-display font-medium text-ink tracking-tight">My Chats</h1>
+        <h1 className="text-2xl font-heading font-medium text-ink tracking-tight">My Chats</h1>
         <p className="text-sm text-muted-foreground mt-0.5">{chats.length} conversations</p>
       </div>
 

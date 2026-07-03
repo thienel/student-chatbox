@@ -9,9 +9,9 @@ export default {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
         mono: ['Geist Mono', 'monospace'],
-        display: ['Fraunces', 'serif'],
-        data: ['IBM Plex Mono', 'monospace'],
-        serif: ['Fraunces', 'serif'],
+        heading: ['"Fraunces"', 'serif'],
+        data: ['"IBM Plex Mono"', 'monospace'],
+        serif: ['"Fraunces"', 'serif'],
       },
       colors: {
         border: 'hsl(var(--border))',

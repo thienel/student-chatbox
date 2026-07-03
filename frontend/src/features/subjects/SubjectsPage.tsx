@@ -26,7 +26,7 @@ export default function SubjectsPage() {
     <div className="max-w-5xl mx-auto px-6 py-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-display font-medium text-ink tracking-tight">Subjects</h1>
+          <h1 className="text-2xl font-heading font-medium text-ink tracking-tight">Subjects</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
             {data?.total ?? 0} subjects available
           </p>

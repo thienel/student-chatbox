@@ -47,7 +47,7 @@ export default function LoginPage() {
           <div className="inline-flex items-center justify-center h-10 w-10 rounded-md bg-card border border-border mb-4">
             <span className="text-lg font-semibold text-foreground">E</span>
           </div>
-          <h1 className="text-3xl font-display font-medium text-ink tracking-tight">EduChat</h1>
+          <h1 className="text-3xl font-heading font-medium text-ink tracking-tight">EduChat</h1>
           <p className="text-sm text-muted-foreground mt-1">Sign in to your account</p>
         </div>
 

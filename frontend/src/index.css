@@ -59,8 +59,7 @@
   }
 
   html {
-    @apply bg-background text-foreground;
-    font-family: 'Inter', system-ui, sans-serif;
+    @apply bg-background text-foreground font-sans;
     -webkit-font-smoothing: antialiased;
   }
 

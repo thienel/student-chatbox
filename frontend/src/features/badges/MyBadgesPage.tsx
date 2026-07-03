@@ -30,7 +30,7 @@ export default function MyBadgesPage() {
     <div className="max-w-3xl mx-auto px-6 py-6">
       <div className="flex items-center gap-2 mb-1">
         <Award className="h-4 w-4 text-muted-foreground" />
-        <h1 className="text-2xl font-display font-medium text-ink tracking-tight">My Badges</h1>
+        <h1 className="text-2xl font-heading font-medium text-ink tracking-tight">My Badges</h1>
       </div>
       <p className="text-xs text-muted-foreground mb-6">Earn badges by studying, sharing, and acing exams.</p>
 
