@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { BookOpen, MessageSquare, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { EmptyState } from '@/components/shared/EmptyState'
 import { useAuthStore } from '@/store/useAuthStore'
 import { useSubjects } from '@/features/subjects/queries'
 import { useChats } from '@/features/chat/queries'
@@ -18,11 +19,12 @@ export default function HomePage() {
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-6">
-      <div className="mb-8">
-        <h1 className="text-xl font-semibold text-foreground">
+      <div className="mb-8 bg-card border rounded-xl p-6 shadow-sm relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
+        <h1 className="text-2xl font-bold text-foreground tracking-tight relative z-10">
           Welcome back, {user?.fullName?.split(' ')[0]}
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="text-sm text-muted-foreground mt-1 relative z-10">
           {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
         </p>
       </div>
@@ -48,9 +50,8 @@ export default function HomePage() {
               ))}
             </div>
           ) : subjects.length === 0 ? (
-            <div className="bg-card border rounded-lg p-6 text-center">
-              <BookOpen className="h-5 w-5 text-muted-foreground mx-auto mb-2" />
-              <p className="text-xs text-muted-foreground">No subjects yet</p>
+            <div className="bg-card border rounded-lg p-2">
+              <EmptyState size="sm" icon={BookOpen} title="No subjects yet" />
             </div>
           ) : (
             <div className="space-y-2">
@@ -58,7 +59,7 @@ export default function HomePage() {
                 <div
                   key={s.id}
                   onClick={() => navigate(`/subjects/${s.id}/documents`)}
-                  className="flex items-center gap-3 bg-card border rounded-lg px-4 py-3 hover:border-primary/50 transition-colors duration-150 cursor-pointer"
+                  className="flex items-center gap-3 bg-card border rounded-lg px-4 py-3 hover:border-primary/50 hover-lift cursor-pointer"
                 >
                   <div className="h-8 w-8 rounded-md bg-secondary flex items-center justify-center shrink-0">
                     <BookOpen className="h-4 w-4 text-muted-foreground" />
@@ -94,9 +95,8 @@ export default function HomePage() {
               ))}
             </div>
           ) : recentChats.length === 0 ? (
-            <div className="bg-card border rounded-lg p-6 text-center">
-              <MessageSquare className="h-5 w-5 text-muted-foreground mx-auto mb-2" />
-              <p className="text-xs text-muted-foreground">No chats yet</p>
+            <div className="bg-card border rounded-lg p-2">
+              <EmptyState size="sm" icon={MessageSquare} title="No chats yet" />
             </div>
           ) : (
             <div className="space-y-2">
@@ -104,7 +104,7 @@ export default function HomePage() {
                 <div
                   key={chat.id}
                   onClick={() => navigate(`/chats/${chat.id}`)}
-                  className="flex items-center gap-3 bg-card border rounded-lg px-4 py-3 hover:border-primary/50 transition-colors duration-150 cursor-pointer"
+                  className="flex items-center gap-3 bg-card border rounded-lg px-4 py-3 hover:border-primary/50 hover-lift cursor-pointer"
                 >
                   <div className="h-8 w-8 rounded-md bg-secondary flex items-center justify-center shrink-0">
                     <MessageSquare className="h-4 w-4 text-muted-foreground" />
