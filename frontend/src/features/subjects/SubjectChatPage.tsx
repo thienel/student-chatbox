@@ -223,7 +223,7 @@ export default function SubjectChatPage() {
                         <div className="h-5 w-5 rounded bg-secondary border flex items-center justify-center shrink-0">
                           <Bot className="h-3 w-3 text-muted-foreground" />
                         </div>
-                        <span className="text-xs text-muted-foreground">EduChat · {formatTime(msg.createdAt)}</span>
+                        <span className="text-xs text-muted-foreground">Folio · {formatTime(msg.createdAt)}</span>
                       </div>
                       {msg.isStreaming ? (
                         <div>
