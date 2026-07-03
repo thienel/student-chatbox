@@ -6,7 +6,7 @@ import { CommandPalette } from '@/components/shared/CommandPalette'
 
 export function AppShell() {
   return (
-    <div className="min-h-screen bg-zinc-950">
+    <div className="min-h-screen bg-background">
       <Topbar />
       <main className="pt-12 pb-20 min-h-screen">
         <Outlet />

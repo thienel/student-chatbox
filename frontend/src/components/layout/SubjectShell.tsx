@@ -35,7 +35,7 @@ export function SubjectShell() {
 
   return (
     <SubjectClassProvider subjectId={id}>
-      <div className="min-h-screen bg-zinc-950">
+      <div className="min-h-screen bg-background">
         <Topbar />
         <div className="fixed top-12 left-0 right-0 z-[39]">
           <SubjectTabs subjectId={id} />
