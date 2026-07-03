@@ -32,6 +32,8 @@ export default function HomePage() {
         </div>
         
         <div className="hidden sm:block relative z-10 -mt-2 -mr-2">
+          {/* TODO: Integrate with real study stats endpoint (e.g. GET /study-stats)
+              to fetch user's actual current streak instead of hardcoding '3'. */}
           <AchievementStamp value={3} label="DAY STREAK" />
         </div>
       </div>

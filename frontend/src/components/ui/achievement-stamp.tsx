@@ -15,23 +15,41 @@ export function AchievementStamp({ value, label, className = '' }: AchievementSt
         style={{ transform: 'rotate(-5deg)' }}
       >
         <defs>
-          <filter id="ink-texture" x="0%" y="0%" width="100%" height="100%">
+          <filter id="ink-texture" x="-10%" y="-10%" width="120%" height="120%">
+            {/* Generate low frequency noise for edge displacement (wavy edges) */}
             <feTurbulence
               type="fractalNoise"
-              baseFrequency="0.8"
+              baseFrequency="0.04"
               numOctaves="3"
               result="noise"
+            />
+            {/* Displace the original graphic based on noise */}
+            <feDisplacementMap
+              in="SourceGraphic"
+              in2="noise"
+              scale="2.5"
+              xChannelSelector="R"
+              yChannelSelector="G"
+              result="displaced"
+            />
+            {/* Generate high frequency noise for ink fading/texture */}
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency="0.5"
+              numOctaves="2"
+              result="fineNoise"
             />
             <feColorMatrix
               type="matrix"
               values="1 0 0 0 0
                       0 1 0 0 0
                       0 0 1 0 0
-                      0 0 0 7 -3"
-              in="noise"
-              result="coloredNoise"
+                      0 0 0 4 -1"
+              in="fineNoise"
+              result="textureMask"
             />
-            <feComposite operator="in" in="SourceGraphic" in2="coloredNoise" />
+            {/* Composite the displaced shape with the texture mask */}
+            <feComposite operator="in" in="displaced" in2="textureMask" />
           </filter>
         </defs>
         
@@ -44,13 +62,13 @@ export function AchievementStamp({ value, label, className = '' }: AchievementSt
             fill="none"
             stroke="currentColor"
             strokeWidth="2.5"
-            strokeDasharray="4 4"
+            strokeDasharray="5 3"
           />
           {/* Inner solid border */}
           <circle
             cx="50"
             cy="50"
-            r="40"
+            r="41"
             fill="none"
             stroke="currentColor"
             strokeWidth="1.5"
