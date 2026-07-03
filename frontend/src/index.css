@@ -22,8 +22,9 @@
     --secondary-foreground: 48 3% 36%; /* text phụ #5F5E5A */
     
     --muted: 210 40% 96%; /* surface phụ */
-    --muted-foreground: 52 4% 52%; /* text muted #888780 */
+    --muted-foreground: 51 3% 41%; /* text muted #6B6A64 (Pass AA 4.95:1) */
     
+    /* Lưu ý: cặp accent/accent-foreground (Gold) chỉ đạt 4.46:1, chỉ dùng cho label/badge lớn (>=18px bold hoặc >=24px regular), KHÔNG dùng cho body text nhỏ */
     --accent: 32 94% 44%; /* Gold #D97706 */
     --accent-foreground: 32 94% 13%; /* text đậm #412402 */
     --accent-light: 36 67% 92%; /* nền nhạt #FAEEDA */
