@@ -6,7 +6,7 @@ import { CommandPalette } from '@/components/shared/CommandPalette'
 
 export function AppShell() {
   const { pathname } = useLocation()
-  const isMinimalPage = pathname.includes('/chat/') || pathname.includes('/exams/') || pathname.includes('/study')
+  const isMinimalPage = pathname.includes('/chat/') || pathname.includes('/exams/') || pathname.endsWith('/study')
 
   return (
     <div className="min-h-screen bg-background relative z-0 overflow-hidden">
