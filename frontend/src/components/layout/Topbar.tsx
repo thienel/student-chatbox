@@ -11,6 +11,7 @@ import { useAuthStore } from '@/store/useAuthStore'
 import { useBreadcrumbStore } from '@/store/useBreadcrumbStore'
 import { useCommandPalette } from '@/hooks/useCommandPalette'
 import { cn } from '@/lib/utils'
+import { Logo } from '@/components/ui/logo'
 
 function getDefaultCrumb(pathname: string): Array<{ label: string; href?: string }> {
   if (pathname.startsWith('/admin')) return [{ label: 'Admin' }]
@@ -38,9 +39,14 @@ export function Topbar() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-40 h-12 flex items-center justify-between px-5 bg-background border-b">
-      <nav className="flex items-center gap-1.5 text-sm min-w-0">
-        {displayCrumbs.map((crumb, i) => (
-          <span key={i} className="flex items-center gap-1.5 min-w-0">
+      <div className="flex items-center gap-4 min-w-0">
+        <Link to="/" className="flex-shrink-0 flex items-center hover-lift" title="Home">
+          <Logo className="h-6 w-auto" />
+        </Link>
+        <div className="w-[1px] h-4 bg-border hidden sm:block" />
+        <nav className="flex items-center gap-1.5 text-sm min-w-0">
+          {displayCrumbs.map((crumb, i) => (
+            <span key={i} className="flex items-center gap-1.5 min-w-0">
             {i > 0 && <ChevronRight className="h-3 w-3 text-muted-foreground shrink-0" />}
             {crumb.href ? (
               <Link
@@ -60,6 +66,7 @@ export function Topbar() {
           </span>
         ))}
       </nav>
+      </div>
 
       <div className="flex items-center gap-2 shrink-0">
         <button
