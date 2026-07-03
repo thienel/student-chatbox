@@ -6,8 +6,9 @@ import { CommandPalette } from '@/components/shared/CommandPalette'
 
 export function AppShell() {
   return (
-    <div className="min-h-screen bg-background relative z-0">
-      <div className="fixed inset-0 pointer-events-none -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/5 via-background to-background" />
+    <div className="min-h-screen bg-background relative z-0 overflow-hidden">
+      {/* Ambient background glow - perfectly centered */}
+      <div className="fixed top-[-200px] left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 rounded-[100%] blur-[100px] pointer-events-none -z-10" />
       <Topbar />
       <main className="pt-12 pb-20 min-h-screen">
         <Outlet />
