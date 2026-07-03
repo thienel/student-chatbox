@@ -47,12 +47,13 @@ export default function AdminSubjectsPage() {
     <div className="max-w-5xl mx-auto px-6 py-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-semibold text-zinc-50">Subjects</h1>
-          <p className="text-sm text-zinc-500 mt-0.5">{data?.total ?? 0} total</p>
+          <h1 className="text-xl font-semibold text-foreground">Subjects</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">{data?.total ?? 0} total</p>
         </div>
         <Button
           onClick={() => setCreateOpen(true)}
-          className="bg-zinc-50 text-zinc-950 hover:bg-zinc-200 h-8 px-3 text-sm font-medium rounded-md"
+          variant="outline"
+          className="border bg-card hover:bg-secondary text-foreground h-8 px-3 text-sm font-medium rounded-md"
         >
           <Plus className="h-4 w-4 mr-1.5" />
           New Subject
@@ -60,31 +61,31 @@ export default function AdminSubjectsPage() {
       </div>
 
       <div className="relative mb-4">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-500" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
         <Input
           placeholder="Search..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="pl-8 bg-zinc-900 border-zinc-800 text-zinc-50 placeholder:text-zinc-600 h-9 rounded-md"
+          className="pl-8 bg-card border text-foreground placeholder:text-muted-foreground h-9 rounded-md"
         />
       </div>
 
       {isLoading ? (
         <div className="space-y-2">
           {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-14 rounded-lg bg-zinc-900" />
+            <Skeleton key={i} className="h-14 rounded-lg bg-muted" />
           ))}
         </div>
       ) : subjects.length === 0 ? (
         <EmptyState icon={BookOpen} title="No subjects yet" />
       ) : (
-        <div className="border border-zinc-800 rounded-lg overflow-hidden">
+        <div className="border rounded-lg overflow-hidden bg-card">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-zinc-800">
-                <th className="text-left py-3 px-4 text-xs font-medium text-zinc-500 uppercase tracking-wide">Subject</th>
-                <th className="text-left py-3 px-4 text-xs font-medium text-zinc-500 uppercase tracking-wide hidden sm:table-cell">Code</th>
-                <th className="text-left py-3 px-4 text-xs font-medium text-zinc-500 uppercase tracking-wide hidden md:table-cell">Status</th>
+              <tr className="border-b bg-secondary">
+                <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wide">Subject</th>
+                <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wide hidden sm:table-cell">Code</th>
+                <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wide hidden md:table-cell">Status</th>
                 <th className="w-10 py-3 px-4" />
               </tr>
             </thead>
@@ -92,18 +93,18 @@ export default function AdminSubjectsPage() {
               {subjects.map(s => (
                 <tr
                   key={s.id}
-                  className="border-b border-zinc-800/50 hover:bg-zinc-900/50 transition-colors duration-150 cursor-pointer"
+                  className="border-b hover:bg-muted/50 transition-colors duration-150 cursor-pointer"
                   onClick={() => navigate(`/subjects/${s.id}/documents`)}
                 >
                   <td className="py-3 px-4">
-                    <p className="text-zinc-300">{s.name}</p>
-                    {s.description && <p className="text-xs text-zinc-500 truncate max-w-[240px]">{s.description}</p>}
+                    <p className="text-foreground">{s.name}</p>
+                    {s.description && <p className="text-xs text-muted-foreground truncate max-w-[240px]">{s.description}</p>}
                   </td>
-                  <td className="py-3 px-4 text-zinc-500 text-xs font-mono hidden sm:table-cell">{s.code}</td>
+                  <td className="py-3 px-4 text-muted-foreground text-xs font-mono hidden sm:table-cell">{s.code}</td>
                   <td className="py-3 px-4 hidden md:table-cell">
-                    <Badge className={cn('text-[10px] rounded capitalize', s.status === 'active'
-                      ? 'bg-zinc-800 text-zinc-400 border-zinc-700'
-                      : 'bg-zinc-900 text-zinc-600 border-zinc-800'
+                    <Badge className={cn('text-[10px] rounded capitalize border', s.status === 'active'
+                      ? 'bg-secondary text-muted-foreground'
+                      : 'bg-muted text-muted-foreground'
                     )}>
                       {s.status}
                     </Badge>
@@ -114,7 +115,7 @@ export default function AdminSubjectsPage() {
                         variant="ghost"
                         size="icon"
                         onClick={() => navigate(`/subjects/${s.id}/documents`)}
-                        className="h-7 w-7 rounded-md text-zinc-500 hover:text-zinc-50 hover:bg-zinc-800"
+                        className="h-7 w-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary"
                         title="View subject"
                       >
                         <ExternalLink className="h-3.5 w-3.5" />
@@ -123,7 +124,7 @@ export default function AdminSubjectsPage() {
                         variant="ghost"
                         size="icon"
                         onClick={() => deleteSubject.mutate(s.id)}
-                        className="h-7 w-7 rounded-md text-zinc-600 hover:text-red-400 hover:bg-zinc-800"
+                        className="h-7 w-7 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
@@ -137,33 +138,33 @@ export default function AdminSubjectsPage() {
       )}
 
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="bg-zinc-900 border border-zinc-800 rounded-lg shadow-none p-0 max-w-md">
-          <div className="px-5 py-4 border-b border-zinc-800">
-            <DialogTitle className="text-base font-semibold text-zinc-50">Create Subject</DialogTitle>
-            <DialogDescription className="text-sm text-zinc-400 mt-0.5">Add a new subject to the system.</DialogDescription>
+        <DialogContent className="bg-card border rounded-lg shadow-none p-0 max-w-md">
+          <div className="px-5 py-4 border-b">
+            <DialogTitle className="text-base font-semibold text-foreground">Create Subject</DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground mt-0.5">Add a new subject to the system.</DialogDescription>
           </div>
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="p-5 space-y-4">
               <div className="space-y-1.5">
-                <Label className="text-sm text-zinc-300">Code</Label>
-                <Input {...register('code')} placeholder="e.g. CS101" className="bg-zinc-950 border-zinc-800 text-zinc-50" />
-                {errors.code && <p className="text-xs text-red-400">{errors.code.message}</p>}
+                <Label className="text-sm text-foreground">Code</Label>
+                <Input {...register('code')} placeholder="e.g. CS101" className="bg-secondary border text-foreground" />
+                {errors.code && <p className="text-xs text-destructive">{errors.code.message}</p>}
               </div>
               <div className="space-y-1.5">
-                <Label className="text-sm text-zinc-300">Name</Label>
-                <Input {...register('name')} placeholder="Introduction to CS" className="bg-zinc-950 border-zinc-800 text-zinc-50" />
-                {errors.name && <p className="text-xs text-red-400">{errors.name.message}</p>}
+                <Label className="text-sm text-foreground">Name</Label>
+                <Input {...register('name')} placeholder="Introduction to CS" className="bg-secondary border text-foreground" />
+                {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
               </div>
               <div className="space-y-1.5">
-                <Label className="text-sm text-zinc-300">Description (optional)</Label>
-                <Input {...register('description')} className="bg-zinc-950 border-zinc-800 text-zinc-50" />
+                <Label className="text-sm text-foreground">Description (optional)</Label>
+                <Input {...register('description')} className="bg-secondary border text-foreground" />
               </div>
             </div>
-            <div className="px-5 py-4 border-t border-zinc-800 flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => setCreateOpen(false)} className="border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 h-8 px-3 text-sm rounded-md">
+            <div className="px-5 py-4 border-t flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setCreateOpen(false)} className="border bg-transparent text-muted-foreground hover:bg-secondary h-8 px-3 text-sm rounded-md">
                 Cancel
               </Button>
-              <Button type="submit" disabled={isSubmitting} className="bg-zinc-50 text-zinc-950 hover:bg-zinc-200 h-8 px-3 text-sm rounded-md">
+              <Button type="submit" disabled={isSubmitting} className="bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-3 text-sm rounded-md">
                 {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Create'}
               </Button>
             </div>
