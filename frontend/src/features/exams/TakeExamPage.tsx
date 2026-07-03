@@ -125,27 +125,27 @@ export default function TakeExamPage() {
       {/* Top bar */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-sm font-medium text-zinc-50">{exam.title}</h2>
-          <p className="text-xs text-zinc-500 mt-0.5">{answered} / {total} answered</p>
+          <h2 className="text-sm font-medium text-foreground">{exam.title}</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">{answered} / {total} answered</p>
         </div>
-        <div className="flex items-center gap-1.5 text-xs text-zinc-400">
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <Clock className="h-3.5 w-3.5" />
           {formatTime(elapsed)}
         </div>
       </div>
 
       {/* Progress */}
-      <div className="h-1 bg-zinc-800 rounded-full mb-6 overflow-hidden">
+      <div className="h-1 bg-secondary rounded-full mb-6 overflow-hidden">
         <div
-          className="h-full bg-zinc-50 rounded-full transition-all duration-300"
+          className="h-full bg-primary rounded-full transition-all duration-300"
           style={{ width: `${(answered / total) * 100}%` }}
         />
       </div>
 
       {/* Question */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6 mb-4">
-        <p className="text-xs text-zinc-600 mb-3">Question {currentIndex + 1} of {total}</p>
-        <p className="text-sm font-medium text-zinc-50 leading-relaxed mb-5">{question.content}</p>
+      <div className="bg-card border rounded-lg p-6 mb-4">
+        <p className="text-xs text-muted-foreground mb-3">Question {currentIndex + 1} of {total}</p>
+        <p className="text-sm font-medium text-foreground leading-relaxed mb-5">{question.content}</p>
         <div className="space-y-2">
           {question.options.map((opt, i) => (
             <button
@@ -154,11 +154,11 @@ export default function TakeExamPage() {
               className={cn(
                 'w-full text-left px-4 py-3 rounded-md border text-sm transition-colors duration-150',
                 answers[question.id] === opt.key
-                  ? 'border-zinc-400 bg-zinc-800 text-zinc-50'
-                  : 'border-zinc-800 bg-zinc-950 text-zinc-400 hover:border-zinc-700 hover:text-zinc-300'
+                  ? 'border-primary bg-primary/10 text-primary'
+                  : 'border-border bg-secondary text-muted-foreground hover:border-muted-foreground hover:text-foreground'
               )}
             >
-              <span className="font-medium mr-2 text-zinc-600">{i + 1}.</span>
+              <span className="font-medium mr-2 text-muted-foreground">{i + 1}.</span>
               {opt.text}
             </button>
           ))}
@@ -171,7 +171,7 @@ export default function TakeExamPage() {
           variant="outline"
           onClick={() => setCurrentIndex(i => Math.max(0, i - 1))}
           disabled={currentIndex === 0}
-          className="border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 h-8 px-3 text-sm rounded-md disabled:opacity-30"
+          className="border bg-transparent text-muted-foreground hover:bg-secondary hover:text-foreground h-8 px-3 text-sm rounded-md disabled:opacity-30"
         >
           Previous
         </Button>
@@ -184,10 +184,10 @@ export default function TakeExamPage() {
               className={cn(
                 'h-6 w-6 rounded text-xs font-medium transition-colors duration-150',
                 i === currentIndex
-                  ? 'bg-zinc-50 text-zinc-950'
+                  ? 'bg-primary text-primary-foreground'
                   : answers[q.id]
-                  ? 'bg-zinc-700 text-zinc-200'
-                  : 'bg-zinc-800 text-zinc-500 hover:bg-zinc-700'
+                  ? 'bg-primary/20 text-primary'
+                  : 'bg-secondary text-muted-foreground hover:bg-muted'
               )}
             >
               {i + 1}
@@ -199,7 +199,7 @@ export default function TakeExamPage() {
           <Button
             variant="outline"
             onClick={() => setCurrentIndex(i => Math.min(total - 1, i + 1))}
-            className="border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 h-8 px-3 text-sm rounded-md"
+            className="border bg-transparent text-muted-foreground hover:bg-secondary hover:text-foreground h-8 px-3 text-sm rounded-md"
           >
             Next
           </Button>
@@ -207,7 +207,7 @@ export default function TakeExamPage() {
           <Button
             onClick={handleSubmit}
             disabled={submit.isPending}
-            className="bg-zinc-50 text-zinc-950 hover:bg-zinc-200 h-8 px-3 text-sm font-medium rounded-md"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-3 text-sm font-medium rounded-md"
           >
             {submit.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />}
             Submit
@@ -215,7 +215,7 @@ export default function TakeExamPage() {
         )}
       </div>
 
-      <p className="text-center text-[11px] text-zinc-700 mt-4">
+      <p className="text-center text-[11px] text-muted-foreground/50 mt-4">
         ← → navigate · 1–4 select answer
       </p>
     </div>
