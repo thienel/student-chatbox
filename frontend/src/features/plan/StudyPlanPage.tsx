@@ -42,7 +42,7 @@ export default function StudyPlanPage() {
             <div
               key={day.date}
               className={cn(
-                'bg-card border rounded-lg p-4',
+                'bg-card card-texture border rounded-lg p-4',
                 isToday(day.date) ? 'border-primary' : 'border-border',
               )}
             >

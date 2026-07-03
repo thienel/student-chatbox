@@ -79,7 +79,7 @@ export default function CommunityPage() {
           ) : (
             <div className="space-y-2">
               {discover.data.items.map(set => (
-                <div key={set.id} className="bg-card border rounded-lg p-4 flex items-center gap-3">
+                <div key={set.id} className="bg-card card-texture border rounded-lg p-4 flex items-center gap-3">
                   <div className="h-8 w-8 rounded-md bg-secondary flex items-center justify-center shrink-0">
                     <Layers className="h-4 w-4 text-muted-foreground" />
                   </div>
@@ -125,7 +125,7 @@ export default function CommunityPage() {
       ) : (
         <div className="space-y-1.5">
           {leaderboard.data.items.map(entry => (
-            <div key={entry.userId} className="bg-card border rounded-lg px-4 py-2.5 flex items-center gap-3">
+            <div key={entry.userId} className="bg-card card-texture border rounded-lg px-4 py-2.5 flex items-center gap-3">
               <span className={cn(
                 'w-7 text-sm tabular-nums text-center',
                 entry.rank <= 3 ? 'text-lime-600 font-bold' : 'text-muted-foreground font-semibold',

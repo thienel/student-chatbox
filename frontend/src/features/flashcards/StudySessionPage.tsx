@@ -162,7 +162,10 @@ export default function StudySessionPage() {
 
           <div
             onClick={() => setFlipped(f => !f)}
-            className="bg-card border rounded-lg flex flex-col items-center justify-center p-8 min-h-[280px] cursor-pointer select-none hover:border-muted-foreground/30"
+            className={cn(
+              "card-texture border rounded-lg flex flex-col items-center justify-center p-8 min-h-[280px] cursor-pointer select-none hover:border-muted-foreground/30",
+              flipped ? "bg-secondary" : "bg-card"
+            )}
           >
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-4">
               {flipped ? 'Answer' : 'Question'}

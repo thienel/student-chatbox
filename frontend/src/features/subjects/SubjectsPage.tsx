@@ -69,7 +69,7 @@ export default function SubjectsPage() {
           {subjects.map(subject => (
             <div
               key={subject.id}
-              className="group bg-card border rounded-lg p-4 hover:border-primary/50 transition-colors duration-150 cursor-pointer"
+              className="bg-card card-texture border rounded-lg p-5 hover:border-primary/50 hover-lift cursor-pointer h-full flex flex-col"
               onClick={() => navigate(`/subjects/${subject.id}/documents`)}
             >
               <div className="flex items-start justify-between mb-3">

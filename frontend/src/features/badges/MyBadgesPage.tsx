@@ -52,7 +52,7 @@ export default function MyBadgesPage() {
               {data.earned.map(b => {
                 const Icon = iconFor(b.iconKey)
                 return (
-                  <div key={b.badgeId} className="bg-lime-50 border border-lime-200 rounded-lg p-4 flex flex-col items-center text-center">
+                  <div key={b.badgeId} className="bg-lime-50 card-texture border border-lime-200 rounded-lg p-4 flex flex-col items-center text-center">
                     <div className="h-10 w-10 rounded-full bg-lime-100 border border-lime-200 flex items-center justify-center mb-2">
                       <Icon className="h-5 w-5 text-lime-700" />
                     </div>
@@ -73,7 +73,7 @@ export default function MyBadgesPage() {
             {data.locked.map(b => {
               const Icon = iconFor(b.iconKey)
               return (
-                <div key={b.badgeId} className={cn('bg-muted border border-border rounded-lg p-4 flex flex-col items-center text-center')}>
+                <div key={b.badgeId} className={cn('bg-muted card-texture border border-border rounded-lg p-4 flex flex-col items-center text-center')}>
                   <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center mb-2">
                     <Icon className="h-5 w-5 text-muted-foreground" />
                   </div>

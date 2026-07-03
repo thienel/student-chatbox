@@ -155,7 +155,7 @@ export default function FlashcardStudyPage() {
           {/* Front */}
           <div
             style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
-            className="absolute inset-0 bg-card border rounded-lg flex flex-col items-center justify-center p-8 hover:border-muted-foreground/30 transition-colors duration-150 synapse-glow"
+            className="absolute inset-0 bg-card card-texture border rounded-lg flex flex-col items-center justify-center p-8 hover:border-muted-foreground/30 transition-colors duration-150 synapse-glow"
           >
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-4">Question</p>
             <p className="text-base font-medium text-foreground text-center leading-relaxed">{card?.front}</p>
@@ -168,7 +168,7 @@ export default function FlashcardStudyPage() {
               WebkitBackfaceVisibility: 'hidden',
               transform: 'rotateY(180deg)',
             }}
-            className="absolute inset-0 bg-secondary border rounded-lg flex flex-col items-center justify-center p-8"
+            className="absolute inset-0 bg-secondary card-texture border rounded-lg flex flex-col items-center justify-center p-8"
           >
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-4">Answer</p>
             <p className="text-base text-foreground text-center leading-relaxed">{card?.back}</p>

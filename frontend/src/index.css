@@ -86,6 +86,28 @@
     opacity: 0.35;
   }
 
+  .card-texture {
+    position: relative;
+  }
+
+  .card-texture::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    /* Mực màu --color-ink (rgb(16, 24, 32)) ở opacity 6% */
+    background-image: radial-gradient(circle, rgba(16, 24, 32, 0.06) 1.5px, transparent 1.5px);
+    background-size: 16px 16px;
+    pointer-events: none;
+    z-index: 0;
+    border-radius: inherit;
+  }
+
+  /* Đảm bảo nội dung bên trong card nổi lên trên pattern */
+  .card-texture > * {
+    position: relative;
+    z-index: 1;
+  }
+
   .synapse-glow {
     border-left: 2px solid;
     border-image: linear-gradient(to bottom, hsl(var(--primary)), hsl(var(--accent))) 1;

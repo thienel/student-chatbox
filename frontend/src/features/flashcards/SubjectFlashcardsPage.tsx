@@ -108,7 +108,7 @@ export default function SubjectFlashcardsPage() {
           {sets.map(set => (
             <div
               key={set.id}
-              className="bg-card border rounded-lg p-4 flex items-center justify-between group hover:border-muted-foreground/30 transition-colors duration-150 synapse-glow"
+              className="bg-card card-texture border rounded-lg p-4 flex items-center justify-between group hover:border-muted-foreground/30 transition-colors duration-150 synapse-glow"
             >
               <Link
                 to={`/subjects/${subjectId}/flashcards/${set.id}`}
