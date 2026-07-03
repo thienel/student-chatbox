@@ -46,8 +46,8 @@ export default function BookmarksPage() {
   return (
     <div className="max-w-3xl mx-auto px-6 py-6">
       <div className="mb-6">
-        <h2 className="text-base font-medium text-zinc-50">Bookmarks</h2>
-        <p className="text-xs text-zinc-500 mt-0.5">{bookmarks.length} saved</p>
+        <h2 className="text-base font-medium text-foreground">Bookmarks</h2>
+        <p className="text-xs text-muted-foreground mt-0.5">{bookmarks.length} saved</p>
       </div>
 
       {/* Filter chips */}
@@ -59,8 +59,8 @@ export default function BookmarksPage() {
             className={[
               'px-3 py-1 rounded-md text-xs font-medium transition-colors duration-150',
               filter === f.value
-                ? 'bg-zinc-700 text-zinc-50'
-                : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-300 border border-zinc-800',
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-card text-muted-foreground hover:bg-secondary hover:text-foreground border border-border',
             ].join(' ')}
           >
             {f.label}
@@ -71,7 +71,7 @@ export default function BookmarksPage() {
       {isLoading ? (
         <div className="space-y-2">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-16 rounded-lg bg-zinc-900" />
+            <Skeleton key={i} className="h-16 rounded-lg bg-muted" />
           ))}
         </div>
       ) : bookmarks.length === 0 ? (
@@ -88,30 +88,30 @@ export default function BookmarksPage() {
             return (
               <div
                 key={bm.id}
-                className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 flex items-center gap-3 group hover:border-zinc-700 transition-colors duration-150"
+                className="bg-card border rounded-lg p-4 flex items-center gap-3 group hover:border-primary/50 transition-colors duration-150"
               >
                 <Link to={href} className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className="h-8 w-8 rounded-md bg-zinc-800 flex items-center justify-center shrink-0">
-                    <Icon className="h-4 w-4 text-zinc-400" />
+                  <div className="h-8 w-8 rounded-md bg-secondary flex items-center justify-center shrink-0">
+                    <Icon className="h-4 w-4 text-muted-foreground" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-zinc-50 truncate">
+                    <p className="text-sm font-medium text-foreground truncate">
                       {bm.resourceId}
                     </p>
                     {bm.note && (
-                      <p className="text-xs text-zinc-500 mt-0.5 truncate">{bm.note}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5 truncate">{bm.note}</p>
                     )}
-                    <p className="text-xs text-zinc-700 mt-0.5 capitalize">
+                    <p className="text-xs text-muted-foreground mt-0.5 capitalize">
                       {bm.resourceType.replace('_', ' ')}
                     </p>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-zinc-600 shrink-0 group-hover:text-zinc-400 transition-colors duration-150" />
+                  <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 group-hover:text-foreground transition-colors duration-150" />
                 </Link>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => handleDelete(bm.id)}
-                  className="h-7 w-7 rounded-md text-zinc-600 hover:text-red-400 hover:bg-zinc-800 shrink-0"
+                  className="h-7 w-7 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
