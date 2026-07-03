@@ -16,7 +16,7 @@ export function AppShell() {
         <div className="fixed top-0 bottom-0 left-12 w-[1px] bg-primary/20 pointer-events-none -z-10" />
       )}
       <Topbar />
-      <main className="pt-12 pb-20 min-h-screen">
+      <main className="pt-14 pb-20 min-h-screen">
         <Outlet />
       </main>
       <Dock />

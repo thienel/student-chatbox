@@ -38,27 +38,27 @@ export function Topbar() {
     .toUpperCase() ?? '?'
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-40 h-12 flex items-center justify-between px-5 bg-background border-b">
-      <div className="flex items-center gap-4 min-w-0">
+    <header className="fixed top-0 left-0 right-0 z-40 h-14 flex items-center justify-between px-6 bg-background border-b-4 border-double border-border">
+      <div className="flex items-center gap-5 min-w-0">
         <Link to="/" className="flex-shrink-0 flex items-center hover-lift" title="Home">
           <Logo className="h-6 w-auto" />
         </Link>
         <div className="w-[1px] h-4 bg-border hidden sm:block" />
-        <nav className="flex items-center gap-1.5 text-sm min-w-0">
+        <nav className="flex items-center gap-2 text-sm min-w-0">
           {displayCrumbs.map((crumb, i) => (
-            <span key={i} className="flex items-center gap-1.5 min-w-0">
-            {i > 0 && <ChevronRight className="h-3 w-3 text-muted-foreground shrink-0" />}
+            <span key={i} className="flex items-center gap-2 min-w-0">
+            {i > 0 && <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50 shrink-0" />}
             {crumb.href ? (
               <Link
                 to={crumb.href}
-                className="text-muted-foreground hover:text-foreground transition-colors duration-150 truncate"
+                className="font-data text-[11px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors duration-150 truncate"
               >
                 {crumb.label}
               </Link>
             ) : (
               <span className={cn(
-                'truncate',
-                i === displayCrumbs.length - 1 ? 'text-foreground font-medium' : 'text-muted-foreground'
+                'font-data text-[11px] uppercase tracking-widest truncate',
+                i === displayCrumbs.length - 1 ? 'text-foreground font-semibold' : 'text-muted-foreground'
               )}>
                 {crumb.label}
               </span>
@@ -68,41 +68,41 @@ export function Topbar() {
       </nav>
       </div>
 
-      <div className="flex items-center gap-2 shrink-0">
+      <div className="flex items-center gap-3 shrink-0">
         <button
           onClick={openCmd}
-          className="flex items-center gap-2 h-7 px-2.5 rounded-md bg-secondary border text-muted-foreground hover:text-foreground hover:border-muted-foreground/30 transition-colors duration-150 text-xs"
+          className="group relative flex items-center gap-2 h-8 px-3 rounded-lg bg-card border-2 border-b-[3px] border-border text-muted-foreground hover:bg-muted hover:text-foreground active:border-b-2 active:translate-y-[1px] transition-all duration-150 text-xs shadow-sm"
         >
-          <Search className="h-3 w-3" />
-          <span>Search</span>
-          <kbd className="ml-1 text-[10px] text-muted-foreground font-mono">⌘K</kbd>
+          <Search className="h-3.5 w-3.5" />
+          <span className="font-medium">Search</span>
+          <kbd className="ml-1 text-[10px] text-muted-foreground font-data bg-background border px-1.5 rounded uppercase tracking-wider group-hover:bg-card">⌘K</kbd>
         </button>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex items-center justify-center h-7 w-7 rounded-md bg-secondary border text-muted-foreground text-xs font-medium hover:bg-muted transition-colors duration-150">
+            <button className="flex items-center justify-center h-8 w-8 rounded-full bg-secondary border text-muted-foreground text-xs font-semibold hover:bg-muted hover:ring-2 hover:ring-primary ring-offset-2 transition-all duration-150 focus:outline-none">
               {initials}
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48 bg-card border">
-            <div className="px-2 py-1.5">
-              <p className="text-sm font-medium text-foreground truncate">{user?.fullName}</p>
-              <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+          <DropdownMenuContent align="end" className="w-56 bg-card card-texture border-2 border-border shadow-md rounded-xl overflow-hidden mt-2 p-1">
+            <div className="px-3 py-2.5 relative z-10 bg-paper/50 rounded-t-lg mb-1">
+              <p className="text-sm font-semibold text-foreground truncate">{user?.fullName}</p>
+              <p className="text-xs text-muted-foreground truncate font-data mt-0.5">{user?.email}</p>
             </div>
-            <DropdownMenuSeparator className="bg-border" />
-            <DropdownMenuItem asChild className="text-muted-foreground hover:text-foreground hover:bg-secondary cursor-pointer">
+            <DropdownMenuSeparator className="bg-border mx-2" />
+            <DropdownMenuItem asChild className="text-muted-foreground hover:text-foreground hover:bg-secondary cursor-pointer relative z-10 rounded-md mx-1 px-3 h-9">
               <Link to="/settings">
                 <User className="h-4 w-4 mr-2" />
-                Settings
+                <span className="font-medium text-sm">Settings</span>
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuSeparator className="bg-border" />
+            <DropdownMenuSeparator className="bg-border mx-2" />
             <DropdownMenuItem
               onClick={logout}
-              className="text-destructive hover:text-destructive hover:bg-destructive/10 cursor-pointer"
+              className="text-destructive hover:text-destructive hover:bg-destructive/10 cursor-pointer relative z-10 rounded-md mx-1 px-3 h-9"
             >
               <LogOut className="h-4 w-4 mr-2" />
-              Log out
+              <span className="font-medium text-sm">Log out</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
