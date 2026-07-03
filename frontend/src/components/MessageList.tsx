@@ -14,23 +14,23 @@ interface MessageListProps {
 const SourceCitation = ({ sources }: { sources: MessageSource[] }) => {
   const [expanded, setExpanded] = useState(false);
   return (
-    <div className="mt-2 text-xs border border-indigo-100 rounded-lg overflow-hidden">
+    <div className="mt-2 text-xs border border-border rounded-lg overflow-hidden">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between px-3 py-2 bg-indigo-50 text-indigo-700 font-medium hover:bg-indigo-100 transition-colors"
+        className="w-full flex items-center justify-between px-3 py-2 bg-secondary text-foreground font-medium hover:bg-secondary/80 transition-colors"
       >
         <span>Nguồn tham khảo ({sources.length})</span>
         {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
       </button>
       {expanded && (
-        <div className="divide-y divide-indigo-50">
+        <div className="divide-y divide-border">
           {sources.map((src, idx) => (
-            <div key={idx} className="px-3 py-2 bg-white">
+            <div key={idx} className="px-3 py-2 bg-card">
               <div className="flex items-center justify-between mb-1">
-                <span className="font-semibold text-indigo-800">{src.originalName}</span>
-                <span className="text-gray-400">Score: {(src.score * 100).toFixed(0)}%</span>
+                <span className="font-semibold text-foreground">{src.originalName}</span>
+                <span className="text-muted-foreground">Score: {(src.score * 100).toFixed(0)}%</span>
               </div>
-              <p className="text-gray-600 line-clamp-2 italic">"{src.excerpt}"</p>
+              <p className="text-muted-foreground line-clamp-2 italic">"{src.excerpt}"</p>
             </div>
           ))}
         </div>
@@ -48,9 +48,9 @@ const MessageList = ({ messages, isLoading, streamingContent, isStreaming }: Mes
 
   if (isLoading) {
     return (
-      <div className="flex-1 flex items-center justify-center text-gray-500 text-sm">
+      <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
           Đang tải tin nhắn...
         </div>
       </div>
@@ -59,9 +59,9 @@ const MessageList = ({ messages, isLoading, streamingContent, isStreaming }: Mes
 
   if (messages.length === 0 && !isStreaming) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center text-gray-400 text-sm gap-3">
-        <Bot className="w-12 h-12 text-indigo-200" />
-        <p className="text-base font-medium text-gray-500">Bắt đầu cuộc trò chuyện</p>
+      <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground text-sm gap-3">
+        <Bot className="w-12 h-12 opacity-30" />
+        <p className="text-base font-medium text-muted-foreground">Bắt đầu cuộc trò chuyện</p>
         <p className="text-xs">Hỏi bất kỳ điều gì về nội dung môn học</p>
       </div>
     );
@@ -101,18 +101,18 @@ const MessageList = ({ messages, isLoading, streamingContent, isStreaming }: Mes
                       ul: ({ children }) => <ul className="list-disc pl-5 mb-2 space-y-1">{children}</ul>,
                       ol: ({ children }) => <ol className="list-decimal pl-5 mb-2 space-y-1">{children}</ol>,
                       a: ({ href, children }) => (
-                        <a href={href} className="text-indigo-600 hover:underline" target="_blank" rel="noreferrer">
+                        <a href={href} className="text-primary hover:underline" target="_blank" rel="noreferrer">
                           {children}
                         </a>
                       ),
                       code: ({ className, children, ...props }) => {
                         const isBlock = !!(className ?? '').match(/language-/);
                         return isBlock ? (
-                          <pre className="p-3 bg-gray-900 text-gray-50 rounded-lg my-2 overflow-x-auto text-xs">
+                          <pre className="p-3 bg-muted text-muted-foreground rounded-lg my-2 overflow-x-auto text-xs">
                             <code className={className} {...props}>{children}</code>
                           </pre>
                         ) : (
-                          <code className="bg-gray-100 text-indigo-700 px-1.5 py-0.5 rounded text-xs font-mono" {...props}>
+                          <code className="bg-secondary text-foreground px-1.5 py-0.5 rounded text-xs font-mono" {...props}>
                             {children}
                           </code>
                         );
@@ -129,7 +129,7 @@ const MessageList = ({ messages, isLoading, streamingContent, isStreaming }: Mes
                 <SourceCitation sources={msg.sources} />
               </div>
             )}
-            <span className="text-xs text-gray-400 mt-1">
+            <span className="text-xs text-muted-foreground mt-1">
               {new Date(msg.createdAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
             </span>
           </div>
@@ -150,9 +150,9 @@ const MessageList = ({ messages, isLoading, streamingContent, isStreaming }: Mes
                 </div>
               ) : (
                 <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <span className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <span className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                  <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                 </div>
               )}
             </div>

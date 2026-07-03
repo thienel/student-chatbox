@@ -57,18 +57,18 @@ const ChatContainer = ({ chatId, initialMessages, chatTitle, subjectName }: Chat
   );
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden bg-gray-50">
+    <div className="flex-1 flex flex-col overflow-hidden bg-background">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-gray-200 bg-white">
-        <h2 className="text-sm font-semibold text-gray-800 truncate">{chatTitle ?? 'Cuộc trò chuyện'}</h2>
-        {subjectName && <p className="text-xs text-gray-400">{subjectName}</p>}
+      <div className="px-4 py-3 border-b border-border bg-card">
+        <h2 className="text-sm font-semibold text-foreground truncate">{chatTitle ?? 'Cuộc trò chuyện'}</h2>
+        {subjectName && <p className="text-xs text-muted-foreground">{subjectName}</p>}
       </div>
 
       {/* Error Banner */}
       {error && (
-        <div className="px-4 py-2 bg-red-50 border-b border-red-200 text-sm text-red-600 flex items-center justify-between">
+        <div className="px-4 py-2 bg-destructive/10 border-b border-destructive/20 text-sm text-destructive flex items-center justify-between">
           <span>{error}</span>
-          <button onClick={() => setError(null)} className="text-red-400 hover:text-red-600 ml-2">&times;</button>
+          <button onClick={() => setError(null)} className="opacity-80 hover:opacity-100 ml-2">&times;</button>
         </div>
       )}
 

@@ -36,24 +36,24 @@ export function CommandPalette() {
     <CommandDialog open={isOpen} onOpenChange={v => !v && close()}>
       <CommandInput
         placeholder="Search subjects, chats..."
-        className="border-0 focus:ring-0 text-sm text-zinc-50 placeholder:text-zinc-600"
+        className="border-0 focus:ring-0 text-sm text-foreground placeholder:text-muted-foreground"
       />
       <CommandList className="max-h-80">
-        <CommandEmpty className="text-sm text-zinc-500 text-center py-6">
+        <CommandEmpty className="text-sm text-muted-foreground text-center py-6">
           No results found.
         </CommandEmpty>
         <CommandGroup heading="Navigation">
           <CommandItem onSelect={() => go('/home')}>
-            <BookOpen className="h-3.5 w-3.5 mr-2 text-zinc-500" />
-            <span className="text-zinc-300">Home</span>
+            <BookOpen className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+            <span className="text-foreground">Home</span>
           </CommandItem>
           <CommandItem onSelect={() => go('/subjects')}>
-            <BookOpen className="h-3.5 w-3.5 mr-2 text-zinc-500" />
-            <span className="text-zinc-300">Subjects</span>
+            <BookOpen className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+            <span className="text-foreground">Subjects</span>
           </CommandItem>
           <CommandItem onSelect={() => go('/chats')}>
-            <MessageSquare className="h-3.5 w-3.5 mr-2 text-zinc-500" />
-            <span className="text-zinc-300">My Chats</span>
+            <MessageSquare className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+            <span className="text-foreground">My Chats</span>
           </CommandItem>
         </CommandGroup>
         <CommandSeparator />

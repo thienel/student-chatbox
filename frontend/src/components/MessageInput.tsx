@@ -25,7 +25,7 @@ const MessageInput = ({ onSend, isDisabled = false, placeholder = 'Nhập câu h
   };
 
   return (
-    <div className="p-4 border-t border-gray-200 bg-white">
+    <div className="p-4 border-t border-border bg-card">
       <div className="flex gap-3 items-end max-w-4xl mx-auto">
         <textarea
           value={value}
@@ -34,12 +34,12 @@ const MessageInput = ({ onSend, isDisabled = false, placeholder = 'Nhập câu h
           placeholder={placeholder}
           rows={2}
           disabled={isDisabled}
-          className="flex-1 resize-none border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
+          className="flex-1 resize-none border border-border bg-background rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary disabled:bg-muted disabled:cursor-not-allowed transition-colors"
         />
         <button
           onClick={handleSend}
           disabled={isDisabled || !value.trim()}
-          className="p-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+          className="p-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
           title="Gửi tin nhắn"
         >
           <Send className="w-5 h-5" />
