@@ -46,7 +46,7 @@ export default function BookmarksPage() {
   return (
     <div className="max-w-3xl mx-auto px-6 py-6">
       <div className="mb-6">
-        <h2 className="text-base font-medium text-foreground">Bookmarks</h2>
+        <h1 className="text-2xl font-heading font-medium text-ink tracking-tight">Bookmarks</h1>
         <p className="text-xs text-muted-foreground mt-0.5">{bookmarks.length} saved</p>
       </div>
 

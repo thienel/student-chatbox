@@ -6,6 +6,7 @@ import { EmptyState } from '@/components/shared/EmptyState'
 import { useAuthStore } from '@/store/useAuthStore'
 import { useSubjects } from '@/features/subjects/queries'
 import { useChats } from '@/features/chat/queries'
+import { AchievementStamp } from '@/components/ui/achievement-stamp'
 
 export default function HomePage() {
   const user = useAuthStore(s => s.user)
@@ -19,14 +20,20 @@ export default function HomePage() {
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-6">
-      <div className="mb-8 bg-card border rounded-xl p-6 shadow-sm relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
-        <h1 className="text-3xl font-heading font-medium text-ink tracking-tight relative z-10">
-          Welcome back, {user?.fullName?.split(' ')[0]}
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1 relative z-10">
-          {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-        </p>
+      <div className="mb-8 bg-card border rounded-xl p-6 shadow-sm relative overflow-hidden flex items-start justify-between">
+        <div>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
+          <h1 className="text-3xl font-heading font-medium text-ink tracking-tight relative z-10">
+            Welcome back, {user?.fullName?.split(' ')[0]}
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1 relative z-10">
+            {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+          </p>
+        </div>
+        
+        <div className="hidden sm:block relative z-10 -mt-2 -mr-2">
+          <AchievementStamp value={3} label="DAY STREAK" />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
