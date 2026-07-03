@@ -4,7 +4,7 @@ export function Logo({ className = '' }: { className?: string }) {
   return (
     <svg 
       className={className}
-      viewBox="0 0 160 64" 
+      viewBox="0 0 116 64" 
       xmlns="http://www.w3.org/2000/svg" 
       style={{ overflow: 'visible' }}
     >

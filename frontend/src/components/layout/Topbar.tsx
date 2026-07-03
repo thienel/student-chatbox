@@ -40,7 +40,7 @@ export function Topbar() {
   return (
     <header className="fixed top-0 left-0 right-0 z-40 h-14 bg-background border-b border-border flex justify-center">
       <div className="w-full max-w-5xl px-6 h-full flex items-center justify-between">
-        <div className="flex items-center gap-5 min-w-0">
+        <div className="flex items-center gap-3 min-w-0">
         <Link to="/" className="flex-shrink-0 flex items-center hover:opacity-80 transition-opacity duration-150" title="Home">
           <Logo className="h-10 w-auto" />
         </Link>
