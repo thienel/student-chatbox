@@ -222,7 +222,7 @@ export default function SubjectDocumentsPage() {
             ) : summary.isError ? (
               <p className="text-sm text-red-400">{getErrorMessage(summary.error, 'Failed to load summary.')}</p>
             ) : summary.data ? (
-              <div className="prose prose-invert prose-sm max-w-none text-zinc-300 prose-headings:text-zinc-100 prose-strong:text-zinc-100">
+              <div className="prose font-serif prose-invert prose-sm max-w-none text-zinc-300 prose-headings:text-zinc-100 prose-strong:text-zinc-100">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{summary.data.summary}</ReactMarkdown>
               </div>
             ) : null}

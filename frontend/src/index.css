@@ -1,29 +1,48 @@
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background:    240 10% 3.9%;
-    --foreground:    0 0% 98%;
-    --card:          240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover:       240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary:       0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary:     240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted:         240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent:        240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive:   0 62.8% 30.6%;
+    /* Base Academic */
+    --background: 0 0% 98%; /* #FAFAFA */
+    --foreground: 0 0% 10%; /* #1a1a1a */
+    
+    --card: 0 0% 100%; /* #FFFFFF */
+    --card-foreground: 0 0% 10%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+    
+    --primary: 163 88% 20%; /* Pine Green #065F46 */
+    --primary-foreground: 88 50% 91%; /* #EAF3DE */
+    
+    --secondary: 210 40% 96%; /* surface phụ #F1F5F9 */
+    --secondary-foreground: 48 3% 36%; /* text phụ #5F5E5A */
+    
+    --muted: 210 40% 96%; /* surface phụ */
+    --muted-foreground: 52 4% 52%; /* text muted #888780 */
+    
+    --accent: 32 94% 44%; /* Gold #D97706 */
+    --accent-foreground: 32 94% 13%; /* text đậm #412402 */
+    --accent-light: 36 67% 92%; /* nền nhạt #FAEEDA */
+    
+    --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border:        240 3.7% 15.9%;
-    --input:         240 3.7% 15.9%;
-    --ring:          240 4.9% 83.9%;
+
+    --border: 210 32% 91%; /* #E2E8F0 */
+    --input: 210 32% 91%;
+    --ring: 163 88% 20%;
+    
+    /* Gamification Layer (Lime) */
+    --lime-bg: 81 88% 95%; /* #F7FEE7 */
+    --lime-border: 81 89% 80%; /* #D9F99D */
+    --lime-text: 86 69% 23%; /* #3F6212 */
+  }
+
+  .dark {
+    /* Đã lược bỏ dark mode mặc định do user yêu cầu tập trung vào Light Mode first. Nếu cần thiết sau này sẽ thêm lại tông dark cho hợp với Pine. */
   }
 
   * {
@@ -32,8 +51,8 @@
   }
 
   html {
-    @apply bg-zinc-950 text-zinc-50;
-    font-family: 'Geist', system-ui, sans-serif;
+    @apply bg-background text-foreground;
+    font-family: 'Inter', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
 
@@ -42,7 +61,14 @@
   }
 
   ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { @apply bg-zinc-950; }
-  ::-webkit-scrollbar-thumb { @apply bg-zinc-800 rounded-full; }
-  ::-webkit-scrollbar-thumb:hover { @apply bg-zinc-700; }
+  ::-webkit-scrollbar-track { @apply bg-transparent; }
+  ::-webkit-scrollbar-thumb { @apply bg-slate-300 rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-slate-400; }
+}
+
+@layer utilities {
+  .synapse-glow {
+    border-left: 2px solid;
+    border-image: linear-gradient(to bottom, hsl(var(--primary)), hsl(var(--accent))) 1;
+  }
 }

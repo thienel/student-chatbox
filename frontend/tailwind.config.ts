@@ -7,8 +7,9 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Geist', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'system-ui', 'sans-serif'],
         mono: ['Geist Mono', 'monospace'],
+        serif: ['Lora', 'serif'],
       },
       colors: {
         border: 'hsl(var(--border))',

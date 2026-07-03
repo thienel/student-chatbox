@@ -73,21 +73,21 @@ const MessageList = ({ messages, isLoading, streamingContent, isStreaming }: Mes
         <div key={msg.id} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
           <div
             className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 shadow-sm ${
-              msg.role === 'user' ? 'bg-indigo-600' : 'bg-gray-700'
+              msg.role === 'user' ? 'bg-secondary' : 'bg-muted'
             }`}
           >
             {msg.role === 'user' ? (
-              <User className="w-4 h-4 text-white" />
+              <User className="w-4 h-4 text-secondary-foreground" />
             ) : (
-              <Bot className="w-4 h-4 text-white" />
+              <Bot className="w-4 h-4 text-foreground" />
             )}
           </div>
           <div className={`flex flex-col max-w-[85%] ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
             <div
               className={`px-4 py-3 rounded-2xl shadow-sm text-sm leading-relaxed ${
                 msg.role === 'user'
-                  ? 'bg-indigo-600 text-white rounded-tr-sm'
-                  : 'bg-white border border-gray-200 text-gray-800 rounded-tl-sm'
+                  ? 'bg-secondary text-secondary-foreground rounded-tr-sm'
+                  : 'bg-card border text-foreground rounded-tl-sm'
               }`}
             >
               {msg.role === 'user' ? (
@@ -139,11 +139,11 @@ const MessageList = ({ messages, isLoading, streamingContent, isStreaming }: Mes
       {/* Streaming message */}
       {isStreaming && streamingContent !== undefined && (
         <div className="flex gap-3">
-          <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center shrink-0 shadow-sm">
-            <Bot className="w-4 h-4 text-white" />
+          <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0 shadow-sm">
+            <Bot className="w-4 h-4 text-foreground" />
           </div>
           <div className="flex flex-col max-w-[85%] items-start">
-            <div className="px-4 py-3 rounded-2xl rounded-tl-sm bg-white border border-gray-200 text-gray-800 shadow-sm text-sm leading-relaxed">
+            <div className="px-4 py-3 rounded-2xl rounded-tl-sm bg-card border synapse-glow text-foreground shadow-sm text-sm leading-relaxed">
               {streamingContent ? (
                 <div className="prose prose-sm max-w-none">
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>{streamingContent}</ReactMarkdown>
