@@ -53,31 +53,33 @@ export default function HomePage() {
             </Button>
           </div>
           {subjectsLoading ? (
-            <div className="space-y-2">
+            <div className="flex flex-col">
               {Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={i} className="h-12 rounded-lg bg-muted" />
+                <div key={i} className="py-4 border-b border-border/50">
+                  <Skeleton className="h-10 w-full rounded-sm bg-muted/50" />
+                </div>
               ))}
             </div>
           ) : subjects.length === 0 ? (
-            <div className="bg-card border rounded-lg p-2">
+            <div className="py-8 border-b border-border/50">
               <EmptyState size="sm" icon={BookOpen} title="No subjects yet" />
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="flex flex-col">
               {subjects.map(s => (
                 <div
                   key={s.id}
                   onClick={() => navigate(`/subjects/${s.id}/documents`)}
-                  className="flex items-center gap-3 bg-card border rounded-lg px-4 py-3 hover:border-primary/50 hover-lift cursor-pointer"
+                  className="group flex items-center gap-4 py-4 border-b border-border/50 hover:border-border cursor-pointer transition-colors"
                 >
-                  <div className="h-8 w-8 rounded-md bg-secondary flex items-center justify-center shrink-0">
-                    <BookOpen className="h-4 w-4 text-muted-foreground" />
+                  <div className="h-8 w-8 flex items-center justify-center shrink-0">
+                    <BookOpen className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{s.name}</p>
-                    <p className="text-xs text-muted-foreground">{s.code}</p>
+                    <p className="text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors">{s.name}</p>
+                    <p className="text-xs text-muted-foreground font-data uppercase tracking-wider mt-0.5">{s.code}</p>
                   </div>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0 ml-auto" />
+                  <ArrowRight className="h-4 w-4 text-primary shrink-0 ml-auto opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
                 </div>
               ))}
             </div>
@@ -98,33 +100,35 @@ export default function HomePage() {
             </Button>
           </div>
           {chatsLoading ? (
-            <div className="space-y-2">
+            <div className="flex flex-col">
               {Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={i} className="h-12 rounded-lg bg-muted" />
+                <div key={i} className="py-4 border-b border-border/50">
+                  <Skeleton className="h-10 w-full rounded-sm bg-muted/50" />
+                </div>
               ))}
             </div>
           ) : recentChats.length === 0 ? (
-            <div className="bg-card border rounded-lg p-2">
+            <div className="py-8 border-b border-border/50">
               <EmptyState size="sm" icon={MessageSquare} title="No chats yet" />
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="flex flex-col">
               {recentChats.map(chat => (
                 <div
                   key={chat.id}
                   onClick={() => navigate(`/chats/${chat.id}`)}
-                  className="flex items-center gap-3 bg-card border rounded-lg px-4 py-3 hover:border-primary/50 hover-lift cursor-pointer"
+                  className="group flex items-center gap-4 py-4 border-b border-border/50 hover:border-border cursor-pointer transition-colors"
                 >
-                  <div className="h-8 w-8 rounded-md bg-secondary flex items-center justify-center shrink-0">
-                    <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                  <div className="h-8 w-8 flex items-center justify-center shrink-0">
+                    <MessageSquare className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{chat.title}</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors">{chat.title}</p>
+                    <p className="text-xs text-muted-foreground font-data uppercase tracking-wider mt-0.5">
                       {new Date(chat.updatedAt).toLocaleDateString()}
                     </p>
                   </div>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0 ml-auto" />
+                  <ArrowRight className="h-4 w-4 text-primary shrink-0 ml-auto opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
                 </div>
               ))}
             </div>
