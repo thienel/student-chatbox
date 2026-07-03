@@ -158,7 +158,7 @@ export default function CommunityPage() {
 
       {(toggleStar.isPending || clone.isPending) && (
         <div className="fixed bottom-20 left-1/2 -translate-x-1/2">
-          <Loader2 className="h-4 w-4 animate-spin text-zinc-500" />
+          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
         </div>
       )}
     </div>

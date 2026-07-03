@@ -111,7 +111,7 @@ export default function TakeExamPage() {
   if (!state) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-sm text-zinc-500">Exam session expired. Please start again.</p>
+        <p className="text-sm text-muted-foreground">Exam session expired. Please start again.</p>
       </div>
     )
   }
