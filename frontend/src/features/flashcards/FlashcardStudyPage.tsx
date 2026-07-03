@@ -79,7 +79,7 @@ export default function FlashcardStudyPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <Skeleton className="h-64 w-full max-w-xl rounded-lg bg-zinc-900" />
+        <Skeleton className="h-64 w-full max-w-xl rounded-lg bg-muted" />
       </div>
     )
   }
@@ -92,7 +92,7 @@ export default function FlashcardStudyPage() {
       <div className="flex items-center justify-between mb-6">
         <button
           onClick={() => navigate(`/subjects/${subjectId}/flashcards`)}
-          className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-zinc-50 transition-colors duration-150"
+          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors duration-150"
         >
           <ChevronLeft className="h-4 w-4" />
           {data.set.title}
@@ -101,7 +101,7 @@ export default function FlashcardStudyPage() {
           {canStudy && (
             <Button
               asChild
-              className="bg-zinc-50 text-zinc-950 hover:bg-zinc-200 h-7 px-2.5 text-xs font-medium rounded-md"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 h-7 px-2.5 text-xs font-medium rounded-md"
             >
               <Link to={`/subjects/${subjectId}/flashcards/${setId}/study`}>
                 <Brain className="h-3.5 w-3.5 mr-1.5" />
@@ -111,14 +111,14 @@ export default function FlashcardStudyPage() {
           )}
           <button
             onClick={doShuffle}
-            className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 transition-colors duration-150 px-2 py-1 rounded-md hover:bg-zinc-800"
+            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors duration-150 px-2 py-1 rounded-md hover:bg-secondary"
           >
             <Shuffle className="h-3.5 w-3.5" />
             Shuffle
           </button>
           <button
             onClick={doReset}
-            className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 transition-colors duration-150 px-2 py-1 rounded-md hover:bg-zinc-800"
+            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors duration-150 px-2 py-1 rounded-md hover:bg-secondary"
           >
             <RotateCcw className="h-3.5 w-3.5" />
             Reset
@@ -128,13 +128,13 @@ export default function FlashcardStudyPage() {
 
       {/* Progress */}
       <div className="flex items-center gap-3 mb-6">
-        <div className="flex-1 h-1 bg-zinc-800 rounded-full overflow-hidden">
+        <div className="flex-1 h-1 bg-secondary rounded-full overflow-hidden">
           <div
-            className="h-full bg-zinc-50 rounded-full transition-all duration-300"
+            className="h-full bg-primary rounded-full transition-all duration-300"
             style={{ width: `${((index + 1) / total) * 100}%` }}
           />
         </div>
-        <span className="text-xs text-zinc-500 tabular-nums shrink-0">{index + 1} / {total}</span>
+        <span className="text-xs text-muted-foreground tabular-nums shrink-0">{index + 1} / {total}</span>
       </div>
 
       {/* Card */}
@@ -155,11 +155,11 @@ export default function FlashcardStudyPage() {
           {/* Front */}
           <div
             style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
-            className="absolute inset-0 bg-zinc-900 border border-zinc-800 rounded-lg flex flex-col items-center justify-center p-8 hover:border-zinc-700 transition-colors duration-150"
+            className="absolute inset-0 bg-card card-texture border rounded-lg flex flex-col items-center justify-center p-8 hover:border-muted-foreground/30 transition-colors duration-150 synapse-glow"
           >
-            <p className="text-xs font-medium text-zinc-600 uppercase tracking-wide mb-4">Question</p>
-            <p className="text-base font-medium text-zinc-50 text-center leading-relaxed">{card?.front}</p>
-            <p className="text-xs text-zinc-600 mt-6">Press Space to flip</p>
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-4">Question</p>
+            <p className="text-base font-medium text-foreground text-center leading-relaxed">{card?.front}</p>
+            <p className="text-xs text-muted-foreground mt-6">Press Space to flip</p>
           </div>
           {/* Back */}
           <div
@@ -168,10 +168,10 @@ export default function FlashcardStudyPage() {
               WebkitBackfaceVisibility: 'hidden',
               transform: 'rotateY(180deg)',
             }}
-            className="absolute inset-0 bg-zinc-800 border border-zinc-700 rounded-lg flex flex-col items-center justify-center p-8"
+            className="absolute inset-0 bg-secondary card-texture border rounded-lg flex flex-col items-center justify-center p-8"
           >
-            <p className="text-xs font-medium text-zinc-500 uppercase tracking-wide mb-4">Answer</p>
-            <p className="text-base text-zinc-200 text-center leading-relaxed">{card?.back}</p>
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-4">Answer</p>
+            <p className="text-base text-foreground text-center leading-relaxed">{card?.back}</p>
           </div>
         </div>
       </div>
@@ -183,7 +183,7 @@ export default function FlashcardStudyPage() {
           size="icon"
           onClick={goPrev}
           disabled={index <= 0}
-          className="h-9 w-9 rounded-md border-zinc-700 bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-50 disabled:opacity-30"
+          className="h-9 w-9 rounded-md border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground disabled:opacity-30"
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
@@ -192,14 +192,14 @@ export default function FlashcardStudyPage() {
           size="icon"
           onClick={goNext}
           disabled={index >= total - 1}
-          className="h-9 w-9 rounded-md border-zinc-700 bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-50 disabled:opacity-30"
+          className="h-9 w-9 rounded-md border bg-card text-muted-foreground hover:bg-secondary hover:text-foreground disabled:opacity-30"
         >
           <ArrowRight className="h-4 w-4" />
         </Button>
       </div>
 
       {/* Keyboard hint */}
-      <p className="text-center text-xs text-zinc-700 mt-4">← → to navigate</p>
+      <p className="text-center text-xs text-muted-foreground mt-4">← → to navigate</p>
     </div>
   )
 }

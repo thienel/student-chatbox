@@ -54,21 +54,21 @@ export function EnrollDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-zinc-900 border border-zinc-800 rounded-lg max-w-md">
+      <DialogContent className="bg-card border rounded-lg max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-zinc-50">Join a class</DialogTitle>
-          <DialogDescription className="text-zinc-400">
+          <DialogTitle className="text-foreground">Join a class</DialogTitle>
+          <DialogDescription className="text-muted-foreground">
             Pick your lecturer and enter the class password they gave you.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
           <div className="space-y-2">
-            <Label className="text-xs text-zinc-400">Lecturer</Label>
+            <Label className="text-xs text-muted-foreground">Lecturer</Label>
             {isLoading ? (
-              <p className="text-sm text-zinc-500">Loading…</p>
+              <p className="text-sm text-muted-foreground">Loading…</p>
             ) : lecturers.length === 0 ? (
-              <p className="text-sm text-zinc-500">No classes are open for this subject yet.</p>
+              <p className="text-sm text-muted-foreground">No classes are open for this subject yet.</p>
             ) : (
               <div className="space-y-1.5 max-h-48 overflow-y-auto">
                 {lecturers.map(l => (
@@ -78,8 +78,8 @@ export function EnrollDialog({
                     className={cn(
                       'w-full text-left px-3 py-2 rounded-md border text-sm transition-colors duration-150',
                       lecturerId === l.id
-                        ? 'border-zinc-400 bg-zinc-800 text-zinc-50'
-                        : 'border-zinc-800 bg-zinc-950 text-zinc-400 hover:border-zinc-700',
+                        ? 'border-primary bg-primary/10 text-primary'
+                        : 'border-border bg-secondary text-muted-foreground hover:border-muted-foreground',
                     )}
                   >
                     {l.fullName}
@@ -90,7 +90,7 @@ export function EnrollDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="class-password" className="text-xs text-zinc-400">
+            <Label htmlFor="class-password" className="text-xs text-muted-foreground">
               Class password
             </Label>
             <Input
@@ -100,7 +100,7 @@ export function EnrollDialog({
               onChange={e => setPassword(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && submit()}
               placeholder="Enter password"
-              className="bg-zinc-950 border-zinc-800 text-zinc-50 h-9 rounded-md"
+              className="bg-secondary border-border text-foreground h-9 rounded-md"
             />
           </div>
         </div>
@@ -109,14 +109,14 @@ export function EnrollDialog({
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
-            className="border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 h-8 px-3 text-sm rounded-md"
+            className="border bg-transparent text-muted-foreground hover:bg-secondary h-8 px-3 text-sm rounded-md"
           >
             Cancel
           </Button>
           <Button
             onClick={submit}
             disabled={!lecturerId || !password || enroll.isPending}
-            className="bg-zinc-50 text-zinc-950 hover:bg-zinc-200 h-8 px-3 text-sm font-medium rounded-md"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-3 text-sm font-medium rounded-md"
           >
             {enroll.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />}
             Join

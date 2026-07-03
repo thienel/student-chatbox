@@ -26,15 +26,15 @@ export default function SubjectsPage() {
     <div className="max-w-5xl mx-auto px-6 py-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-semibold text-zinc-50">Subjects</h1>
-          <p className="text-sm text-zinc-500 mt-0.5">
+          <h1 className="text-2xl font-heading font-medium text-ink tracking-tight">Subjects</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
             {data?.total ?? 0} subjects available
           </p>
         </div>
         {canCreate && (
           <Button
             onClick={() => navigate('/admin/subjects')}
-            className="bg-zinc-50 text-zinc-950 hover:bg-zinc-200 h-8 px-3 text-sm font-medium rounded-md"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-3 text-sm font-medium rounded-md"
           >
             <Plus className="h-4 w-4 mr-1.5" />
             New Subject
@@ -43,19 +43,19 @@ export default function SubjectsPage() {
       </div>
 
       <div className="relative mb-4">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-500" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
         <Input
           placeholder="Search by name or code..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="pl-8 bg-zinc-900 border-zinc-800 text-zinc-50 placeholder:text-zinc-600 h-9 rounded-md"
+          className="pl-8 bg-card border text-foreground placeholder:text-muted-foreground h-9 rounded-md"
         />
       </div>
 
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-32 rounded-lg bg-zinc-900" />
+            <Skeleton key={i} className="h-32 rounded-lg bg-muted" />
           ))}
         </div>
       ) : subjects.length === 0 ? (
@@ -69,30 +69,30 @@ export default function SubjectsPage() {
           {subjects.map(subject => (
             <div
               key={subject.id}
-              className="group bg-zinc-900 border border-zinc-800 rounded-lg p-4 hover:border-zinc-700 transition-colors duration-150 cursor-pointer"
+              className="bg-card card-texture border rounded-lg p-5 hover:border-primary/50 hover-lift cursor-pointer h-full flex flex-col"
               onClick={() => navigate(`/subjects/${subject.id}/documents`)}
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="min-w-0">
-                  <p className="text-xs font-mono text-zinc-500 mb-0.5">{subject.code}</p>
-                  <h3 className="text-sm font-medium text-zinc-50 truncate">{subject.name}</h3>
+                  <p className="text-xs font-mono text-muted-foreground mb-0.5">{subject.code}</p>
+                  <h3 className="text-sm font-medium text-foreground truncate">{subject.name}</h3>
                 </div>
                 <Badge className={cn(
-                  'text-[10px] rounded shrink-0 ml-2',
+                  'text-[10px] rounded shrink-0 ml-2 border',
                   subject.status === 'active'
-                    ? 'bg-zinc-800 text-zinc-400 border-zinc-700'
-                    : 'bg-zinc-900 text-zinc-600 border-zinc-800'
+                    ? 'bg-secondary text-muted-foreground'
+                    : 'bg-muted text-muted-foreground'
                 )}>
                   {subject.status}
                 </Badge>
               </div>
 
               {subject.description && (
-                <p className="text-xs text-zinc-500 line-clamp-2 mb-3">{subject.description}</p>
+                <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{subject.description}</p>
               )}
 
               {subject.lecturers && subject.lecturers.length > 0 && (
-                <p className="text-xs text-zinc-600 mb-3 truncate">
+                <p className="text-xs text-muted-foreground mb-3 truncate">
                   {subject.lecturers.map(l => l.fullName).join(', ')}
                 </p>
               )}
@@ -120,7 +120,7 @@ function EnrollButton({ subjectId, isEnrolled }: { subjectId: string; isEnrolled
         size="sm"
         disabled={unenroll.isPending}
         onClick={() => unenroll.mutate()}
-        className="h-7 px-3 text-xs rounded-md w-full bg-transparent border border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-50"
+        className="h-7 px-3 text-xs rounded-md w-full bg-transparent border text-muted-foreground hover:bg-destructive hover:border-destructive hover:text-destructive-foreground"
       >
         {unenroll.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Leave class'}
       </Button>
@@ -132,7 +132,7 @@ function EnrollButton({ subjectId, isEnrolled }: { subjectId: string; isEnrolled
       <Button
         size="sm"
         onClick={() => setOpen(true)}
-        className="h-7 px-3 text-xs rounded-md w-full bg-zinc-50 text-zinc-950 hover:bg-zinc-200"
+        className="h-7 px-3 text-xs rounded-md w-full bg-primary text-primary-foreground hover:bg-primary/90"
       >
         Enroll
       </Button>

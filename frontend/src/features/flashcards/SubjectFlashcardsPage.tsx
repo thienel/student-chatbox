@@ -66,13 +66,13 @@ export default function SubjectFlashcardsPage() {
     <div className="max-w-5xl mx-auto px-6 py-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-base font-medium text-zinc-50">Flashcard Sets</h2>
-          <p className="text-xs text-zinc-500 mt-0.5">{sets.length} sets</p>
+          <h2 className="text-base font-medium text-foreground">Flashcard Sets</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">{sets.length} sets</p>
         </div>
         {canGenerate && (
           <Button
             onClick={() => setGenOpen(true)}
-            className="bg-zinc-50 text-zinc-950 hover:bg-zinc-200 h-8 px-3 text-sm font-medium rounded-md"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-3 text-sm font-medium rounded-md"
           >
             <Sparkles className="h-3.5 w-3.5 mr-1.5" />
             Generate
@@ -85,7 +85,7 @@ export default function SubjectFlashcardsPage() {
       ) : isLoading ? (
         <div className="space-y-2">
           {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-16 rounded-lg bg-zinc-900" />
+            <Skeleton key={i} className="h-16 rounded-lg bg-muted" />
           ))}
         </div>
       ) : sets.length === 0 ? (
@@ -96,7 +96,7 @@ export default function SubjectFlashcardsPage() {
           action={canGenerate ? (
             <Button
               onClick={() => setGenOpen(true)}
-              className="bg-zinc-50 text-zinc-950 hover:bg-zinc-200 h-8 px-3 text-sm font-medium rounded-md"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-3 text-sm font-medium rounded-md"
             >
               <Sparkles className="h-3.5 w-3.5 mr-1.5" />
               Generate first set
@@ -108,26 +108,26 @@ export default function SubjectFlashcardsPage() {
           {sets.map(set => (
             <div
               key={set.id}
-              className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 flex items-center justify-between group hover:border-zinc-700 transition-colors duration-150"
+              className="bg-card card-texture border rounded-lg p-4 flex items-center justify-between group hover:border-muted-foreground/30 transition-colors duration-150 synapse-glow"
             >
               <Link
                 to={`/subjects/${subjectId}/flashcards/${set.id}`}
                 className="flex items-center gap-3 flex-1 min-w-0"
               >
-                <div className="h-8 w-8 rounded-md bg-zinc-800 flex items-center justify-center shrink-0">
-                  <Layers className="h-4 w-4 text-zinc-400" />
+                <div className="h-8 w-8 rounded-md bg-secondary flex items-center justify-center shrink-0">
+                  <Layers className="h-4 w-4 text-muted-foreground" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-zinc-50 truncate">{set.title}</p>
-                  <p className="text-xs text-zinc-500 mt-0.5">
+                  <p className="text-sm font-medium text-foreground truncate">{set.title}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
                     {new Date(set.createdAt).toLocaleDateString()}
                   </p>
                 </div>
-                <ChevronRight className="h-4 w-4 text-zinc-600 ml-auto shrink-0 group-hover:text-zinc-400 transition-colors duration-150" />
+                <ChevronRight className="h-4 w-4 text-muted-foreground ml-auto shrink-0 transition-colors duration-150" />
               </Link>
               {set.isPublic && (
-                <span className="flex items-center gap-1 text-xs text-amber-400 ml-2 shrink-0 tabular-nums">
-                  <Star className="h-3.5 w-3.5 fill-amber-400" />
+                <span className="flex items-center gap-1 text-xs text-accent ml-2 shrink-0 tabular-nums">
+                  <Star className="h-3.5 w-3.5 fill-accent" />
                   {set.starCount}
                 </span>
               )}
@@ -139,8 +139,8 @@ export default function SubjectFlashcardsPage() {
                   disabled={setVisibility.isPending}
                   title={set.isPublic ? 'Make private' : 'Publish to community'}
                   className={cn(
-                    'h-7 w-7 rounded-md ml-2 shrink-0 hover:bg-zinc-800',
-                    set.isPublic ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300',
+                    'h-7 w-7 rounded-md ml-2 shrink-0 hover:bg-secondary',
+                    set.isPublic ? 'text-[hsl(var(--lime-text))]' : 'text-muted-foreground hover:text-foreground',
                   )}
                 >
                   {set.isPublic ? <Globe className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
@@ -152,21 +152,21 @@ export default function SubjectFlashcardsPage() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 rounded-md text-zinc-600 hover:text-red-400 hover:bg-zinc-800 ml-2 shrink-0"
+                      className="h-7 w-7 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 ml-2 shrink-0"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </AlertDialogTrigger>
-                  <AlertDialogContent className="bg-zinc-900 border border-zinc-800">
+                  <AlertDialogContent className="bg-card border">
                     <AlertDialogHeader>
-                      <AlertDialogTitle className="text-zinc-50">Delete flashcard set?</AlertDialogTitle>
-                      <AlertDialogDescription className="text-zinc-400">This action cannot be undone.</AlertDialogDescription>
+                      <AlertDialogTitle className="text-foreground">Delete flashcard set?</AlertDialogTitle>
+                      <AlertDialogDescription className="text-muted-foreground">This action cannot be undone.</AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel className="border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800">Cancel</AlertDialogCancel>
+                      <AlertDialogCancel className="border bg-transparent text-foreground hover:bg-secondary">Cancel</AlertDialogCancel>
                       <AlertDialogAction
                         onClick={() => remove.mutate(set.id)}
-                        className="bg-red-950 text-red-400 border border-red-900 hover:bg-red-900"
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                       >
                         Delete
                       </AlertDialogAction>
@@ -181,32 +181,32 @@ export default function SubjectFlashcardsPage() {
 
       {/* Generate Dialog */}
       <Dialog open={genOpen} onOpenChange={setGenOpen}>
-        <DialogContent className="bg-zinc-900 border border-zinc-800 rounded-lg shadow-none p-0 max-w-md">
-          <div className="px-5 py-4 border-b border-zinc-800">
-            <DialogTitle className="text-base font-semibold text-zinc-50">Generate Flashcards</DialogTitle>
-            <DialogDescription className="text-sm text-zinc-400 mt-0.5">
+        <DialogContent className="bg-card border rounded-lg shadow-none p-0 max-w-md">
+          <div className="px-5 py-4 border-b">
+            <DialogTitle className="text-base font-semibold text-foreground">Generate Flashcards</DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground mt-0.5">
               AI will generate cards from subject documents.
             </DialogDescription>
           </div>
           <div className="p-5 space-y-4">
             <div className="space-y-1.5">
-              <Label className="text-xs font-medium text-zinc-400 uppercase tracking-wide">Topic (optional)</Label>
+              <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Topic (optional)</Label>
               <Input
                 value={topic}
                 onChange={e => setTopic(e.target.value)}
                 placeholder="e.g. Dependency Injection"
-                className="bg-zinc-800 border-zinc-700 text-zinc-50 placeholder:text-zinc-600 h-9 text-sm rounded-md focus-visible:ring-1 focus-visible:ring-zinc-600"
+                className="bg-transparent border text-foreground placeholder:text-muted-foreground h-9 text-sm rounded-md focus-visible:ring-1 focus-visible:ring-primary"
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs font-medium text-zinc-400 uppercase tracking-wide">Number of cards</Label>
+              <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Number of cards</Label>
               <Input
                 type="number"
                 value={cardCount}
                 onChange={e => setCardCount(e.target.value)}
                 min={1}
                 max={50}
-                className="bg-zinc-800 border-zinc-700 text-zinc-50 h-9 text-sm rounded-md focus-visible:ring-1 focus-visible:ring-zinc-600"
+                className="bg-transparent border text-foreground h-9 text-sm rounded-md focus-visible:ring-1 focus-visible:ring-primary"
               />
             </div>
             <DocumentPicker
@@ -215,18 +215,18 @@ export default function SubjectFlashcardsPage() {
               onChange={setDocumentIds}
             />
           </div>
-          <div className="px-5 py-4 border-t border-zinc-800 flex justify-end gap-2">
+          <div className="px-5 py-4 border-t flex justify-end gap-2">
             <Button
               variant="outline"
               onClick={() => setGenOpen(false)}
-              className="border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 h-8 px-3 text-sm rounded-md"
+              className="bg-transparent hover:bg-secondary h-8 px-3 text-sm rounded-md"
             >
               Cancel
             </Button>
             <Button
               onClick={handleGenerate}
               disabled={generate.isPending}
-              className="bg-zinc-50 text-zinc-950 hover:bg-zinc-200 h-8 px-3 text-sm font-medium rounded-md"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-3 text-sm font-medium rounded-md"
             >
               {generate.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />}
               Generate

@@ -41,59 +41,59 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <div className="inline-flex items-center justify-center h-10 w-10 rounded-md bg-zinc-900 border border-zinc-800 mb-4">
-            <span className="text-lg font-semibold text-zinc-50">E</span>
+          <div className="inline-flex items-center justify-center h-10 w-10 rounded-sm bg-card border border-border mb-4">
+            <span className="text-lg font-semibold text-foreground">F</span>
           </div>
-          <h1 className="text-xl font-semibold text-zinc-50">EduChat</h1>
-          <p className="text-sm text-zinc-500 mt-1">Sign in to your account</p>
+          <h1 className="text-3xl font-heading font-medium text-ink tracking-tight">Folio</h1>
+          <p className="text-sm text-muted-foreground mt-1">Sign in to your account</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="email" className="text-sm text-zinc-300">Email</Label>
+            <Label htmlFor="email" className="text-sm text-foreground">Email</Label>
             <Input
               id="email"
               type="email"
               autoComplete="email"
               placeholder="you@university.edu"
               className={cn(
-                'bg-zinc-900 border-zinc-800 text-zinc-50 placeholder:text-zinc-600',
-                'focus:border-zinc-700 focus:ring-0',
-                errors.email && 'border-red-900 focus:border-red-800'
+                'bg-secondary border-border text-foreground placeholder:text-muted-foreground',
+                'focus:border-primary focus:ring-0',
+                errors.email && 'border-destructive focus:border-destructive'
               )}
               {...register('email')}
             />
             {errors.email && (
-              <p className="text-xs text-red-400">{errors.email.message}</p>
+              <p className="text-xs text-destructive">{errors.email.message}</p>
             )}
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="password" className="text-sm text-zinc-300">Password</Label>
+            <Label htmlFor="password" className="text-sm text-foreground">Password</Label>
             <Input
               id="password"
               type="password"
               autoComplete="current-password"
               placeholder="••••••••"
               className={cn(
-                'bg-zinc-900 border-zinc-800 text-zinc-50 placeholder:text-zinc-600',
-                'focus:border-zinc-700 focus:ring-0',
-                errors.password && 'border-red-900 focus:border-red-800'
+                'bg-secondary border-border text-foreground placeholder:text-muted-foreground',
+                'focus:border-primary focus:ring-0',
+                errors.password && 'border-destructive focus:border-destructive'
               )}
               {...register('password')}
             />
             {errors.password && (
-              <p className="text-xs text-red-400">{errors.password.message}</p>
+              <p className="text-xs text-destructive">{errors.password.message}</p>
             )}
           </div>
 
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="w-full h-9 bg-zinc-50 text-zinc-950 hover:bg-zinc-200 font-medium rounded-md mt-2"
+            className="w-full h-9 bg-primary text-primary-foreground hover:bg-primary/90 font-medium rounded-md mt-2"
           >
             {isSubmitting ? (
               <Loader2 className="h-4 w-4 animate-spin" />

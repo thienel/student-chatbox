@@ -1,26 +1,28 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ChevronLeft, Loader2, Flame, CheckCircle2, Settings2, CalendarClock } from 'lucide-react'
+import { ChevronLeft, Loader2, CheckCircle2, Settings2, CalendarClock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { EmptyState } from '@/components/shared/EmptyState'
+import { AchievementStamp } from '@/components/ui/achievement-stamp'
 import { useToast } from '@/hooks/use-toast'
 import { getErrorMessage } from '@/lib/errors'
 import { useQueryClient } from '@tanstack/react-query'
+import { cn } from '@/lib/utils'
 import {
   useStudyQueue, useStartStudySession, useReviewCard, useStudyStats,
   useStudySettings, useUpdateStudySettings, studyKeys,
 } from './study-queries'
 import type { CardRating } from '@/types'
 
-const RATINGS: { rating: CardRating; label: string; cls: string }[] = [
-  { rating: 1, label: 'Again', cls: 'bg-red-950 text-red-400 border-red-900 hover:bg-red-900' },
-  { rating: 2, label: 'Hard', cls: 'bg-amber-950 text-amber-400 border-amber-900 hover:bg-amber-900' },
-  { rating: 3, label: 'Good', cls: 'bg-emerald-950 text-emerald-400 border-emerald-900 hover:bg-emerald-900' },
-  { rating: 4, label: 'Easy', cls: 'bg-sky-950 text-sky-400 border-sky-900 hover:bg-sky-900' },
+const RATINGS: { rating: CardRating; label: string; shortcut: string }[] = [
+  { rating: 1, label: 'Again', shortcut: '1' },
+  { rating: 2, label: 'Hard', shortcut: '2' },
+  { rating: 3, label: 'Good', shortcut: '3' },
+  { rating: 4, label: 'Easy', shortcut: '4' },
 ]
 
 export default function StudySessionPage() {
@@ -107,114 +109,145 @@ export default function StudySessionPage() {
 
   const back = () => navigate(`/subjects/${subjectId}/flashcards/${setId}`)
 
+  const remainingNew = cards.slice(index).filter(c => c.isNew).length
+  const remainingDue = cards.slice(index).filter(c => !c.isNew).length
+
   return (
-    <div className="max-w-2xl mx-auto px-6 py-6">
-      <div className="flex items-center justify-between mb-6">
-        <button onClick={back} className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-zinc-50">
-          <ChevronLeft className="h-4 w-4" /> Back to set
+    <div className="max-w-3xl mx-auto px-6 py-6 h-full flex flex-col">
+      <div className="flex items-center justify-between mb-8">
+        <button onClick={back} className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-ink transition-colors">
+          <ChevronLeft className="h-4 w-4" /> Exit Session
         </button>
-        <div className="flex items-center gap-3">
-          {stats.data && (
-            <span className="flex items-center gap-1.5 text-xs text-amber-400">
-              <Flame className="h-3.5 w-3.5" /> {stats.data.currentStreak} day streak
-            </span>
+        
+        <div className="flex items-center gap-4">
+          {!done && cards.length > 0 && (
+            <div className="flex items-center gap-4 bg-card border rounded-full px-4 py-1.5 shadow-sm">
+              <span className="text-xs font-medium text-muted-foreground">
+                Thẻ <span className="font-data text-ink text-sm">{index + 1}</span> / <span className="font-data text-sm">{cards.length}</span> <span className="opacity-70">(đã học <span className="font-data">{reviewed}</span> thẻ)</span>
+              </span>
+              <div className="w-[1px] h-4 bg-border" />
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">New: <span className="font-data">{remainingNew}</span></span>
+                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-muted text-ink border">Due: <span className="font-data">{remainingDue}</span></span>
+              </div>
+            </div>
           )}
-          <button onClick={openSettings} className="text-zinc-500 hover:text-zinc-300" title="Study settings">
+          <button onClick={openSettings} className="h-8 w-8 flex items-center justify-center rounded-full bg-card border text-muted-foreground hover:text-ink hover:bg-secondary transition-colors" title="Study settings">
             <Settings2 className="h-4 w-4" />
           </button>
         </div>
       </div>
 
-      {queue.isLoading ? (
-        <Skeleton className="h-72 w-full rounded-lg bg-zinc-900" />
-      ) : done ? (
-        <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
-          <CheckCircle2 className="h-12 w-12 text-emerald-400 mb-4" />
-          <h2 className="text-lg font-semibold text-zinc-50">Session complete</h2>
-          <p className="text-sm text-zinc-400 mt-1">You reviewed {reviewed} cards.</p>
-          {stats.data && (
-            <p className="text-sm text-amber-400 mt-2 flex items-center gap-1.5">
-              <Flame className="h-4 w-4" /> {stats.data.currentStreak} day streak
-            </p>
-          )}
-          <Button onClick={back} className="mt-6 bg-zinc-50 text-zinc-950 hover:bg-zinc-200 h-9 px-4 text-sm rounded-md">
-            Done
-          </Button>
-        </div>
-      ) : cards.length === 0 ? (
-        <EmptyState
-          icon={CalendarClock}
-          title="All caught up"
-          description={
-            queue.data?.nextDueAt
-              ? `Next review due ${new Date(queue.data.nextDueAt).toLocaleString()}.`
-              : 'No cards are due right now. Come back later.'
-          }
-        />
-      ) : !card ? null : (
-        <>
-          <div className="flex items-center gap-3 mb-6">
-            <div className="flex-1 h-1 bg-zinc-800 rounded-full overflow-hidden">
-              <div className="h-full bg-zinc-50 rounded-full transition-all duration-300" style={{ width: `${(index / cards.length) * 100}%` }} />
-            </div>
-            <span className="text-xs text-zinc-500 tabular-nums shrink-0">{index + 1} / {cards.length}</span>
-          </div>
-
-          <div
-            onClick={() => setFlipped(f => !f)}
-            className="bg-zinc-900 border border-zinc-800 rounded-lg flex flex-col items-center justify-center p-8 min-h-[280px] cursor-pointer select-none hover:border-zinc-700"
-          >
-            <p className="text-xs font-medium text-zinc-600 uppercase tracking-wide mb-4">
-              {flipped ? 'Answer' : 'Question'}
-              {card.isNew && !flipped && <span className="ml-2 text-sky-500">· new</span>}
-            </p>
-            <p className="text-base text-zinc-100 text-center leading-relaxed">{flipped ? card.back : card.front}</p>
-            {!flipped && <p className="text-xs text-zinc-600 mt-6">Press Space to reveal</p>}
-          </div>
-
-          {flipped ? (
-            <div className="grid grid-cols-4 gap-2 mt-6">
-              {RATINGS.map(r => (
-                <Button
-                  key={r.rating}
-                  onClick={() => handleRate(r.rating)}
-                  disabled={review.isPending}
-                  className={`h-10 text-sm font-medium rounded-md border ${r.cls}`}
-                >
-                  {review.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : r.label}
-                </Button>
-              ))}
-            </div>
-          ) : (
-            <div className="flex justify-center mt-6">
-              <Button onClick={() => setFlipped(true)} className="bg-zinc-50 text-zinc-950 hover:bg-zinc-200 h-9 px-6 text-sm rounded-md">
-                Reveal answer
+      <div className="flex-1 flex flex-col justify-center">
+        {queue.isLoading ? (
+          <Skeleton className="h-[400px] w-full rounded-2xl bg-card border" />
+        ) : done ? (
+          <div className="bg-card card-texture border rounded-2xl p-16 text-center shadow-sm relative overflow-hidden flex flex-col items-center justify-center min-h-[400px]">
+            {stats.data && (
+              <AchievementStamp 
+                value={stats.data.currentStreak} 
+                label="DAY STREAK" 
+                className="mb-8 relative z-10 mx-auto"
+              />
+            )}
+            <h2 className="text-4xl font-heading font-medium text-ink relative z-10">Session Complete!</h2>
+            <p className="text-base text-muted-foreground mt-4 relative z-10">You have successfully reviewed <span className="font-data font-semibold text-ink text-lg">{reviewed}</span> cards.</p>
+            <div className="mt-10 relative z-10">
+              <Button onClick={back} className="bg-primary text-primary-foreground hover:bg-primary/90 h-11 px-10 text-sm font-medium rounded-lg">
+                Return to Library
               </Button>
             </div>
-          )}
-          <p className="text-center text-xs text-zinc-700 mt-4">Space to flip · 1–4 to rate</p>
-        </>
-      )}
+          </div>
+        ) : cards.length === 0 ? (
+          <EmptyState
+            icon={CalendarClock}
+            title="All caught up"
+            description={
+              queue.data?.nextDueAt
+                ? `Next review due ${new Date(queue.data.nextDueAt).toLocaleString()}.`
+                : 'No cards are due right now. Take a break.'
+            }
+          />
+        ) : !card ? null : (
+          <div className="flex flex-col h-full gap-8 pb-12">
+            {/* Center Stage: Flashcard */}
+            <div
+              onClick={() => setFlipped(f => !f)}
+              className={cn(
+                "flex-1 bg-card card-texture border rounded-2xl shadow-sm flex flex-col items-center justify-center p-12 cursor-pointer select-none transition-all duration-300 relative",
+                flipped ? "bg-paper border-border" : "hover:border-primary/50 hover-lift"
+              )}
+              style={{ minHeight: '380px' }}
+            >
+              <div className="absolute top-6 left-8 right-8 flex justify-between items-center text-xs font-medium uppercase tracking-widest text-muted-foreground">
+                <span>{flipped ? 'Answer' : 'Question'}</span>
+                {card.isNew && !flipped && <span className="text-primary bg-primary/10 px-2 py-0.5 rounded-sm tracking-normal">New Card</span>}
+              </div>
+              
+              <div className="flex-1 flex items-center justify-center w-full">
+                {flipped ? (
+                  <p className="text-xl text-ink leading-relaxed text-center whitespace-pre-wrap">{card.back}</p>
+                ) : (
+                  <h3 className="text-4xl font-heading font-medium text-ink leading-relaxed text-center whitespace-pre-wrap">{card.front}</h3>
+                )}
+              </div>
+              
+              {!flipped && <p className="absolute bottom-6 text-xs text-muted-foreground font-medium">Press <kbd className="font-data px-1.5 py-0.5 bg-secondary border rounded text-ink mx-1">Space</kbd> to reveal</p>}
+            </div>
+
+            {/* Footer Controls */}
+            {flipped ? (
+              <div className="grid grid-cols-4 gap-4">
+                {RATINGS.map(r => (
+                  <button
+                    key={r.rating}
+                    onClick={() => handleRate(r.rating)}
+                    disabled={review.isPending}
+                    className="group relative flex flex-col items-center justify-center h-24 bg-card border-2 border-b-4 border-border rounded-xl hover:bg-muted active:border-b-2 active:translate-y-[2px] transition-all disabled:opacity-50 disabled:pointer-events-none"
+                  >
+                    <span className="text-base font-medium text-ink group-hover:text-primary transition-colors">
+                      {review.isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : r.label}
+                    </span>
+                    <span className="absolute bottom-3 text-[10px] font-data text-muted-foreground uppercase tracking-widest">
+                      Press {r.shortcut}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="flex justify-center">
+                <button 
+                  onClick={() => setFlipped(true)} 
+                  className="w-full max-w-md flex items-center justify-center h-16 bg-primary text-primary-foreground font-medium text-lg rounded-xl border-b-4 border-primary/50 hover:bg-primary/90 active:border-b-0 active:translate-y-[4px] transition-all"
+                >
+                  Reveal Answer
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
-        <DialogContent className="bg-zinc-900 border border-zinc-800 rounded-lg shadow-none p-0 max-w-sm">
-          <div className="px-5 py-4 border-b border-zinc-800">
-            <DialogTitle className="text-base font-semibold text-zinc-50">Study settings</DialogTitle>
-            <DialogDescription className="text-sm text-zinc-400 mt-0.5">New cards introduced per day.</DialogDescription>
+        <DialogContent className="bg-card card-texture border rounded-xl shadow-lg p-0 max-w-sm overflow-hidden">
+          <div className="px-6 py-5 border-b bg-paper">
+            <DialogTitle className="text-lg font-heading font-medium text-ink">Study Settings</DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground mt-1">Configure your spaced repetition algorithm.</DialogDescription>
           </div>
-          <div className="p-5 space-y-1.5">
-            <Label className="text-xs font-medium text-zinc-400 uppercase tracking-wide">New cards / day</Label>
+          <div className="p-6 space-y-3 bg-card relative z-10">
+            <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">New cards per day</Label>
             <Input
               type="number" min={1} max={100}
               value={newCardsPerDay}
               onChange={e => setNewCardsPerDay(e.target.value)}
-              className="bg-zinc-800 border-zinc-700 text-zinc-50 h-9 text-sm rounded-md focus-visible:ring-1 focus-visible:ring-zinc-600"
+              className="bg-transparent border-border text-ink h-10 text-base font-data rounded-lg focus-visible:ring-1 focus-visible:ring-primary"
             />
+            <p className="text-xs text-muted-foreground">Limits the number of unlearned cards introduced daily.</p>
           </div>
-          <div className="px-5 py-4 border-t border-zinc-800 flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setSettingsOpen(false)} className="border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 h-8 px-3 text-sm rounded-md">Cancel</Button>
-            <Button onClick={saveSettings} disabled={updateSettings.isPending} className="bg-zinc-50 text-zinc-950 hover:bg-zinc-200 h-8 px-3 text-sm rounded-md">
-              {updateSettings.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />}Save
+          <div className="px-6 py-4 border-t bg-paper flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setSettingsOpen(false)} className="bg-transparent border-border hover:bg-muted text-ink h-9 px-4 rounded-md">Cancel</Button>
+            <Button onClick={saveSettings} disabled={updateSettings.isPending} className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 rounded-md font-medium">
+              {updateSettings.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />} Save Changes
             </Button>
           </div>
         </DialogContent>

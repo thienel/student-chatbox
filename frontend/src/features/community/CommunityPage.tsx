@@ -38,18 +38,18 @@ export default function CommunityPage() {
   return (
     <div className="max-w-4xl mx-auto px-6 py-6">
       <div className="mb-6">
-        <h1 className="text-lg font-semibold text-zinc-50">Community Flashcards</h1>
-        <p className="text-xs text-zinc-500 mt-0.5">Discover and star sets shared by other students.</p>
+        <h1 className="text-2xl font-heading font-medium text-ink tracking-tight">Community Flashcards</h1>
+        <p className="text-xs text-muted-foreground mt-0.5">Discover and star sets shared by other students.</p>
       </div>
 
-      <div className="flex items-center gap-1 border-b border-zinc-900 mb-5">
+      <div className="flex items-center gap-1 border-b border-border mb-5">
         {(['discover', 'leaderboard'] as Tab[]).map(t => (
           <button
             key={t}
             onClick={() => setTab(t)}
             className={cn(
               'flex items-center gap-1.5 h-9 px-3 text-sm border-b-2 -mb-px capitalize transition-colors',
-              tab === t ? 'border-zinc-50 text-zinc-50' : 'border-transparent text-zinc-500 hover:text-zinc-300',
+              tab === t ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground',
             )}
           >
             {t === 'discover' ? <Layers className="h-3.5 w-3.5" /> : <Trophy className="h-3.5 w-3.5" />}
@@ -64,7 +64,7 @@ export default function CommunityPage() {
             <select
               value={sort}
               onChange={e => setSort(e.target.value as 'stars' | 'newest')}
-              className="h-8 px-2 bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs rounded-md focus:outline-none"
+              className="h-8 px-2 bg-card border-border text-foreground text-xs rounded-md focus:outline-none"
             >
               <option value="stars">Most starred</option>
               <option value="newest">Newest</option>
@@ -72,20 +72,20 @@ export default function CommunityPage() {
           </div>
           {discover.isLoading ? (
             <div className="space-y-2">
-              {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-16 rounded-lg bg-zinc-900" />)}
+              {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-16 rounded-lg bg-muted" />)}
             </div>
           ) : !discover.data || discover.data.items.length === 0 ? (
             <EmptyState icon={Layers} title="No public sets yet" description="Be the first to publish a flashcard set." />
           ) : (
             <div className="space-y-2">
               {discover.data.items.map(set => (
-                <div key={set.id} className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-md bg-zinc-800 flex items-center justify-center shrink-0">
-                    <Layers className="h-4 w-4 text-zinc-400" />
+                <div key={set.id} className="bg-card card-texture border rounded-lg p-4 flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-md bg-secondary flex items-center justify-center shrink-0">
+                    <Layers className="h-4 w-4 text-muted-foreground" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-zinc-50 truncate">{set.title}</p>
-                    <p className="text-xs text-zinc-500 mt-0.5 truncate">
+                    <p className="text-sm font-medium text-foreground truncate">{set.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5 truncate">
                       {set.creatorName} · {set.subjectName} · {set.cardCount} cards
                     </p>
                   </div>
@@ -94,11 +94,11 @@ export default function CommunityPage() {
                     size="sm"
                     onClick={() => handleStar(set.id, set.isStarredByMe)}
                     className={cn(
-                      'h-8 px-2.5 text-xs rounded-md border-zinc-700 bg-transparent hover:bg-zinc-800',
-                      set.isStarredByMe ? 'text-amber-400' : 'text-zinc-400',
+                      'h-8 px-2.5 text-xs rounded-md border-border bg-transparent hover:bg-secondary',
+                      set.isStarredByMe ? 'text-primary' : 'text-muted-foreground',
                     )}
                   >
-                    <Star className={cn('h-3.5 w-3.5 mr-1', set.isStarredByMe && 'fill-amber-400')} />
+                    <Star className={cn('h-3.5 w-3.5 mr-1', set.isStarredByMe && 'fill-primary')} />
                     {set.starCount}
                   </Button>
                   <Button
@@ -107,7 +107,7 @@ export default function CommunityPage() {
                     onClick={() => handleClone(set.id)}
                     disabled={clone.isPending}
                     title="Clone to my class"
-                    className="h-8 w-8 rounded-md text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800"
+                    className="h-8 w-8 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary"
                   >
                     <Copy className="h-3.5 w-3.5" />
                   </Button>
@@ -118,35 +118,38 @@ export default function CommunityPage() {
         </>
       ) : leaderboard.isLoading ? (
         <div className="space-y-2">
-          {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-12 rounded-lg bg-zinc-900" />)}
+          {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-12 rounded-lg bg-muted" />)}
         </div>
       ) : !leaderboard.data || leaderboard.data.items.length === 0 ? (
         <EmptyState icon={Trophy} title="No ranking yet" description="Publish sets and earn stars to climb the leaderboard." />
       ) : (
         <div className="space-y-1.5">
           {leaderboard.data.items.map(entry => (
-            <div key={entry.userId} className="bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2.5 flex items-center gap-3">
+            <div key={entry.userId} className="bg-card card-texture border rounded-lg px-4 py-2.5 flex items-center gap-3">
               <span className={cn(
-                'w-7 text-sm font-semibold tabular-nums text-center',
-                entry.rank <= 3 ? 'text-amber-400' : 'text-zinc-500',
+                'w-7 text-sm tabular-nums text-center',
+                entry.rank <= 3 ? 'text-lime-600 font-bold' : 'text-muted-foreground font-semibold',
               )}>
                 {entry.rank}
               </span>
-              <span className="text-sm text-zinc-200 flex-1 truncate">{entry.fullName}</span>
-              <span className="text-xs text-zinc-500">{entry.totalPublicSets} sets</span>
-              <Badge className="bg-zinc-800 text-amber-400 border-zinc-700 rounded-md text-xs tabular-nums">
-                <Star className="h-3 w-3 mr-1 fill-amber-400" />{entry.totalStars}
+              <span className="text-sm text-foreground flex-1 truncate">{entry.fullName}</span>
+              <span className="text-xs text-muted-foreground">{entry.totalPublicSets} sets</span>
+              <Badge className={cn(
+                'rounded-md text-xs tabular-nums',
+                entry.rank <= 3 ? 'bg-lime-50 text-lime-700 border-lime-200' : 'bg-secondary text-primary border-border'
+              )}>
+                <Star className={cn('h-3 w-3 mr-1', entry.rank <= 3 ? 'fill-lime-600' : 'fill-primary')} />{entry.totalStars}
               </Badge>
             </div>
           ))}
           {leaderboard.data.myRank && (
-            <div className="mt-3 bg-zinc-900/60 border border-zinc-800 border-dashed rounded-lg px-4 py-2.5 flex items-center gap-3">
-              <Medal className="h-4 w-4 text-zinc-500" />
-              <span className="text-sm text-zinc-300 flex-1">
-                Your rank: <span className="font-semibold text-zinc-100">#{leaderboard.data.myRank.rank}</span>
+            <div className="mt-3 bg-secondary/30 border border-border border-dashed rounded-lg px-4 py-2.5 flex items-center gap-3">
+              <Medal className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm text-foreground flex-1">
+                Your rank: <span className="font-semibold">#{leaderboard.data.myRank.rank}</span>
               </span>
-              <Badge className="bg-zinc-800 text-amber-400 border-zinc-700 rounded-md text-xs tabular-nums">
-                <Star className="h-3 w-3 mr-1 fill-amber-400" />{leaderboard.data.myRank.totalStars}
+              <Badge className="bg-secondary text-primary border-border rounded-md text-xs tabular-nums">
+                <Star className="h-3 w-3 mr-1 fill-primary" />{leaderboard.data.myRank.totalStars}
               </Badge>
             </div>
           )}
@@ -155,7 +158,7 @@ export default function CommunityPage() {
 
       {(toggleStar.isPending || clone.isPending) && (
         <div className="fixed bottom-20 left-1/2 -translate-x-1/2">
-          <Loader2 className="h-4 w-4 animate-spin text-zinc-500" />
+          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
         </div>
       )}
     </div>

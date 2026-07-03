@@ -26,14 +26,14 @@ export function DocumentPicker({
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-zinc-400 uppercase tracking-wide">
+        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
           Source documents
         </span>
-        <span className="text-[11px] text-zinc-600">
+        <span className="text-[11px] text-muted-foreground">
           {value.length === 0 ? 'All documents' : `${value.length} selected`}
         </span>
       </div>
-      <div className="space-y-1 max-h-40 overflow-y-auto rounded-md border border-zinc-800 p-1.5">
+      <div className="space-y-1 max-h-40 overflow-y-auto rounded-md border border-border p-1.5">
         {ready.map(doc => {
           const selected = value.includes(doc.id)
           return (
@@ -43,18 +43,18 @@ export function DocumentPicker({
               onClick={() => toggle(doc.id)}
               className={cn(
                 'w-full flex items-center gap-2 px-2 py-1.5 rounded text-left text-sm transition-colors duration-150',
-                selected ? 'bg-zinc-800 text-zinc-50' : 'text-zinc-400 hover:bg-zinc-800/50',
+                selected ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-secondary/50',
               )}
             >
               <span
                 className={cn(
                   'h-4 w-4 rounded border flex items-center justify-center shrink-0',
-                  selected ? 'bg-zinc-50 border-zinc-50' : 'border-zinc-700',
+                  selected ? 'bg-primary border-primary text-primary-foreground' : 'border-border',
                 )}
               >
-                {selected && <Check className="h-3 w-3 text-zinc-950" />}
+                {selected && <Check className="h-3 w-3" />}
               </span>
-              <FileText className="h-3.5 w-3.5 text-zinc-500 shrink-0" />
+              <FileText className="h-3.5 w-3.5 opacity-70 shrink-0" />
               <span className="truncate">{doc.originalName}</span>
             </button>
           )
