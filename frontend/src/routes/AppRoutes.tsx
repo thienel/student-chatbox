@@ -1,5 +1,8 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import { useAuthStore } from '@/store/useAuthStore'
+import { useUserStore } from '@/store/useUserStore'
+import { authApi } from '@/api/endpoints/auth'
 import { AppShell } from '@/components/layout/AppShell'
 import { SubjectShell } from '@/components/layout/SubjectShell'
 import { AdminShell } from '@/components/layout/AdminShell'
@@ -41,6 +44,7 @@ import AdminAuditLogsPage from '@/features/admin/AdminAuditLogsPage'
 import AdminAnalyticsPage from '@/features/admin/AdminAnalyticsPage'
 import AdminRbacPage from '@/features/admin/AdminRbacPage'
 import SettingsPage from '@/features/settings/SettingsPage'
+import AdminStudentVerificationsPage from '@/features/admin/AdminStudentVerificationsPage'
 
 interface ProtectedProps {
   children: React.ReactNode
@@ -48,9 +52,26 @@ interface ProtectedProps {
 }
 
 function Protected({ children, roles }: ProtectedProps) {
-  const { accessToken, user } = useAuthStore()
+  const { accessToken } = useAuthStore()
+  const { user, setUser } = useUserStore()
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (accessToken && !user) {
+      authApi.me()
+        .then(data => setUser(data))
+        .catch(() => { })
+        .finally(() => setLoading(false))
+    } else {
+      setLoading(false)
+    }
+  }, [accessToken, user, setUser])
+
   if (!accessToken) return <Navigate to="/login" replace />
+  if (loading) return <div className="flex h-screen items-center justify-center">Loading...</div>
   if (roles && user && !roles.includes(user.role)) return <Navigate to="/home" replace />
+  if (!roles && user && user.role === 'admin') return <Navigate to="/admin" replace />
+
   return <>{children}</>
 }
 
@@ -110,6 +131,7 @@ export default function AppRoutes() {
       <Route element={<Protected roles={['admin']}><AdminShell /></Protected>}>
         <Route path="/admin" element={<AdminDashboardPage />} />
         <Route path="/admin/users" element={<AdminUsersPage />} />
+        <Route path="/admin/verifications" element={<AdminStudentVerificationsPage />} />
         <Route path="/admin/subjects" element={<AdminSubjectsPage />} />
         <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
         <Route path="/admin/rbac" element={<AdminRbacPage />} />

@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useAuthStore } from '@/store/useAuthStore'
+import { useUserStore } from '@/store/useUserStore'
 import { useBreadcrumbStore } from '@/store/useBreadcrumbStore'
 import { useCommandPalette } from '@/hooks/useCommandPalette'
 import { cn } from '@/lib/utils'
@@ -23,7 +24,7 @@ function getDefaultCrumb(pathname: string): Array<{ label: string; href?: string
 
 export function Topbar() {
   const { open: openCmd } = useCommandPalette()
-  const user = useAuthStore(s => s.user)
+  const user = useUserStore(s => s.user)
   const logout = useAuthStore(s => s.logout)
   const { pathname } = useLocation()
   const crumbs = useBreadcrumbStore(s => s.crumbs)

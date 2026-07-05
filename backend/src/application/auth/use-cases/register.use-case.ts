@@ -1,72 +1,75 @@
-import { Injectable, Inject, ConflictException, NotFoundException } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
+import { Injectable, Inject, ConflictException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { IUserRepository } from '../../../domain/user/repositories/user.repository.interface';
 import { IRoleRepository } from '../../../domain/user/repositories/role.repository.interface';
-import { IOtpTokenRepository } from '../../../domain/user/repositories/otp-token.repository.interface';
 import { TOKENS } from '../../../shared/constants/tokens';
-import { RegisterDto } from '../dtos/register.dto';
+import { RegisterStudentDto } from '../dtos/register-student.dto';
 import { UserStatus } from '../../../domain/user/entities/user.entity';
 import { OtpTokenType } from '../../../domain/user/entities/otp-token.entity';
-import { EmailService } from '../../../infrastructure/email/email.service';
+import { IPasswordService } from '../../../domain/auth/services/password.service.interface';
+import { OtpService } from '../services/otp.service';
+import { isAllowedStudentEmail } from '../../../shared/helpers/email-domain.helper';
 
 @Injectable()
 export class RegisterUseCase {
   constructor(
     @Inject(TOKENS.USER_REPO) private readonly userRepo: IUserRepository,
     @Inject(TOKENS.ROLE_REPO) private readonly roleRepo: IRoleRepository,
-    @Inject(TOKENS.OTP_TOKEN_REPO) private readonly otpRepo: IOtpTokenRepository,
-    private readonly emailService: EmailService,
-  ) {}
+    @Inject('IPasswordService') private readonly passwordService: IPasswordService,
+    private readonly otpService: OtpService,
+  ) { }
 
-  async execute(dto: RegisterDto): Promise<{ message: string }> {
-    // 1. Check if email already exists
-    const existingUser = await this.userRepo.findByEmail(dto.email);
-    if (existingUser) {
-      if (existingUser.status === UserStatus.ACTIVE) {
-        throw new ConflictException('Email already registered and active');
-      }
-      // If pending, we can update or just allow resending OTP.
-      // For simplicity, we just delete the pending user to recreate it
-      // or we can just reject it if we want strictness. Let's delete to recreate cleanly.
-      await this.userRepo.delete(existingUser.id);
+  async execute(dto: RegisterStudentDto): Promise<{ message: string; code: string }> {
+    // 1. Normalize email
+    const email = dto.email.trim().toLowerCase();
+
+    // 2. Check if email is valid FPT domain
+    if (!isAllowedStudentEmail(email)) {
+      throw new BadRequestException({
+        message: 'Vui lòng sử dụng email sinh viên FPT để đăng ký tài khoản Student.',
+        code: 'INVALID_STUDENT_EMAIL_DOMAIN'
+      });
     }
 
-    // 2. Resolve Role (default to 'student' if not provided)
-    const roleCode = dto.roleCode || 'student';
+    // 3. Check if email already exists
+    const existingUser = await this.userRepo.findByEmail(email);
+    if (existingUser) {
+      throw new ConflictException({
+        message: 'Email này đã được sử dụng. Vui lòng đăng nhập hoặc sử dụng chức năng quên mật khẩu.',
+        code: 'EMAIL_ALREADY_EXISTS'
+      });
+    }
+
+    // 4. Resolve 'student' Role
+    const roleCode = 'student';
     const role = await this.roleRepo.findByName(roleCode);
     if (!role) {
       throw new NotFoundException(`Role ${roleCode} not found`);
     }
 
-    // 3. Hash Password
-    const passwordHash = await bcrypt.hash(dto.password, 10);
+    // 5. Hash password
+    const passwordHash = await this.passwordService.hash(dto.password);
 
-    // 4. Create User (Pending Status)
+    // 6. Create User (Pending Email Verification)
     const user = await this.userRepo.create({
-      email: dto.email,
+      email,
       fullName: dto.fullName,
       passwordHash,
       roleId: role.id,
-      status: UserStatus.PENDING,
+      status: UserStatus.PENDING_EMAIL_VERIFICATION,
     });
 
-    // 5. Generate 6-digit OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    // 7. Generate and Send OTP
+    await this.otpService.generateAndSaveOtp(
+      user.id,
+      email,
+      OtpTokenType.EMAIL_VERIFY,
+      10,
+      'email_verify'
+    );
 
-    // 6. Invalidate old OTPs and create new one
-    await this.otpRepo.revokeAllForEmail(dto.email, OtpTokenType.EMAIL_VERIFY);
-    await this.otpRepo.create({
-      userId: user.id,
-      email: dto.email,
-      code: otp,
-      type: OtpTokenType.EMAIL_VERIFY,
-      expiresAt,
-    });
-
-    // 7. Send Email
-    await this.emailService.sendOtpEmail(dto.email, otp, 'email_verify');
-
-    return { message: 'Registration successful. Please check your email for the OTP.' };
+    return {
+      message: 'Tài khoản đã được tạo. Vui lòng kiểm tra email FPT để xác minh tài khoản.',
+      code: 'PENDING_EMAIL_VERIFICATION'
+    };
   }
 }

@@ -9,8 +9,10 @@ import {
   HttpCode,
   HttpStatus,
   Req,
+  Res,
+  UnauthorizedException,
 } from '@nestjs/common';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { LoginUseCase } from '../../../application/auth/use-cases/login.use-case';
 import { RefreshTokenUseCase } from '../../../application/auth/use-cases/refresh-token.use-case';
 import { LogoutUseCase } from '../../../application/auth/use-cases/logout.use-case';
@@ -26,7 +28,7 @@ import { ResendOtpUseCase } from '../../../application/auth/use-cases/resend-otp
 import { ForgotPasswordUseCase } from '../../../application/auth/use-cases/forgot-password.use-case';
 import { ResetPasswordUseCase } from '../../../application/auth/use-cases/reset-password.use-case';
 import { VerifyResetOtpUseCase } from '../../../application/auth/use-cases/verify-reset-otp.use-case';
-import { RegisterDto } from '../../../application/auth/dtos/register.dto';
+import { RegisterStudentDto } from '../../../application/auth/dtos/register-student.dto';
 import { VerifyOtpDto } from '../../../application/auth/dtos/verify-otp.dto';
 import { ResendOtpDto } from '../../../application/auth/dtos/resend-otp.dto';
 import { ForgotPasswordDto } from '../../../application/auth/dtos/forgot-password.dto';
@@ -51,7 +53,7 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() dto: LoginDto, @Req() req: Request) {
+  async login(@Body() dto: LoginDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
     try {
       const result = await this.loginUseCase.execute(dto);
       await this.auditLogService.log(
@@ -62,7 +64,15 @@ export class AuthController {
         { email: dto.email },
         req.ip,
       );
-      return result;
+
+      res.cookie('refreshToken', result.refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+
+      return { accessToken: result.accessToken };
     } catch (error) {
       await this.auditLogService.log(
         undefined,
@@ -76,14 +86,14 @@ export class AuthController {
     }
   }
 
-  @Post('register')
-  async register(@Body() dto: RegisterDto) {
+  @Post('register/student')
+  async registerStudent(@Body() dto: RegisterStudentDto) {
     return this.registerUseCase.execute(dto);
   }
 
-  @Post('verify-otp')
+  @Post('verify-email')
   @HttpCode(HttpStatus.OK)
-  async verifyOtp(@Body() dto: VerifyOtpDto) {
+  async verifyEmail(@Body() dto: VerifyOtpDto) {
     return this.verifyEmailUseCase.execute(dto);
   }
 
@@ -113,15 +123,23 @@ export class AuthController {
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  async refresh(@Body() dto: RefreshTokenDto) {
-    return this.refreshTokenUseCase.execute(dto.refreshToken);
+  async refresh(@Req() req: Request) {
+    const refreshToken = req.cookies?.refreshToken;
+    if (!refreshToken) {
+      throw new UnauthorizedException('No refresh token provided');
+    }
+    return this.refreshTokenUseCase.execute(refreshToken);
   }
 
   @Post('logout')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  async logout(@Body() dto: RefreshTokenDto) {
-    await this.logoutUseCase.execute(dto.refreshToken);
+  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const refreshToken = req.cookies?.refreshToken;
+    if (refreshToken) {
+      await this.logoutUseCase.execute(refreshToken);
+    }
+    res.clearCookie('refreshToken');
     return { message: 'Logged out successfully' };
   }
 

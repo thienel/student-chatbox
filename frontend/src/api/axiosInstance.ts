@@ -7,6 +7,7 @@ const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api/v1';
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
   timeout: 15000,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -48,15 +49,12 @@ axiosInstance.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
+    // Skip interceptor for login and refresh endpoints to avoid reload loops on 401
+    if (originalRequest.url?.includes('/auth/login') || originalRequest.url?.includes('/auth/refresh')) {
+      return Promise.reject(error);
+    }
+
     if (error.response?.status === 401 && !originalRequest._retry) {
-      const refreshToken = useAuthStore.getState().refreshToken;
-
-      if (!refreshToken) {
-        useAuthStore.getState().clearAuth();
-        window.location.href = '/login';
-        return Promise.reject(error);
-      }
-
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -74,13 +72,11 @@ axiosInstance.interceptors.response.use(
       try {
         const response = await axios.post<{ data: { accessToken: string } }>(
           `${BASE_URL}/auth/refresh`,
-          { refreshToken }
+          {},
+          { withCredentials: true }
         );
         const newToken = response.data.data.accessToken;
-        const { user } = useAuthStore.getState();
-        if (user) {
-          useAuthStore.getState().setAuth(user, newToken);
-        }
+        useAuthStore.getState().setAuth(newToken);
         processQueue(null, newToken);
         if (originalRequest.headers) {
           originalRequest.headers.Authorization = `Bearer ${newToken}`;

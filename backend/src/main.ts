@@ -6,8 +6,11 @@ import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './interface/filters/http-exception.filter';
 import { ResponseTransformInterceptor } from './interface/interceptors/response-transform.interceptor';
 
+import * as cookieParser from 'cookie-parser';
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.use(cookieParser());
 
   // CORS
   app.enableCors({

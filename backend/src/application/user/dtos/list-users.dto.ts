@@ -8,7 +8,7 @@ export class ListUsersDto {
 
   @IsOptional()
   @IsString()
-  @IsIn(['active', 'suspended'])
+  @IsIn(['active', 'suspended', 'pending_verification', 'rejected'])
   status?: string;
 
   @IsOptional()

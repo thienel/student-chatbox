@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils'
 const adminTabs = [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard, exact: true },
   { label: 'Users', href: '/admin/users', icon: Users },
+  { label: 'Verifications', href: '/admin/verifications', icon: Shield },
   { label: 'Subjects', href: '/admin/subjects', icon: BookOpen },
   { label: 'Analytics', href: '/admin/analytics', icon: BarChart2 },
   { label: 'Roles', href: '/admin/rbac', icon: Shield },
@@ -30,10 +31,10 @@ export function AdminShell() {
               key={tab.href}
               to={tab.href}
               className={cn(
-                'flex items-center gap-1.5 h-10 px-3 text-sm border-b-2 -mb-px',
+                'flex items-center gap-1.5 h-10 px-4 text-xs font-mono uppercase tracking-widest border-b-2 -mb-px',
                 'transition-colors duration-150',
                 isActive
-                  ? 'border-foreground text-foreground'
+                  ? 'border-primary text-primary'
                   : 'border-transparent text-muted-foreground hover:text-foreground'
               )}
             >

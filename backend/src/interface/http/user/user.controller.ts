@@ -82,7 +82,7 @@ export class UserController {
   }
 
   @Patch(':id/status')
-  @RequirePermission('user:suspend')
+  @RequirePermission('user:update')
   async updateUserStatus(
     @Param('id') id: string,
     @Body() dto: UpdateUserStatusDto,
@@ -90,8 +90,14 @@ export class UserController {
     @Req() req: Request,
   ) {
     const user = await this.updateUserStatusUseCase.execute(id, dto);
-    const action = dto.status === 'suspended' ? 'USER_SUSPENDED' : 'USER_ACTIVATED';
-    await this.auditLogService.log(currentUser.id, action, 'user', id, { reason: dto.reason }, req.ip);
+    let action = 'USER_STATUS_UPDATED';
+    switch (dto.status) {
+      case 'suspended': action = 'USER_SUSPENDED'; break;
+      case 'active': action = 'USER_ACTIVATED'; break;
+      case 'rejected': action = 'USER_VERIFICATION_REJECTED'; break;
+      case 'pending_verification': action = 'USER_INFO_REQUESTED'; break;
+    }
+    await this.auditLogService.log(currentUser.id, action, 'user', id, { reason: dto.reason, status: dto.status }, req.ip);
     return user;
   }
 

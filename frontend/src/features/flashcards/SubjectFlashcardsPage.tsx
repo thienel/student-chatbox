@@ -9,7 +9,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Skeleton } from '@/components/ui/skeleton'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { useToast } from '@/hooks/use-toast'
-import { useAuthStore } from '@/store/useAuthStore'
+import { useUserStore } from '@/store/useUserStore'
 import { useSubjectClass } from '@/features/classes/ClassContext'
 import { DocumentPicker } from '@/components/shared/DocumentPicker'
 import { NeedClassNotice } from '@/features/classes/NeedClassNotice'
@@ -19,7 +19,7 @@ import { useFlashcardSets, useGenerateFlashcards, useDeleteFlashcardSet, useSetF
 
 export default function SubjectFlashcardsPage() {
   const { id: subjectId = '' } = useParams<{ id: string }>()
-  const user = useAuthStore(s => s.user)
+  const user = useUserStore(s => s.user)
   const canGenerate = user?.permissions?.includes('ai:generate-flashcard')
   const canDelete = user?.permissions?.includes('flashcard:delete')
   const canShare = user?.permissions?.includes('flashcard:manage-own')

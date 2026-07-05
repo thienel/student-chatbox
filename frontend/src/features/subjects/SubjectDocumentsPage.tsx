@@ -18,7 +18,7 @@ import {
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { useSubjectDocuments, useUploadDocument, useDeleteDocument, useDocumentSummary } from './queries'
-import { usePermission } from '@/store/useAuthStore'
+import { usePermission } from '@/store/useUserStore'
 import { getErrorMessage } from '@/lib/errors'
 import { cn } from '@/lib/utils'
 

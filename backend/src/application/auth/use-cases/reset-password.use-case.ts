@@ -1,17 +1,18 @@
 import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
 import { IUserRepository } from '../../../domain/user/repositories/user.repository.interface';
 import { IOtpTokenRepository } from '../../../domain/user/repositories/otp-token.repository.interface';
 import { TOKENS } from '../../../shared/constants/tokens';
 import { ResetPasswordDto } from '../dtos/reset-password.dto';
 import { UserStatus } from '../../../domain/user/entities/user.entity';
 import { OtpTokenType } from '../../../domain/user/entities/otp-token.entity';
+import { IPasswordService } from '../../../domain/auth/services/password.service.interface';
 
 @Injectable()
 export class ResetPasswordUseCase {
   constructor(
     @Inject(TOKENS.USER_REPO) private readonly userRepo: IUserRepository,
     @Inject(TOKENS.OTP_TOKEN_REPO) private readonly otpRepo: IOtpTokenRepository,
+    @Inject('IPasswordService') private readonly passwordService: IPasswordService,
   ) {}
 
   async execute(dto: ResetPasswordDto): Promise<{ message: string }> {
@@ -30,7 +31,7 @@ export class ResetPasswordUseCase {
     }
 
     // Hash new password
-    const passwordHash = await bcrypt.hash(dto.newPassword, 10);
+    const passwordHash = await this.passwordService.hash(dto.newPassword);
 
     // Update user password
     await this.userRepo.update(user.id, { passwordHash });

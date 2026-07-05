@@ -9,7 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { useToast } from '@/hooks/use-toast'
-import { useAuthStore } from '@/store/useAuthStore'
+import { useUserStore } from '@/store/useUserStore'
 import { useSubjectClass } from '@/features/classes/ClassContext'
 import { DocumentPicker } from '@/components/shared/DocumentPicker'
 import { NeedClassNotice } from '@/features/classes/NeedClassNotice'
@@ -25,7 +25,7 @@ const difficultyLabel: Record<ExamDifficulty, string> = {
 
 export default function SubjectExamsPage() {
   const { id: subjectId = '' } = useParams<{ id: string }>()
-  const user = useAuthStore(s => s.user)
+  const user = useUserStore(s => s.user)
   const canGenerate = user?.permissions?.includes('ai:generate-exam')
   const canCreateOfficial = user?.permissions?.includes('exam:create-official')
   const { toast } = useToast()

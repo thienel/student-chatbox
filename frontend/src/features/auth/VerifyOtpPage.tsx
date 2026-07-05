@@ -9,6 +9,7 @@ export default function VerifyOtpPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const email = searchParams.get('email')
+  const isManual = searchParams.get('isManual') === 'true'
 
   const [otp, setOtp] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -43,7 +44,10 @@ export default function VerifyOtpPage() {
     try {
       await authApi.verifyOtp(email, otp)
       // On success, redirect to login with a success message
-      navigate('/login', { state: { message: 'Xác thực thành công. Vui lòng đăng nhập.' } })
+      const successMessage = isManual 
+        ? 'Xác minh email thành công. Vui lòng chờ quản trị viên phê duyệt.' 
+        : 'Xác thực thành công. Vui lòng đăng nhập.'
+      navigate('/login', { state: { message: successMessage } })
     } catch (err: any) {
       setError(err.response?.data?.message || 'Mã xác thực không đúng hoặc đã hết hạn.')
     } finally {

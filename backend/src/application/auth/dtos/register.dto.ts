@@ -15,4 +15,15 @@ export class RegisterDto {
   @IsOptional()
   @IsString()
   roleCode?: string;
+
+  @IsOptional()
+  isManualVerification?: boolean;
+
+  @IsOptional()
+  @IsString()
+  studentId?: string;
+
+  @IsOptional()
+  @IsString()
+  campus?: string;
 }

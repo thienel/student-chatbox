@@ -44,6 +44,7 @@ import { WeakTopicTypeOrmRepository } from './repositories/weak-topic.typeorm-re
 import { StudentStudyPlanOrmEntity } from './orm-entities/student-study-plan.orm-entity';
 import { StudyPlanTypeOrmRepository } from './repositories/study-plan.typeorm-repository';
 import { UserBadgeOrmEntity } from './orm-entities/user-badge.orm-entity';
+import { StudentVerificationRequestOrmEntity } from './orm-entities/student-verification-request.orm-entity';
 import { BadgeTypeOrmRepository } from './repositories/badge.typeorm-repository';
 import { BoardQuestionOrmEntity } from './orm-entities/board-question.orm-entity';
 import { BoardAnswerOrmEntity } from './orm-entities/board-answer.orm-entity';
@@ -86,6 +87,7 @@ const ormEntities = [
   BoardAnswerOrmEntity,
   BoardUpvoteOrmEntity,
   OtpTokenEntity,
+  StudentVerificationRequestOrmEntity,
 ];
 
 @Module({

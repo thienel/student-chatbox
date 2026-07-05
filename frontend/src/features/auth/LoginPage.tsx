@@ -9,9 +9,9 @@ import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/ui/password-input'
 import { Label } from '@/components/ui/label'
 import { useAuthStore } from '@/store/useAuthStore'
-import { authApi } from '@/api/endpoints/auth'
 import { getErrorMessage } from '@/lib/errors'
 import { AuthCard } from './components/AuthCard'
+import { authApi } from '@/api/endpoints/auth'
 
 const schema = z.object({
   email: z.string().email('Email không hợp lệ'),
@@ -38,10 +38,20 @@ export default function LoginPage() {
   const onSubmit = async (data: FormData) => {
     try {
       const result = await authApi.login(data.email, data.password)
-      setAuth(result.user, result.accessToken, result.refreshToken)
-      navigate('/home', { replace: true })
-    } catch (err) {
-      setError('password', { message: getErrorMessage(err, 'Email hoặc mật khẩu không đúng') })
+      setAuth(result.accessToken)
+      // Use the token to fetch the user
+      // Note: we can't easily set the axios token header synchronously here unless we reload or rely on interceptors,
+      // but wait, the interceptor uses the store. However, we might need a brief delay or just reload.
+      // Wait, let's just reload to '/' and let RootRedirect and Protected handle it!
+      navigate('/', { replace: true })
+      window.location.reload()
+    } catch (err: any) {
+      const msg = getErrorMessage(err, 'Email hoặc mật khẩu không đúng')
+      if (msg === 'Vui lòng xác thực email trước khi đăng nhập') {
+        navigate('/verify-otp', { state: { email: data.email } })
+      } else {
+        setError('password', { message: msg })
+      }
     }
   }
 

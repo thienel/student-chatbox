@@ -2,7 +2,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { Home, BookOpen, MessageSquare, Bookmark, ShieldCheck, Settings, Users, CalendarCheck, Award } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
-import { useAuthStore, usePermission } from '@/store/useAuthStore'
+import { useUserStore, usePermission } from '@/store/useUserStore'
 
 interface DockItemProps {
   to: string
@@ -42,7 +42,7 @@ function DockItem({ to, icon: Icon, label, exact }: DockItemProps) {
 }
 
 export function Dock() {
-  const user = useAuthStore(s => s.user)
+  const user = useUserStore(s => s.user)
   const isAdmin = user?.role === 'admin'
   const canCommunity = usePermission('flashcard:read')
   const canStudyPlan = usePermission('flashcard:study')

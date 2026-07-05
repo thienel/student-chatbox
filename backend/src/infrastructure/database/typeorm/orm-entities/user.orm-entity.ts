@@ -26,19 +26,28 @@ export class UserOrmEntity {
   @Column({ name: 'role_id' })
   roleId: string;
 
-  @Column({ default: 'active', length: 20 })
+  @Column({ default: 'active', length: 50 })
   status: string;
 
+  @ManyToOne(() => RoleOrmEntity, { eager: false })
+  @JoinColumn({ name: 'role_id' })
+  role: RoleOrmEntity;
+
+  @Column({ name: 'student_code', nullable: true, length: 50, type: 'varchar' })
+  studentCode?: string | null;
+
+  @Column({ name: 'email_verified_at', nullable: true, type: 'timestamp' })
+  emailVerifiedAt?: Date | null;
+
+  @Column({ name: 'last_login_at', nullable: true, type: 'timestamp' })
+  lastLoginAt?: Date | null;
+
   @Column({ name: 'created_by', nullable: true, type: 'uuid' })
-  createdBy: string;
+  createdBy?: string | null;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
-
-  @ManyToOne(() => RoleOrmEntity, { eager: false })
-  @JoinColumn({ name: 'role_id' })
-  role: RoleOrmEntity;
 }

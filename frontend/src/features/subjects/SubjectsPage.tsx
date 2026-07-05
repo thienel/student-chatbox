@@ -9,7 +9,7 @@ import { EmptyState } from '@/components/shared/EmptyState'
 import { useSubjects } from './queries'
 import { useUnenroll } from '@/features/classes/queries'
 import { EnrollDialog } from '@/features/classes/EnrollDialog'
-import { usePermission } from '@/store/useAuthStore'
+import { usePermission } from '@/store/useUserStore'
 import { cn } from '@/lib/utils'
 
 export default function SubjectsPage() {

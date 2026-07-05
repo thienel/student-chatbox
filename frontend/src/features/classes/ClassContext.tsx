@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, type ReactNode } from 'react'
-import { usePermission } from '@/store/useAuthStore'
+import { usePermission } from '@/store/useUserStore'
 import { useActiveClassStore } from '@/store/useActiveClassStore'
 import { useClasses, useMyClass } from './queries'
 import type { Class } from '@/types'

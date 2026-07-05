@@ -4,7 +4,7 @@ import { authApi } from '@/api/endpoints/auth'
 import { AuthCard } from './components/AuthCard'
 import { OtpInput } from './components/OtpInput'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+
 import { PasswordInput } from '@/components/ui/password-input'
 import { Label } from '@/components/ui/label'
 

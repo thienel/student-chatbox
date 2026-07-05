@@ -16,10 +16,15 @@ import { VerifyResetOtpUseCase } from '../../../application/auth/use-cases/verif
 import { JwtStrategy } from '../../guards/jwt.strategy';
 import { TypeOrmDatabaseModule } from '../../../infrastructure/database/typeorm/typeorm.module';
 import { AuditLogService } from '../../../application/system/services/audit-log.service';
+import { TokenService } from '../../../application/auth/services/token.service';
+import { OtpService } from '../../../application/auth/services/otp.service';
+import { BcryptPasswordService } from '../../../infrastructure/auth/services/bcrypt-password.service';
+import { EmailModule } from '../../../infrastructure/email/email.module';
 
 @Module({
   imports: [
     TypeOrmDatabaseModule,
+    EmailModule,
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -44,7 +49,13 @@ import { AuditLogService } from '../../../application/system/services/audit-log.
     VerifyResetOtpUseCase,
     JwtStrategy,
     AuditLogService,
+    TokenService,
+    OtpService,
+    {
+      provide: 'IPasswordService',
+      useClass: BcryptPasswordService,
+    }
   ],
-  exports: [JwtStrategy, JwtModule, PassportModule],
+  exports: [JwtStrategy, JwtModule, PassportModule, OtpService],
 })
 export class AuthModule {}

@@ -1,4 +1,5 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
+import { AuthModule } from '../auth/auth.module';
 import { UserController } from './user.controller';
 import { CreateUserUseCase } from '../../../application/user/use-cases/create-user.use-case';
 import { ListUsersUseCase } from '../../../application/user/use-cases/list-users.use-case';
@@ -8,10 +9,15 @@ import { UpdateUserStatusUseCase } from '../../../application/user/use-cases/upd
 import { ResetPasswordUseCase } from '../../../application/user/use-cases/reset-password.use-case';
 import { TypeOrmDatabaseModule } from '../../../infrastructure/database/typeorm/typeorm.module';
 import { AuditLogService } from '../../../application/system/services/audit-log.service';
+import { StudentVerificationController } from './student-verification.controller';
+import { AdminStudentVerificationController } from './admin-student-verification.controller';
+import { StudentVerificationService } from '../../../application/user/services/student-verification.service';
+import { BcryptPasswordService } from '../../../infrastructure/auth/services/bcrypt-password.service';
+import { EmailModule } from '../../../infrastructure/email/email.module';
 
 @Module({
-  imports: [TypeOrmDatabaseModule],
-  controllers: [UserController],
+  imports: [TypeOrmDatabaseModule, EmailModule, forwardRef(() => AuthModule)],
+  controllers: [UserController, StudentVerificationController, AdminStudentVerificationController],
   providers: [
     CreateUserUseCase,
     ListUsersUseCase,
@@ -20,6 +26,11 @@ import { AuditLogService } from '../../../application/system/services/audit-log.
     UpdateUserStatusUseCase,
     ResetPasswordUseCase,
     AuditLogService,
+    StudentVerificationService,
+    {
+      provide: 'IPasswordService',
+      useClass: BcryptPasswordService,
+    },
   ],
 })
 export class UserModule {}

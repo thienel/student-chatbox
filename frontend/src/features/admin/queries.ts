@@ -8,7 +8,7 @@ export const userKeys = {
   detail: (id: string) => [...userKeys.all(), id] as const,
 }
 
-export function useUsers(params?: { page?: number; limit?: number; role?: string; search?: string }) {
+export function useUsers(params?: { page?: number; limit?: number; role?: string; status?: string; search?: string }) {
   return useQuery({
     queryKey: userKeys.list(params),
     queryFn: () => usersApi.list(params),
@@ -46,7 +46,7 @@ export function useUpdateUser() {
 export function useUpdateUserStatus() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, status, reason }: { id: string; status: 'active' | 'suspended'; reason?: string }) =>
+    mutationFn: ({ id, status, reason }: { id: string; status: 'active' | 'suspended' | 'rejected' | 'pending_email_verification' | 'pending_manual_verification'; reason?: string }) =>
       usersApi.updateStatus(id, status, reason),
     onSuccess: () => qc.invalidateQueries({ queryKey: userKeys.all() }),
   })
@@ -56,6 +56,51 @@ export function useResetPassword() {
   return useMutation({
     mutationFn: ({ id, newPassword }: { id: string; newPassword: string }) =>
       usersApi.resetPassword(id, newPassword),
+  })
+}
+
+export const verificationKeys = {
+  all: () => ['verifications'] as const,
+  list: () => [...verificationKeys.all(), 'list'] as const,
+  detail: (id: string) => [...verificationKeys.all(), id] as const,
+}
+
+export function usePendingVerifications() {
+  return useQuery({
+    queryKey: verificationKeys.list(),
+    queryFn: () => usersApi.getPendingVerifications(),
+  })
+}
+
+export function useVerificationDetail(id: string) {
+  return useQuery({
+    queryKey: verificationKeys.detail(id),
+    queryFn: () => usersApi.getVerificationDetail(id),
+    enabled: !!id,
+  })
+}
+
+export function useApproveVerification() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => usersApi.approveVerification(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: verificationKeys.all() }),
+  })
+}
+
+export function useRejectVerification() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason: string }) => usersApi.rejectVerification(id, reason),
+    onSuccess: () => qc.invalidateQueries({ queryKey: verificationKeys.all() }),
+  })
+}
+
+export function useRequestMoreInfoVerification() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason: string }) => usersApi.requestMoreInfoVerification(id, reason),
+    onSuccess: () => qc.invalidateQueries({ queryKey: verificationKeys.all() }),
   })
 }
 
