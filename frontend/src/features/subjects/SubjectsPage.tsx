@@ -1,24 +1,48 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BookOpen, Plus, Search, Loader2 } from 'lucide-react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { EmptyState } from '@/components/shared/EmptyState'
-import { useSubjects } from './queries'
+import { useSubjects, useCreateSubject } from './queries'
 import { useUnenroll } from '@/features/classes/queries'
 import { EnrollDialog } from '@/features/classes/EnrollDialog'
 import { usePermission } from '@/store/useUserStore'
 import { cn } from '@/lib/utils'
+
+const createSchema = z.object({
+  code: z.string().min(1, 'Required'),
+  name: z.string().min(1, 'Required'),
+  description: z.string().optional(),
+})
+type CreateForm = z.infer<typeof createSchema>
 
 export default function SubjectsPage() {
   const navigate = useNavigate()
   const canCreate = usePermission('subject:create')
   const canEnroll = usePermission('subject:enroll')
   const [search, setSearch] = useState('')
+  const [createOpen, setCreateOpen] = useState(false)
 
   const { data, isLoading } = useSubjects({ search: search || undefined, limit: 50 })
+  const createSubject = useCreateSubject()
+
+  const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm<CreateForm>({
+    resolver: zodResolver(createSchema),
+  })
+
+  const onSubmit = async (data: CreateForm) => {
+    await createSubject.mutateAsync(data)
+    setCreateOpen(false)
+    reset()
+  }
 
   const subjects = data?.items ?? []
 
@@ -33,7 +57,7 @@ export default function SubjectsPage() {
         </div>
         {canCreate && (
           <Button
-            onClick={() => navigate('/admin/subjects')}
+            onClick={() => setCreateOpen(true)}
             className="bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-3 text-sm font-medium rounded-md"
           >
             <Plus className="h-4 w-4 mr-1.5" />
@@ -106,6 +130,44 @@ export default function SubjectsPage() {
           ))}
         </div>
       )}
+
+      {/* Create Subject Dialog */}
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent className="bg-card border border-border/60 rounded-[2rem] shadow-xl p-0 max-w-md overflow-hidden">
+          <div className="px-8 py-6 border-b border-border/40 bg-muted/10">
+            <DialogTitle className="text-2xl font-serif text-primary-ink">New Subject</DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground font-mono mt-1">
+              Add a new course to the registry
+            </DialogDescription>
+          </div>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <div className="p-8 space-y-5">
+              <div className="space-y-2">
+                <Label className="text-xs font-mono uppercase tracking-widest text-muted-foreground ml-1">Subject Code</Label>
+                <Input {...register('code')} placeholder="e.g. PRN231" className="rounded-xl font-mono text-sm border-border/60 focus-visible:ring-primary h-11 px-4" />
+                {errors.code && <p className="text-xs text-destructive font-mono mt-1 ml-1">{errors.code.message}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-mono uppercase tracking-widest text-muted-foreground ml-1">Subject Name</Label>
+                <Input {...register('name')} placeholder="e.g. Java Web Application Development" className="rounded-xl font-mono text-sm border-border/60 focus-visible:ring-primary h-11 px-4" />
+                {errors.name && <p className="text-xs text-destructive font-mono mt-1 ml-1">{errors.name.message}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-mono uppercase tracking-widest text-muted-foreground ml-1">Description</Label>
+                <Input {...register('description')} placeholder="e.g. Advanced Java programming concepts" className="rounded-xl font-mono text-sm border-border/60 focus-visible:ring-primary h-11 px-4" />
+              </div>
+            </div>
+            <div className="px-8 py-5 border-t border-border/40 flex justify-end gap-3 bg-muted/10">
+              <Button type="button" variant="ghost" onClick={() => setCreateOpen(false)} className="rounded-full font-mono text-xs px-5 hover:bg-muted/50">
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting} className="rounded-full font-mono text-xs tracking-wider px-6 shadow-sm">
+                {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Create'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

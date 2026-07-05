@@ -31,47 +31,50 @@ export default function AdminSettingsPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-6">
-      <div className="mb-6">
-        <h1 className="text-xl font-semibold text-foreground">System Settings</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">Configure global system parameters</p>
-      </div>
+    <div className="max-w-7xl mx-auto px-8 py-10">
+      <header className="mb-10">
+        <h1 className="text-4xl font-serif text-primary-ink mb-2">System Settings</h1>
+        <p className="text-sm text-muted-foreground font-mono">Configure global system parameters</p>
+      </header>
 
       {isLoading ? (
         <div className="space-y-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-16 rounded-lg bg-muted" />
+            <Skeleton key={i} className="h-20 rounded-3xl bg-muted/50 border border-border/30" />
           ))}
         </div>
       ) : settings.length === 0 ? (
-        <EmptyState icon={Settings} title="No settings found" />
+        <div className="border border-border/50 bg-card rounded-3xl p-16 shadow-sm">
+          <EmptyState icon={Settings} title="No settings found" />
+        </div>
       ) : (
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="bg-card border rounded-lg divide-y divide-border">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="bg-card border border-border/50 rounded-3xl divide-y divide-border/40 shadow-sm overflow-hidden">
             {settings.map(setting => (
-              <div key={setting.key} className="px-5 py-4 flex items-center gap-6">
+              <div key={setting.key} className="px-8 py-6 flex flex-col sm:flex-row sm:items-center gap-6 hover:bg-muted/10 transition-colors">
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground font-mono">{setting.key}</p>
-                  {setting.description && (
-                    <p className="text-xs text-muted-foreground mt-0.5">{setting.description}</p>
-                  )}
+                  <p className="text-sm font-semibold text-foreground font-mono tracking-wide">{setting.description}</p>
+                  {/* {setting.description && (
+                    <p className="text-sm text-muted-foreground mt-1.5">{setting.description}</p>
+                  )} */}
                 </div>
-                <div className="w-48">
+                <div className="w-full sm:w-64 shrink-0">
                   <Input
                     {...register(encodeKey(setting.key))}
-                    className="bg-secondary border-border text-foreground h-8 text-sm"
+                    className="bg-muted/5 border-border/60 text-foreground h-11 text-sm rounded-xl focus-visible:ring-primary shadow-sm"
                   />
                 </div>
               </div>
             ))}
           </div>
-          <div className="mt-4 flex justify-end">
+          <div className="flex justify-end">
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 text-sm font-medium rounded-md"
+              className="rounded-full font-mono text-xs tracking-wider uppercase h-11 px-8 shadow-sm"
             >
-              {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save changes'}
+              {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              {isSubmitting ? 'Saving...' : 'Save changes'}
             </Button>
           </div>
         </form>

@@ -44,89 +44,95 @@ export default function AdminSubjectsPage() {
   const subjects = data?.items ?? []
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="max-w-7xl mx-auto px-8 py-10">
+      <header className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">Subjects</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">{data?.total ?? 0} total</p>
+          <h1 className="text-4xl font-serif text-primary-ink mb-2">Subject Directory</h1>
+          <p className="text-sm text-muted-foreground font-mono">
+            {data?.total ?? 0} active subjects registered
+          </p>
         </div>
-        <Button
-          onClick={() => setCreateOpen(true)}
-          variant="outline"
-          className="border bg-card hover:bg-secondary text-foreground h-8 px-3 text-sm font-medium rounded-md"
-        >
-          <Plus className="h-4 w-4 mr-1.5" />
-          New Subject
-        </Button>
-      </div>
-
-      <div className="relative mb-4">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-        <Input
-          placeholder="Search..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="pl-8 bg-card border text-foreground placeholder:text-muted-foreground h-9 rounded-md"
-        />
-      </div>
+        
+        <div className="flex items-center gap-4 bg-card p-2 rounded-full border border-border/50 shadow-sm">
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search subjects..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="pl-11 w-64 bg-muted/20 border-transparent focus-visible:ring-primary font-mono text-sm rounded-full h-10"
+            />
+          </div>
+          <Button
+            onClick={() => setCreateOpen(true)}
+            className="rounded-full font-mono text-xs tracking-wider uppercase h-10 px-6 shadow-sm"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            New Subject
+          </Button>
+        </div>
+      </header>
 
       {isLoading ? (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-14 rounded-lg bg-muted" />
+            <Skeleton key={i} className="h-20 rounded-2xl bg-muted/50 border border-border/30" />
           ))}
         </div>
       ) : subjects.length === 0 ? (
-        <EmptyState icon={BookOpen} title="No subjects yet" />
+        <div className="border border-border/50 bg-card rounded-3xl p-16 shadow-sm">
+          <EmptyState icon={BookOpen} title="No subjects yet" />
+        </div>
       ) : (
-        <div className="border rounded-lg overflow-hidden bg-card">
+        <div className="border border-border/50 rounded-3xl overflow-hidden bg-card shadow-sm">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b bg-secondary">
-                <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wide">Subject</th>
-                <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wide hidden sm:table-cell">Code</th>
-                <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wide hidden md:table-cell">Status</th>
-                <th className="w-10 py-3 px-4" />
+              <tr className="border-b border-border/50 bg-muted/20">
+                <th className="text-left py-5 px-6 text-xs font-mono font-semibold text-muted-foreground uppercase tracking-wider">Subject</th>
+                <th className="text-left py-5 px-6 text-xs font-mono font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">Code</th>
+                <th className="text-left py-5 px-6 text-xs font-mono font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">Status</th>
+                <th className="w-24 py-5 px-6" />
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-border/30">
               {subjects.map(s => (
                 <tr
                   key={s.id}
-                  className="border-b hover:bg-muted/50 transition-colors duration-150 cursor-pointer"
+                  className="hover:bg-muted/30 transition-colors duration-150 cursor-pointer group"
                   onClick={() => navigate(`/subjects/${s.id}/documents`)}
                 >
-                  <td className="py-3 px-4">
-                    <p className="text-foreground">{s.name}</p>
-                    {s.description && <p className="text-xs text-muted-foreground truncate max-w-[240px]">{s.description}</p>}
+                  <td className="py-4 px-6">
+                    <p className="text-foreground font-serif text-lg font-medium">{s.name}</p>
+                    {s.description && <p className="text-xs text-muted-foreground font-mono mt-1 truncate max-w-[280px]">{s.description}</p>}
                   </td>
-                  <td className="py-3 px-4 text-muted-foreground text-xs font-mono hidden sm:table-cell">{s.code}</td>
-                  <td className="py-3 px-4 hidden md:table-cell">
-                    <Badge className={cn('text-[10px] rounded capitalize border', s.status === 'active'
-                      ? 'bg-secondary text-muted-foreground'
-                      : 'bg-muted text-muted-foreground'
+                  <td className="py-4 px-6 text-muted-foreground text-sm font-mono font-semibold hidden sm:table-cell">{s.code}</td>
+                  <td className="py-4 px-6 hidden md:table-cell">
+                    <Badge className={cn('text-[10px] rounded-full uppercase font-mono tracking-wider px-3 py-1 border', 
+                      s.status === 'active'
+                      ? 'bg-primary/5 text-primary border-primary/20'
+                      : 'bg-muted text-muted-foreground border-border/50'
                     )}>
                       {s.status}
                     </Badge>
                   </td>
-                  <td className="py-3 px-4" onClick={e => e.stopPropagation()}>
-                    <div className="flex items-center gap-1">
+                  <td className="py-4 px-6 text-right" onClick={e => e.stopPropagation()}>
+                    <div className="flex items-center justify-end gap-2 opacity-50 group-hover:opacity-100 transition-opacity">
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => navigate(`/subjects/${s.id}/documents`)}
-                        className="h-7 w-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary"
+                        className="h-9 w-9 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
                         title="View subject"
                       >
-                        <ExternalLink className="h-3.5 w-3.5" />
+                        <ExternalLink className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => deleteSubject.mutate(s.id)}
-                        className="h-7 w-7 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                        className="h-9 w-9 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                       >
-                        <Trash2 className="h-3.5 w-3.5" />
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </td>
@@ -138,33 +144,33 @@ export default function AdminSubjectsPage() {
       )}
 
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="bg-card border rounded-lg shadow-none p-0 max-w-md">
-          <div className="px-5 py-4 border-b">
-            <DialogTitle className="text-base font-semibold text-foreground">Create Subject</DialogTitle>
-            <DialogDescription className="text-sm text-muted-foreground mt-0.5">Add a new subject to the system.</DialogDescription>
+        <DialogContent className="bg-card border border-border/60 rounded-[2rem] shadow-xl p-0 max-w-md overflow-hidden">
+          <div className="px-8 py-6 border-b border-border/40 bg-muted/10">
+            <DialogTitle className="text-2xl font-serif text-primary-ink">Create Subject</DialogTitle>
+            <DialogDescription className="text-sm font-mono text-muted-foreground mt-2">Add a new subject to the system.</DialogDescription>
           </div>
           <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="p-5 space-y-4">
-              <div className="space-y-1.5">
-                <Label className="text-sm text-foreground">Code</Label>
-                <Input {...register('code')} placeholder="e.g. CS101" className="bg-secondary border text-foreground" />
-                {errors.code && <p className="text-xs text-destructive">{errors.code.message}</p>}
+            <div className="p-8 space-y-5">
+              <div className="space-y-2">
+                <Label className="text-xs font-mono uppercase tracking-widest text-muted-foreground ml-1">Code</Label>
+                <Input {...register('code')} placeholder="e.g. CS101" className="rounded-xl font-mono text-sm border-border/60 bg-muted/5 focus-visible:ring-primary h-11 px-4" />
+                {errors.code && <p className="text-xs text-destructive ml-1">{errors.code.message}</p>}
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-sm text-foreground">Name</Label>
-                <Input {...register('name')} placeholder="Introduction to CS" className="bg-secondary border text-foreground" />
-                {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
+              <div className="space-y-2">
+                <Label className="text-xs font-mono uppercase tracking-widest text-muted-foreground ml-1">Name</Label>
+                <Input {...register('name')} placeholder="Introduction to CS" className="rounded-xl font-mono text-sm border-border/60 bg-muted/5 focus-visible:ring-primary h-11 px-4" />
+                {errors.name && <p className="text-xs text-destructive ml-1">{errors.name.message}</p>}
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-sm text-foreground">Description (optional)</Label>
-                <Input {...register('description')} className="bg-secondary border text-foreground" />
+              <div className="space-y-2">
+                <Label className="text-xs font-mono uppercase tracking-widest text-muted-foreground ml-1">Description (optional)</Label>
+                <Input {...register('description')} className="rounded-xl font-mono text-sm border-border/60 bg-muted/5 focus-visible:ring-primary h-11 px-4" />
               </div>
             </div>
-            <div className="px-5 py-4 border-t flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => setCreateOpen(false)} className="border bg-transparent text-muted-foreground hover:bg-secondary h-8 px-3 text-sm rounded-md">
+            <div className="px-8 py-5 border-t border-border/40 flex justify-end gap-3 bg-muted/10">
+              <Button type="button" variant="ghost" onClick={() => setCreateOpen(false)} className="rounded-full font-mono text-xs px-5 hover:bg-muted/50">
                 Cancel
               </Button>
-              <Button type="submit" disabled={isSubmitting} className="bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-3 text-sm rounded-md">
+              <Button type="submit" disabled={isSubmitting} className="rounded-full font-mono text-xs tracking-wider px-6 shadow-sm">
                 {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Create'}
               </Button>
             </div>

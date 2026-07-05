@@ -6,6 +6,7 @@ import { authApi } from '@/api/endpoints/auth'
 import { AppShell } from '@/components/layout/AppShell'
 import { SubjectShell } from '@/components/layout/SubjectShell'
 import { AdminShell } from '@/components/layout/AdminShell'
+import { LecturerShell } from '@/components/layout/LecturerShell'
 
 import LoginPage from '@/features/auth/LoginPage'
 import RegisterPage from '@/features/auth/RegisterPage'
@@ -45,6 +46,7 @@ import AdminAnalyticsPage from '@/features/admin/AdminAnalyticsPage'
 import AdminRbacPage from '@/features/admin/AdminRbacPage'
 import SettingsPage from '@/features/settings/SettingsPage'
 import AdminStudentVerificationsPage from '@/features/admin/AdminStudentVerificationsPage'
+import LecturerDashboardPage from '@/features/lecturer/LecturerDashboardPage'
 
 interface ProtectedProps {
   children: React.ReactNode
@@ -63,14 +65,15 @@ function Protected({ children, roles }: ProtectedProps) {
         .catch(() => { })
         .finally(() => setLoading(false))
     } else {
-      setLoading(false)
+      loading && setLoading(false)
     }
-  }, [accessToken, user, setUser])
+  }, [accessToken, user, setUser, loading])
 
   if (!accessToken) return <Navigate to="/login" replace />
   if (loading) return <div className="flex h-screen items-center justify-center">Loading...</div>
   if (roles && user && !roles.includes(user.role)) return <Navigate to="/home" replace />
   if (!roles && user && user.role === 'admin') return <Navigate to="/admin" replace />
+  if (!roles && user && user.role === 'lecturer') return <Navigate to="/lecturer" replace />
 
   return <>{children}</>
 }
@@ -137,6 +140,24 @@ export default function AppRoutes() {
         <Route path="/admin/rbac" element={<AdminRbacPage />} />
         <Route path="/admin/settings" element={<AdminSettingsPage />} />
         <Route path="/admin/audit-logs" element={<AdminAuditLogsPage />} />
+      </Route>
+
+      {/* Lecturer shell */}
+      <Route element={<Protected roles={['lecturer']}><LecturerShell /></Protected>}>
+        <Route path="/lecturer" element={<Navigate to="dashboard" replace />} />
+        <Route path="/lecturer/dashboard" element={<LecturerDashboardPage />} />
+        <Route path="/lecturer/subjects" element={<SubjectsPage />} />
+        <Route path="/lecturer/settings" element={<SettingsPage />} />
+
+        {/* Nested subject contextual routes */}
+        <Route path="/lecturer/subjects/:id/documents" element={<SubjectDocumentsPage />} />
+        <Route path="/lecturer/subjects/:id/classes" element={<ClassesPage />} />
+        <Route path="/lecturer/subjects/:id/students" element={<StudentsPage />} />
+        <Route path="/lecturer/subjects/:id/engagement" element={<EngagementPage />} />
+        <Route path="/lecturer/subjects/:id/board" element={<BoardPage />} />
+        <Route path="/lecturer/subjects/:id/exams" element={<SubjectExamsPage />} />
+        <Route path="/lecturer/subjects/:id/exams/new" element={<CreateOfficialExamPage />} />
+        <Route path="/lecturer/subjects/:id/flashcards" element={<SubjectFlashcardsPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/home" replace />} />

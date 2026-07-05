@@ -16,6 +16,7 @@ import { Logo } from '@/components/ui/logo'
 
 function getDefaultCrumb(pathname: string): Array<{ label: string; href?: string }> {
   if (pathname.startsWith('/admin')) return [{ label: 'Admin' }]
+  if (pathname.startsWith('/lecturer')) return [{ label: 'Lecturer' }]
   if (pathname.startsWith('/subjects')) return [{ label: 'Subjects' }]
   if (pathname.startsWith('/chats')) return [{ label: 'My Chats' }]
   if (pathname.startsWith('/settings')) return [{ label: 'Settings' }]
@@ -93,7 +94,7 @@ export function Topbar() {
             </div>
             <DropdownMenuSeparator className="bg-border mx-2" />
             <DropdownMenuItem asChild className="text-muted-foreground hover:text-foreground hover:bg-secondary cursor-pointer relative z-10 rounded-md mx-1 px-3 h-9">
-              <Link to="/settings">
+              <Link to={user?.role === 'admin' ? '/admin/settings' : user?.role === 'lecturer' ? '/lecturer/settings' : '/settings'}>
                 <User className="h-4 w-4 mr-2" />
                 <span className="font-medium text-sm">Settings</span>
               </Link>
