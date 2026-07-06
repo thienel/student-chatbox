@@ -36,7 +36,7 @@ const statusColor: Record<string, string> = {
 
 export default function SubjectDocumentsPage() {
   const { id: subjectId = '' } = useParams<{ id: string }>()
-  const canUploadDocs = usePermission('document:upload')
+  const canUploadDocs = usePermission('document:create')
   const canDelete = usePermission('document:delete')
   const canSummarize = usePermission('ai:summarize-document')
   const fileRef = useRef<HTMLInputElement>(null)

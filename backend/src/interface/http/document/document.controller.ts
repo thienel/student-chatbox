@@ -45,7 +45,7 @@ export class DocumentController {
   ) {}
 
   @Post()
-  @RequirePermission('document:upload')
+  @RequirePermission('document:create')
   @HttpCode(HttpStatus.ACCEPTED)
   @UseInterceptors(
     FileInterceptor('file', {

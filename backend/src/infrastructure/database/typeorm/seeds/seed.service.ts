@@ -58,7 +58,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
         { name: 'subject:assign-lecturer', description: 'Assign lecturer to subject' },
         { name: 'subject:enroll', description: 'Self-enroll in subject' },
         { name: 'class:manage', description: 'Create and manage classes' },
-        { name: 'document:upload', description: 'Upload documents' },
+        { name: 'document:create', description: 'Upload/create documents' },
         { name: 'document:delete', description: 'Delete documents' },
         { name: 'document:read', description: 'View document list' },
         { name: 'ai:summarize-document', description: 'AI summarize a document' },
@@ -114,8 +114,8 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
       // students, and view class stats. Does not study (no chat/flashcards/
       // exams).
       const lecturerPerms = [
-        'subject:read', 'class:manage',
-        'document:upload', 'document:delete', 'document:read',
+        'subject:read', 'subject:create', 'class:manage',
+        'document:create', 'document:delete', 'document:read',
         'ai:summarize-document',
         'exam:read', 'exam:create-official',
         'analytics:read-own',
