@@ -18,6 +18,7 @@ export class User {
   status: UserStatus;
   emailVerifiedAt?: Date | null;
   lastLoginAt?: Date | null;
+  registrationSource?: string | null;
   metadata?: Record<string, any> | null;
   createdBy?: string | null;
   createdAt: Date;

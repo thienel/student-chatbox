@@ -1,5 +1,6 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useParams, Outlet } from 'react-router-dom'
 import { useEffect, useState } from 'react'
+import { SubjectClassProvider } from '@/features/classes/ClassContext'
 import { useAuthStore } from '@/store/useAuthStore'
 import { useUserStore } from '@/store/useUserStore'
 import { authApi } from '@/api/endpoints/auth'
@@ -46,6 +47,7 @@ import AdminAnalyticsPage from '@/features/admin/AdminAnalyticsPage'
 import AdminRbacPage from '@/features/admin/AdminRbacPage'
 import SettingsPage from '@/features/settings/SettingsPage'
 import AdminStudentVerificationsPage from '@/features/admin/AdminStudentVerificationsPage'
+import AdminStudentEmailAllowlistPage from '@/features/admin/AdminStudentEmailAllowlistPage'
 import LecturerDashboardPage from '@/features/lecturer/LecturerDashboardPage'
 
 interface ProtectedProps {
@@ -81,6 +83,15 @@ function Protected({ children, roles }: ProtectedProps) {
 function RootRedirect() {
   const { accessToken } = useAuthStore()
   return accessToken ? <Navigate to="/home" replace /> : <Navigate to="/login" replace />
+}
+
+function LecturerSubjectWrapper() {
+  const { id = '' } = useParams<{ id: string }>()
+  return (
+    <SubjectClassProvider subjectId={id}>
+      <Outlet />
+    </SubjectClassProvider>
+  )
 }
 
 export default function AppRoutes() {
@@ -135,6 +146,7 @@ export default function AppRoutes() {
         <Route path="/admin" element={<AdminDashboardPage />} />
         <Route path="/admin/users" element={<AdminUsersPage />} />
         <Route path="/admin/verifications" element={<AdminStudentVerificationsPage />} />
+        <Route path="/admin/allowlist" element={<AdminStudentEmailAllowlistPage />} />
         <Route path="/admin/subjects" element={<AdminSubjectsPage />} />
         <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
         <Route path="/admin/rbac" element={<AdminRbacPage />} />
@@ -150,14 +162,16 @@ export default function AppRoutes() {
         <Route path="/lecturer/settings" element={<SettingsPage />} />
 
         {/* Nested subject contextual routes */}
-        <Route path="/lecturer/subjects/:id/documents" element={<SubjectDocumentsPage />} />
-        <Route path="/lecturer/subjects/:id/classes" element={<ClassesPage />} />
-        <Route path="/lecturer/subjects/:id/students" element={<StudentsPage />} />
-        <Route path="/lecturer/subjects/:id/engagement" element={<EngagementPage />} />
-        <Route path="/lecturer/subjects/:id/board" element={<BoardPage />} />
-        <Route path="/lecturer/subjects/:id/exams" element={<SubjectExamsPage />} />
-        <Route path="/lecturer/subjects/:id/exams/new" element={<CreateOfficialExamPage />} />
-        <Route path="/lecturer/subjects/:id/flashcards" element={<SubjectFlashcardsPage />} />
+        <Route element={<LecturerSubjectWrapper />}>
+          <Route path="/lecturer/subjects/:id/documents" element={<SubjectDocumentsPage />} />
+          <Route path="/lecturer/subjects/:id/classes" element={<ClassesPage />} />
+          <Route path="/lecturer/subjects/:id/students" element={<StudentsPage />} />
+          <Route path="/lecturer/subjects/:id/engagement" element={<EngagementPage />} />
+          <Route path="/lecturer/subjects/:id/board" element={<BoardPage />} />
+          <Route path="/lecturer/subjects/:id/exams" element={<SubjectExamsPage />} />
+          <Route path="/lecturer/subjects/:id/exams/new" element={<CreateOfficialExamPage />} />
+          <Route path="/lecturer/subjects/:id/flashcards" element={<SubjectFlashcardsPage />} />
+        </Route>
       </Route>
 
       <Route path="*" element={<Navigate to="/home" replace />} />

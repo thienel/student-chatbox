@@ -26,6 +26,8 @@ export class UserTypeOrmRepository implements IUserRepository {
     user.studentCode = orm.studentCode;
     user.emailVerifiedAt = orm.emailVerifiedAt;
     user.lastLoginAt = orm.lastLoginAt;
+    user.registrationSource = orm.registrationSource;
+    user.metadata = orm.metadata;
     if (orm.role) {
       user.roleName = orm.role.name;
       if (orm.role.permissions) {
@@ -98,11 +100,13 @@ export class UserTypeOrmRepository implements IUserRepository {
     if (data.passwordHash !== undefined) orm.passwordHash = data.passwordHash;
     if (data.fullName !== undefined) orm.fullName = data.fullName;
     if (data.roleId !== undefined) orm.roleId = data.roleId;
-    orm.status = data.status ?? UserStatus.ACTIVE;
+    orm.status = data.status ?? UserStatus.PENDING_EMAIL_VERIFICATION;
     if (data.createdBy !== undefined) orm.createdBy = data.createdBy;
     if (data.studentCode !== undefined) orm.studentCode = data.studentCode;
     if (data.emailVerifiedAt !== undefined) orm.emailVerifiedAt = data.emailVerifiedAt;
     if (data.lastLoginAt !== undefined) orm.lastLoginAt = data.lastLoginAt;
+    if (data.registrationSource !== undefined) orm.registrationSource = data.registrationSource;
+    if (data.metadata !== undefined) orm.metadata = data.metadata;
     const saved = await this.repo.save(orm);
     return this.toEntity(saved);
   }
@@ -116,6 +120,8 @@ export class UserTypeOrmRepository implements IUserRepository {
     if (data.studentCode !== undefined) updateData.studentCode = data.studentCode;
     if (data.emailVerifiedAt !== undefined) updateData.emailVerifiedAt = data.emailVerifiedAt;
     if (data.lastLoginAt !== undefined) updateData.lastLoginAt = data.lastLoginAt;
+    if (data.registrationSource !== undefined) updateData.registrationSource = data.registrationSource;
+    if (data.metadata !== undefined) updateData.metadata = data.metadata;
     await this.repo.update(id, updateData);
     const updated = await this.repo.findOne({ where: { id }, relations: ['role', 'role.permissions'] });
     return this.toEntity(updated!);

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -20,12 +20,15 @@ import { TokenService } from '../../../application/auth/services/token.service';
 import { OtpService } from '../../../application/auth/services/otp.service';
 import { BcryptPasswordService } from '../../../infrastructure/auth/services/bcrypt-password.service';
 import { EmailModule } from '../../../infrastructure/email/email.module';
+import { EmailDomainService } from '../../../application/auth/services/email-domain.service';
+import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
     TypeOrmDatabaseModule,
     EmailModule,
     PassportModule,
+    forwardRef(() => UserModule),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (config: ConfigService) => ({
@@ -51,11 +54,12 @@ import { EmailModule } from '../../../infrastructure/email/email.module';
     AuditLogService,
     TokenService,
     OtpService,
+    EmailDomainService,
     {
       provide: 'IPasswordService',
       useClass: BcryptPasswordService,
     }
   ],
-  exports: [JwtStrategy, JwtModule, PassportModule, OtpService],
+  exports: [JwtStrategy, JwtModule, PassportModule, OtpService, EmailDomainService],
 })
 export class AuthModule {}

@@ -11,13 +11,20 @@ import { TypeOrmDatabaseModule } from '../../../infrastructure/database/typeorm/
 import { AuditLogService } from '../../../application/system/services/audit-log.service';
 import { StudentVerificationController } from './student-verification.controller';
 import { AdminStudentVerificationController } from './admin-student-verification.controller';
+import { AdminStudentEmailAllowlistController } from './admin-student-email-allowlist.controller';
 import { StudentVerificationService } from '../../../application/user/services/student-verification.service';
 import { BcryptPasswordService } from '../../../infrastructure/auth/services/bcrypt-password.service';
 import { EmailModule } from '../../../infrastructure/email/email.module';
+import { StudentEmailAllowlistService } from '../../../application/user/services/student-email-allowlist.service';
 
 @Module({
   imports: [TypeOrmDatabaseModule, EmailModule, forwardRef(() => AuthModule)],
-  controllers: [UserController, StudentVerificationController, AdminStudentVerificationController],
+  controllers: [
+    UserController, 
+    StudentVerificationController, 
+    AdminStudentVerificationController,
+    AdminStudentEmailAllowlistController
+  ],
   providers: [
     CreateUserUseCase,
     ListUsersUseCase,
@@ -27,10 +34,12 @@ import { EmailModule } from '../../../infrastructure/email/email.module';
     ResetPasswordUseCase,
     AuditLogService,
     StudentVerificationService,
+    StudentEmailAllowlistService,
     {
       provide: 'IPasswordService',
       useClass: BcryptPasswordService,
     },
   ],
+  exports: [StudentVerificationService, StudentEmailAllowlistService],
 })
 export class UserModule {}

@@ -34,11 +34,8 @@ export const authApi = {
   login: (email: string, password: string) =>
     axiosInstance.post<ApiResponse<LoginResponse>>('/auth/login', { email, password }).then(r => r.data.data),
 
-  registerStudent: (email: string, password: string, fullName: string) =>
-    axiosInstance.post<ApiResponse<RegisterResponse>>('/auth/register/student', { email, password, fullName }).then(r => r.data),
-
-  createManualVerification: (data: { email: string; password: string; fullName: string; studentCode: string; campus: string; personalEmail: string; }) =>
-    axiosInstance.post<ApiResponse<RegisterResponse>>('/student-verification/request', data).then(r => r.data),
+  registerStudent: (data: { email: string; password: string; fullName: string; studentCode?: string; campus?: string; reasonForNoFptEmail?: string; studentCardUrl?: string; }) =>
+    axiosInstance.post<ApiResponse<RegisterResponse>>('/auth/register/student', data).then(r => r.data),
 
   verifyOtp: (email: string, otp: string) =>
     axiosInstance.post<ApiResponse<VerifyOtpResponse>>('/auth/verify-email', { email, otp }).then(r => r.data),

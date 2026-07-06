@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength, MaxLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, MinLength, MaxLength, IsOptional } from 'class-validator';
 
 export class RegisterStudentDto {
   @IsEmail({}, { message: 'Email must be a valid email address' })
@@ -14,4 +14,20 @@ export class RegisterStudentDto {
   @IsNotEmpty({ message: 'Full name is required' })
   @MaxLength(255, { message: 'Full name cannot exceed 255 characters' })
   fullName: string;
+
+  @IsString()
+  @IsOptional()
+  studentCode?: string;
+
+  @IsString()
+  @IsOptional()
+  campus?: string;
+
+  @IsString()
+  @IsOptional()
+  reasonForNoFptEmail?: string;
+
+  @IsString()
+  @IsOptional()
+  studentCardUrl?: string;
 }

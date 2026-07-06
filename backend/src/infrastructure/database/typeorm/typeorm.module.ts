@@ -45,6 +45,7 @@ import { StudentStudyPlanOrmEntity } from './orm-entities/student-study-plan.orm
 import { StudyPlanTypeOrmRepository } from './repositories/study-plan.typeorm-repository';
 import { UserBadgeOrmEntity } from './orm-entities/user-badge.orm-entity';
 import { StudentVerificationRequestOrmEntity } from './orm-entities/student-verification-request.orm-entity';
+import { StudentEmailAllowlistOrmEntity } from './orm-entities/student-email-allowlist.orm-entity';
 import { BadgeTypeOrmRepository } from './repositories/badge.typeorm-repository';
 import { BoardQuestionOrmEntity } from './orm-entities/board-question.orm-entity';
 import { BoardAnswerOrmEntity } from './orm-entities/board-answer.orm-entity';
@@ -88,6 +89,7 @@ const ormEntities = [
   BoardUpvoteOrmEntity,
   OtpTokenEntity,
   StudentVerificationRequestOrmEntity,
+  StudentEmailAllowlistOrmEntity,
 ];
 
 @Module({

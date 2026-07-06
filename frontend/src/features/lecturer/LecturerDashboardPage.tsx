@@ -60,7 +60,7 @@ export default function LecturerDashboardPage() {
   const boardQueries = useQueries({
     queries: allActiveClasses.map(c => ({
       queryKey: ['board-questions-unanswered', c.subjectId, c.classId],
-      queryFn: () => boardApi.listQuestions(c.subjectId, c.classId, { status: 'active', limit: 10 }),
+      queryFn: () => boardApi.listQuestions(c.subjectId, c.classId, { status: 'open' }),
       enabled: allActiveClasses.length > 0,
     }))
   })
@@ -323,11 +323,11 @@ export default function LecturerDashboardPage() {
                         {doc.originalName}
                       </p>
                       <p className="text-[10px] text-muted-foreground font-mono mt-0.5">
-                        {doc.subject.code} • {(doc.fileSize / 1024).toFixed(0)} KB
+                        {doc.subject.code} • {(doc.fileSizeBytes / 1024).toFixed(0)} KB
                       </p>
                     </div>
                     <div>
-                      {doc.status === 'success' ? (
+                      {doc.status === 'ready' ? (
                         <span className="inline-flex items-center gap-1 text-[9px] font-mono bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded-full font-bold">
                           <CheckCircle2 className="h-3 w-3" /> Ready
                         </span>

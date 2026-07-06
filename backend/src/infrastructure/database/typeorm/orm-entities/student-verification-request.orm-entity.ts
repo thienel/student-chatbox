@@ -45,6 +45,11 @@ export class StudentVerificationRequestOrmEntity {
   @Column({ name: 'personal_email', length: 255 })
   personalEmail: string;
 
+  @Column({ name: 'reason_for_no_fpt_email', type: 'text', nullable: true })
+  reasonForNoFptEmail?: string | null;
+
+  @Column({ name: 'student_card_url', type: 'varchar', length: 255, nullable: true })
+  studentCardUrl?: string | null;
 
   @Column({
     type: 'enum',

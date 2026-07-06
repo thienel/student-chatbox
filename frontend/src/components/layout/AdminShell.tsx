@@ -10,6 +10,7 @@ const adminTabs = [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard, exact: true },
   { label: 'Users', href: '/admin/users', icon: Users },
   { label: 'Verifications', href: '/admin/verifications', icon: Shield },
+  { label: 'Allowlist', href: '/admin/allowlist', icon: Shield },
   { label: 'Subjects', href: '/admin/subjects', icon: BookOpen },
   { label: 'Analytics', href: '/admin/analytics', icon: BarChart2 },
   { label: 'Roles', href: '/admin/rbac', icon: Shield },

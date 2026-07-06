@@ -7,7 +7,11 @@ import { UserStatus } from '../../../domain/user/entities/user.entity';
 import { OtpTokenType } from '../../../domain/user/entities/otp-token.entity';
 import { IPasswordService } from '../../../domain/auth/services/password.service.interface';
 import { OtpService } from '../services/otp.service';
-import { isAllowedStudentEmail } from '../../../shared/helpers/email-domain.helper';
+import { EmailDomainService } from '../services/email-domain.service';
+import { StudentEmailAllowlistService } from '../../user/services/student-email-allowlist.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { StudentVerificationRequestOrmEntity, VerificationRequestStatus } from '../../../infrastructure/database/typeorm/orm-entities/student-verification-request.orm-entity';
 
 @Injectable()
 export class RegisterUseCase {
@@ -16,21 +20,16 @@ export class RegisterUseCase {
     @Inject(TOKENS.ROLE_REPO) private readonly roleRepo: IRoleRepository,
     @Inject('IPasswordService') private readonly passwordService: IPasswordService,
     private readonly otpService: OtpService,
+    private readonly emailDomainService: EmailDomainService,
+    private readonly allowlistService: StudentEmailAllowlistService,
+    @InjectRepository(StudentVerificationRequestOrmEntity)
+    private readonly verificationRequestRepo: Repository<StudentVerificationRequestOrmEntity>,
   ) { }
 
   async execute(dto: RegisterStudentDto): Promise<{ message: string; code: string }> {
-    // 1. Normalize email
     const email = dto.email.trim().toLowerCase();
 
-    // 2. Check if email is valid FPT domain
-    if (!isAllowedStudentEmail(email)) {
-      throw new BadRequestException({
-        message: 'Vui lòng sử dụng email sinh viên FPT để đăng ký tài khoản Student.',
-        code: 'INVALID_STUDENT_EMAIL_DOMAIN'
-      });
-    }
-
-    // 3. Check if email already exists
+    // 1. Check if email already exists
     const existingUser = await this.userRepo.findByEmail(email);
     if (existingUser) {
       throw new ConflictException({
@@ -39,24 +38,75 @@ export class RegisterUseCase {
       });
     }
 
-    // 4. Resolve 'student' Role
+    // 2. Resolve 'student' Role
     const roleCode = 'student';
     const role = await this.roleRepo.findByName(roleCode);
     if (!role) {
       throw new NotFoundException(`Role ${roleCode} not found`);
     }
 
-    // 5. Hash password
+    // 3. Hash password
     const passwordHash = await this.passwordService.hash(dto.password);
 
-    // 6. Create User (Pending Email Verification)
+    // 4. Branch based on email domain
+    const isFptEmail = this.emailDomainService.isAllowedStudentEmail(email);
+
+    let registrationSource = 'fpt_email';
+    let requiresManualVerification = false;
+
+    if (!isFptEmail) {
+      // Personal email flow
+      if (!dto.studentCode) {
+        throw new BadRequestException({
+          message: 'Vui lòng cung cấp mã sinh viên khi đăng ký bằng email cá nhân.',
+          code: 'STUDENT_CODE_REQUIRED'
+        });
+      }
+
+      const normalizedCode = dto.studentCode.trim().toUpperCase();
+      const allowlistRecord = await this.allowlistService.findAvailableByEmailAndStudentCode(email, normalizedCode);
+
+      if (allowlistRecord && allowlistRecord.status === 'available') {
+        // Fall inside allowlist -> activate automatically after OTP
+        registrationSource = 'personal_email_allowlist';
+      } else {
+        // Not in allowlist -> Manual Verification Fallback
+        registrationSource = 'manual_verification';
+        requiresManualVerification = true;
+
+        if (!dto.campus || !dto.reasonForNoFptEmail) {
+          throw new BadRequestException({
+            message: 'Email này không nằm trong danh sách ưu tiên. Vui lòng cung cấp thêm campus và lý do để duyệt thủ công.',
+            code: 'MANUAL_VERIFICATION_INFO_REQUIRED'
+          });
+        }
+      }
+    }
+
+    // 5. Create User (Pending Email Verification)
     const user = await this.userRepo.create({
       email,
       fullName: dto.fullName,
       passwordHash,
       roleId: role.id,
+      studentCode: dto.studentCode,
       status: UserStatus.PENDING_EMAIL_VERIFICATION,
+      registrationSource,
     });
+
+    // 6. If Manual Verification, create the request
+    if (requiresManualVerification) {
+      const request = this.verificationRequestRepo.create({
+        userId: user.id,
+        studentCode: dto.studentCode!,
+        campus: dto.campus,
+        personalEmail: email,
+        reasonForNoFptEmail: dto.reasonForNoFptEmail,
+        studentCardUrl: dto.studentCardUrl,
+        status: VerificationRequestStatus.PENDING,
+      });
+      await this.verificationRequestRepo.save(request);
+    }
 
     // 7. Generate and Send OTP
     await this.otpService.generateAndSaveOtp(
@@ -68,7 +118,9 @@ export class RegisterUseCase {
     );
 
     return {
-      message: 'Tài khoản đã được tạo. Vui lòng kiểm tra email FPT để xác minh tài khoản.',
+      message: requiresManualVerification 
+        ? 'Tài khoản đã được tạo. Vui lòng kiểm tra email để xác minh, sau đó chờ admin phê duyệt.'
+        : 'Tài khoản đã được tạo. Vui lòng kiểm tra email để xác minh tài khoản.',
       code: 'PENDING_EMAIL_VERIFICATION'
     };
   }
