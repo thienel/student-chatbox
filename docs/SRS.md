@@ -1,42 +1,94 @@
 # Software Requirements Specification (SRS)
-**Project Name:** EduChat (Student Chatbox Platform)
-**Version:** 1.0
+**Project Name:** Folio (Student Chatbox Platform)
+**Version:** 2.0
+**Status:** Reflects as-built implementation
 
 ## 1. Introduction
-EduChat is an AI-powered educational platform designed to bridge the gap between lecturers and students. It leverages AI for RAG-based document chats, automated flashcard and exam generation, and utilizes the FSRS-4.5 spaced repetition algorithm to optimize student learning. The platform also includes gamification and a community Q&A board to boost engagement.
+Folio is an AI-powered educational platform designed to bridge the gap between lecturers and students. It leverages AI for RAG-based document chats, automated flashcard and exam generation, and uses the FSRS-4.5 spaced repetition algorithm to optimize student learning. The platform also includes gamification (badges, streaks, community flashcards & leaderboard), a per-class Q&A board, weak-topic detection, and personalized study plans to boost engagement and retention.
+
+> **Note on the product name:** The user-facing product is branded **Folio** (see `frontend/index.html`). Some internal package names and the seeded default accounts still carry the legacy `educhat` identifier (e.g. `admin@educhat.local`).
 
 ## 2. User Roles
-- **Admin**: Manages the platform, user accounts, system settings (AI limits), and views platform-wide analytics.
-- **Lecturer**: Manages subjects and classes, uploads course documents (building the AI knowledge base), creates official exams, and views class analytics.
-- **Student**: Enrolls in classes, chats with AI regarding course materials, generates/studies flashcards, takes exams, and interacts on the community board.
+The platform has three system roles, seeded idempotently on bootstrap with a fixed permission set (`infrastructure/database/typeorm/seeds/seed.service.ts`).
+
+- **Admin**: Platform administration only. Manages user accounts, roles & permissions (RBAC), system settings (AI daily limits), audit logs, subject lifecycle, and views platform-wide analytics. **Admin does not study, chat, or manage class knowledge bases** and has no per-class visibility.
+- **Lecturer**: Manages classes for their subjects, uploads course documents (building the AI knowledge base), summarizes documents, creates official exams, and views class engagement/analytics for classes they own. **Lecturer does not study flashcards or use RAG chat.**
+- **Student**: The learner role. Enrolls in subjects/classes, chats with AI over course materials, generates/studies flashcards (FSRS), takes exams, participates in the community (flashcard sharing, question board), bookmarks resources, and views their badges, weak topics, and study plan.
+
+### 2.1 Role → Permission Matrix (as seeded)
+| Permission | Admin | Lecturer | Student |
+|-----------|:-----:|:--------:|:-------:|
+| `user:create`, `user:read-list`, `user:update`, `user:suspend` | ✅ | | |
+| `rbac:manage` | ✅ | | |
+| `system:manage-settings`, `system:read-audit-log` | ✅ | | |
+| `subject:create`, `subject:update`, `subject:delete`, `subject:assign-lecturer` | ✅ | | |
+| `subject:read` | ✅ | ✅ | ✅ |
+| `subject:enroll` | | | ✅ |
+| `class:manage` | | ✅ | |
+| `document:upload`, `document:delete` | | ✅ | |
+| `document:read` | | ✅ | ✅ |
+| `ai:summarize-document` | | ✅ | ✅ |
+| `chat:create`, `chat:read-own`, `ai:chat-rag` | | | ✅ |
+| `flashcard:create`, `flashcard:delete`, `flashcard:read`, `flashcard:manage-own`, `flashcard:study`, `ai:generate-flashcard` | | | ✅ |
+| `exam:read` | ✅ | ✅ | ✅ |
+| `exam:create-official` | ✅ | ✅ | |
+| `exam:take`, `ai:generate-exam` | | | ✅ |
+| `bookmark:manage` | | | ✅ |
+| `analytics:read-all` | ✅ | | |
+| `analytics:read-own` | | ✅ | |
+
+> Deviations from the original design spec: `exam:create-official` is granted to **admin** as well as lecturer; `flashcard:manage-own` is **student-only** (lecturers cannot publish/clone flashcard sets).
 
 ## 3. Core Features
 
 ### 3.1 Knowledge Base & AI RAG Chat
-- **Document Scoping**: Documents are uploaded by lecturers and scoped by `(Lecturer, Subject)`. All classes taught by the same lecturer for a specific subject share this knowledge base.
-- **RAG Chat**: Students can chat with an AI assistant that retrieves context from the lecturer's uploaded documents (using Qdrant vector database) to answer questions accurately.
+- **Document Scoping**: Documents are uploaded by lecturers and scoped by the composite key `(lecturerId, subjectId)`. All classes taught by the same lecturer for a specific subject share this knowledge base; two lecturers teaching the same subject have **separate** knowledge bases. When a student queries, the system resolves `student → enrolled class → class.lecturerId` to select the knowledge base.
+- **Qdrant scoping**: Each vector chunk's payload stores `lecturer_id` + `subject_id`; retrieval filters on both (`langchain/app/services/qdrant_service.py::_scope_filter`).
+- **RAG Chat**: Students chat with an AI assistant that retrieves context from the resolved knowledge base. Responses are **streamed** to the client via Server-Sent Events (`POST /chats/:id/messages`); the assistant message (with sources) is persisted server-side when the stream completes, with a fallback save endpoint `POST /chats/:id/messages/complete`.
 
 ### 3.2 Flashcards & Spaced Repetition (FSRS)
-- **Creation**: Flashcards can be generated by AI from documents/topics, created manually, or cloned from the community.
-- **Study Sessions**: Powered by the **FSRS-4.5 algorithm** (Target retention: 90%).
-- **Rules**: Features daily new card limits, session persistence, and streak tracking based on the Asia/Ho_Chi_Minh (ICT) timezone.
+- **Creation**: Flashcards can be generated by AI from the knowledge base, created manually, or cloned from the community.
+- **Study Sessions**: Powered by the **FSRS-4.5 algorithm** (`domain/study/services/fsrs-scheduler.ts`). Target retention: **90%**. Default pre-trained weights `W[0..18]` are used platform-wide (no per-user weight training).
+- **Rules**: Per-student daily new-card limit (default 20, range 1–100), one active session per set (resumable), session persistence, streak tracking, and stale-session abandonment — all on the **Asia/Ho_Chi_Minh (ICT, UTC+7)** timezone (`shared/utils/ict-time.ts`).
 
-### 3.3 Exams & Weak Topic Detection
-- **Exam Types**: 
-  - `official`: Hand-crafted by lecturers for specific classes.
-  - `ai_generated`: Generated by students for practice.
-- **Weak Topic Detection**: The system analyzes exam results to calculate a `correctRate` per topic. Topics with a rate < 50% are classified as "weak".
+### 3.3 Community Flashcards — Sharing, Stars & Leaderboard
+- Flashcard sets default to **private**. The creator can publish a set (requires ≥ 3 cards) to make it discoverable.
+- Any user can **star** public sets, **clone** them into an independent private copy, browse a **discover feed**, and view a stars-based **leaderboard** (global or per-subject).
 
-### 3.4 Personalized Study Plan
-- Automatically generated weekly for students.
-- Combines pending FSRS due cards and targeted review tasks for detected weak topics.
+### 3.4 Exams & Weak Topic Detection
+- **Exam Types**:
+  - `official`: Hand-crafted by lecturers (or admin) for a specific class they own. Not public; visible only to enrolled students. Editable only while zero attempts exist.
+  - `ai_generated`: Generated by students for practice, scoped to the knowledge base.
+- **Attempts**: Start (`POST /subjects/:subjectId/exams/:examId/attempts`) then submit (`POST .../attempts/:attemptId`); students review their history via `/exam-attempts`.
+- **Weak Topic Detection**: On exam submission the system recomputes, per topic, the student's all-time correct rate across completed attempts in the subject. Classification: **weak** (< 60%), **developing** (60–79%), **strong** (≥ 80%). Topics with fewer than **5** attempted questions are treated as insufficient data and excluded. Questions carry a `topic` tag (AI-assigned at generation time).
 
-### 3.5 Gamification & Community
-- **Badges & Streaks**: Students earn badges for study streaks and engagement.
-- **Question Board**: A community space where students and lecturers can post questions, provide answers, and upvote helpful content.
-- **Flashcard Sharing**: Students can share flashcard sets and "star" helpful sets from others.
+### 3.5 Personalized Study Plan
+- A 7-day (Mon–Sun ICT) plan is built for the student. **As-built deviation:** the plan is generated **lazily on read** using a deterministic **rule-based builder** (`domain/study/services/study-plan-builder.ts`) from the student's current due-card count and weak topics — **not** via a scheduled Monday cron + AI call as originally specified.
+
+### 3.6 Gamification & Community
+- **Badges & Streaks**: Students earn permanent badges (13-badge catalogue in `domain/badge/badge-catalogue.ts`) for study milestones, streaks, sharing, exam performance, and board participation. **As-built deviation:** badge evaluation is **idempotent and lazy-on-read** (`application/badge/badge.service.ts::evaluateForUser`), not per-event async.
+- **Question Board**: A per-class space where students and lecturers post questions and answers, upvote content, and lecturers pin the best answer / close questions.
+- **Bookmarks**: Students can bookmark documents, flashcard sets, exams, and chat messages for quick access, with an optional note.
+
+### 3.7 Analytics
+- **Lecturer**: Engagement stats for students in a class they own (`GET /subjects/:id/classes/:classId/engagement` and per-student stats). All-time, read-only, computed on read.
+- **Admin**: Platform-wide overview and AI usage analytics (`GET /analytics/overview`, `GET /analytics/ai-usage`).
 
 ## 4. System Settings & Constraints
-- **Timezone**: All daily resets (limits, streaks, plans) strictly follow `Asia/Ho_Chi_Minh (UTC+7)`.
-- **AI Limits**: Daily quotas (e.g., max RAG chats, max exam generations) are configurable per role via system settings.
-- **Tech Stack Highlights**: NestJS (Backend), React/Vite (Frontend), PostgreSQL (Relational DB), Qdrant (Vector DB), Python/Langchain (AI Microservice).
+- **Timezone**: All daily resets (limits, streaks, plans) strictly follow **Asia/Ho_Chi_Minh (UTC+7)**.
+- **AI Limits**: Daily quotas are enforced by `AiRateLimitGuard` via the `@AiFeature(...)` decorator, keyed by system settings `ai_daily_limit.<role>.<feature>` (a value of `-1` means unlimited). Seeded defaults:
+
+  | Feature key | Student | Lecturer | Admin |
+  |-------------|:-------:|:--------:|:-----:|
+  | `chat_rag` | 20 | 100 | ∞ (-1) |
+  | `generate_flashcard` | 5 | 20 | ∞ |
+  | `generate_exam` | 3 | 10 | ∞ |
+  | `summarize_document` | 10 | 30 | ∞ |
+
+- **Persistence model**: TypeORM runs with `synchronize: true` — the schema is derived from ORM entities on boot; there are **no migration files**. Roles, permissions, AI-limit settings, and default admin/student accounts are seeded idempotently on bootstrap.
+- **Tech Stack**:
+  - **Backend** — NestJS (clean architecture: `domain` / `application` / `interface/http` / `infrastructure`), PostgreSQL 16 via TypeORM.
+  - **Frontend** — React 18 + Vite + TypeScript, TanStack Query, Zustand, Tailwind CSS + Radix UI, React Router, Axios.
+  - **AI Microservice** — Python FastAPI + LangChain, using OpenAI models (`gpt-4o` for chat, `gpt-4o-mini` for flashcard/exam generation, `text-embedding-3-small` for embeddings; base URL configurable).
+  - **Vector DB** — Qdrant.
+  - **Deployment** — Docker Compose (`postgres`, `qdrant`, `langchain`, `backend`, `frontend`) behind nginx.
