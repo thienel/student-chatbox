@@ -4,6 +4,8 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/compone
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
+import * as XLSX from 'xlsx'
+import Papa from 'papaparse'
 
 interface BulkImportDialogProps {
   open: boolean
@@ -26,18 +28,34 @@ export function BulkImportDialog({ open, onOpenChange, onImport }: BulkImportDia
 
     const lines = textInput.split('\n').map(line => line.trim()).filter(line => line.length > 0)
     const records = []
+    const errors = []
 
-    for (const line of lines) {
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i]
       const parts = line.split(',')
       if (parts.length >= 2) {
-        records.push({
-          personalEmail: parts[0].trim(),
-          studentCode: parts[1].trim()
-        })
+        const email = parts[0].trim()
+        const code = parts[1].trim()
+        
+        // Basic validation
+        if (!email || !code) {
+          errors.push(`Dòng ${i + 1}: Thiếu email hoặc mã sinh viên.`)
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          errors.push(`Dòng ${i + 1}: Email "${email}" không đúng định dạng.`)
+        } else {
+          records.push({
+            personalEmail: email,
+            studentCode: code
+          })
+        }
       } else {
-        setError(`Invalid format on line: "${line}". Expected "email, studentCode".`)
-        return
+        errors.push(`Dòng ${i + 1}: Sai cấu trúc. Yêu cầu "email, studentCode".`)
       }
+    }
+
+    if (errors.length > 0) {
+      setError(`All or nothing failed. Vui lòng sửa ${errors.length} lỗi sau:\n` + errors.slice(0, 5).join('\n') + (errors.length > 5 ? '\n...' : ''))
+      return
     }
 
     try {
@@ -52,48 +70,134 @@ export function BulkImportDialog({ open, onOpenChange, onImport }: BulkImportDia
     }
   }
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setError('')
     const file = e.target.files?.[0]
     if (!file) return
 
-    const reader = new FileReader()
-    reader.onload = async (event) => {
-      try {
-        const text = event.target?.result as string
-        const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0)
+    setIsSubmitting(true)
+
+    try {
+      let rows: string[][] = []
+
+      // Check for Excel file extension or signature
+      const isExcel = file.name.toLowerCase().endsWith('.xlsx') || file.name.toLowerCase().endsWith('.xls')
+
+      if (isExcel) {
+        const arrayBuffer = await file.arrayBuffer()
+        const workbook = XLSX.read(arrayBuffer, { type: 'array' })
+        const firstSheet = workbook.Sheets[workbook.SheetNames[0]]
+        rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: '' }) as string[][]
+      } else {
+        // Handle CSV with fallback encoding for ANSI (Vietnamese Excel CSVs)
+        const readText = (): Promise<string> => {
+          return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+              const text = evt.target?.result as string;
+              // If we see replacement chars or the file starts with PK (zipped excel but wrongly named)
+              if (text.includes('') && !text.startsWith('PK')) { 
+                const fallbackReader = new FileReader();
+                fallbackReader.onload = (evt2) => resolve(evt2.target?.result as string);
+                fallbackReader.readAsText(file, 'windows-1258'); 
+              } else {
+                resolve(text);
+              }
+            };
+            reader.onerror = reject;
+            reader.readAsText(file, 'utf-8');
+          });
+        }
+
+        const fileContent = await readText();
         
-        // Skip header if it exists
-        const startIndex = lines[0].toLowerCase().includes('email') ? 1 : 0
-        const records = []
+        // If it starts with PK, it's actually an excel file renamed to .csv
+        if (fileContent.startsWith('PK')) {
+          const arrayBuffer = await file.arrayBuffer()
+          const workbook = XLSX.read(arrayBuffer, { type: 'array' })
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]]
+          rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: '' }) as string[][]
+        } else {
+          const parseResult = Papa.parse(fileContent, {
+            header: false,
+            skipEmptyLines: 'greedy',
+          })
+          rows = parseResult.data as string[][]
+        }
+      }
 
-        for (let i = startIndex; i < lines.length; i++) {
-          const parts = lines[i].split(',')
-          if (parts.length >= 2) {
-            records.push({
-              personalEmail: parts[0].trim(),
-              studentCode: parts[1].trim()
-            })
-          }
+      if (rows.length === 0) {
+        setError('File is empty.')
+        setIsSubmitting(false)
+        e.target.value = ''
+        return
+      }
+
+      // Auto-detect columns
+      let emailIdx = 0
+      let codeIdx = 1
+      let startIndex = 0
+      
+      const firstRow = rows[0].map(c => String(c)?.toLowerCase() || '')
+      if (firstRow.some(c => c.includes('email') || c.includes('thư điện tử') || c.includes('code') || c.includes('mssv') || c.includes('sinh viên'))) {
+        startIndex = 1
+        const foundEmailIdx = firstRow.findIndex(c => c.includes('email') || c.includes('thư điện tử'))
+        const foundCodeIdx = firstRow.findIndex(c => c.includes('code') || c.includes('mssv') || c.includes('sinh viên') || c.includes('student'))
+        
+        if (foundEmailIdx !== -1) emailIdx = foundEmailIdx
+        if (foundCodeIdx !== -1) codeIdx = foundCodeIdx
+      }
+
+      const records: { personalEmail: string; studentCode: string }[] = []
+      const parseErrors: string[] = []
+
+      for (let i = startIndex; i < rows.length; i++) {
+        const row = rows[i]
+        const email = String(row[emailIdx] || '').trim()
+        const code = String(row[codeIdx] || '').trim()
+
+        if (!email && !code) continue // skip entirely empty rows
+
+        if (!email || !code) {
+          parseErrors.push(`Dòng ${i + 1}: Thiếu dữ liệu email hoặc student code.`)
+          continue
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          parseErrors.push(`Dòng ${i + 1}: Email "${email}" không đúng định dạng.`)
+          continue
         }
 
-        if (records.length === 0) {
-          setError('No valid records found in the CSV.')
-          return
-        }
+        records.push({ personalEmail: email, studentCode: code })
+      }
 
-        setIsSubmitting(true)
+      if (parseErrors.length > 0) {
+        setError(`All or nothing failed. Có ${parseErrors.length} lỗi:\n` + parseErrors.slice(0, 5).join('\n') + (parseErrors.length > 5 ? '\n...' : ''))
+        setIsSubmitting(false)
+        e.target.value = ''
+        return
+      }
+
+      if (records.length === 0) {
+        setError('Không tìm thấy dữ liệu hợp lệ trong file.')
+        setIsSubmitting(false)
+        e.target.value = ''
+        return
+      }
+
+      try {
         await onImport(records)
         onOpenChange(false)
       } catch (err) {
-        setError('Failed to parse the file.')
+          // API errors are handled by react query
       } finally {
         setIsSubmitting(false)
-        // Reset file input
         e.target.value = ''
       }
+    } catch (err: any) {
+      setError('Lỗi đọc file: ' + err.message)
+      setIsSubmitting(false)
+      e.target.value = ''
     }
-    reader.readAsText(file)
   }
 
   return (
@@ -124,12 +228,12 @@ export function BulkImportDialog({ open, onOpenChange, onImport }: BulkImportDia
               )}
             >
               <Upload className="w-3.5 h-3.5" />
-              CSV Upload
+              File Upload
             </button>
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-2xl flex items-start gap-3">
+            <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-2xl flex items-start gap-3 whitespace-pre-wrap">
               <AlertCircle className="w-5 h-5 text-destructive mt-0.5 shrink-0" />
               <p className="text-sm font-mono text-destructive">{error}</p>
             </div>
@@ -142,7 +246,7 @@ export function BulkImportDialog({ open, onOpenChange, onImport }: BulkImportDia
                 <Textarea 
                   value={textInput}
                   onChange={(e) => setTextInput(e.target.value)}
-                  placeholder="nguyenvana@gmail.com, SE123456&#10;tranvanb@yahoo.com, SE654321"
+                  placeholder="nguyenvana@gmail.com, SE123456\ntranvanb@yahoo.com, SE654321"
                   className="min-h-[200px] font-mono text-sm resize-none bg-card border-border/50 focus-visible:ring-primary rounded-xl p-4 leading-relaxed"
                 />
               </div>
@@ -165,7 +269,7 @@ export function BulkImportDialog({ open, onOpenChange, onImport }: BulkImportDia
               <div className="border-2 border-dashed border-border/50 bg-muted/10 rounded-[2rem] p-12 text-center transition-colors hover:bg-muted/20 hover:border-primary/30 relative">
                 <input 
                   type="file" 
-                  accept=".csv" 
+                  accept=".csv,.xlsx,.xls" 
                   onChange={handleFileUpload}
                   disabled={isSubmitting}
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
@@ -175,7 +279,7 @@ export function BulkImportDialog({ open, onOpenChange, onImport }: BulkImportDia
                     {isSubmitting ? <Loader2 className="w-8 h-8 animate-spin" /> : <Upload className="w-8 h-8" />}
                   </div>
                   <div>
-                    <p className="font-serif text-xl text-primary-ink mb-1">Click or drag CSV file</p>
+                    <p className="font-serif text-xl text-primary-ink mb-1">Click or drag Excel/CSV file</p>
                     <p className="font-mono text-xs text-muted-foreground uppercase tracking-widest">Format: email, studentCode</p>
                   </div>
                 </div>

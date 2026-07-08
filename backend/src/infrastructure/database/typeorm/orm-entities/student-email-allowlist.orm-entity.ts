@@ -36,8 +36,8 @@ export class StudentEmailAllowlistOrmEntity {
   @Column({ name: 'student_code', type: 'varchar', length: 50 })
   studentCode: string;
 
-  @Column({ name: 'full_name', type: 'varchar', length: 255 })
-  fullName: string;
+  @Column({ name: 'full_name', type: 'varchar', length: 255, nullable: true })
+  fullName?: string | null;
 
   @Column({ type: 'varchar', length: 100, nullable: true })
   campus?: string | null;

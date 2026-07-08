@@ -11,8 +11,8 @@ export class CreateStudentEmailAllowlistDto {
   studentCode: string;
 
   @IsString()
-  @IsNotEmpty()
-  fullName: string;
+  @IsOptional()
+  fullName?: string;
 
   @IsString()
   @IsOptional()

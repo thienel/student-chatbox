@@ -81,6 +81,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
         { name: 'analytics:read-own', description: 'View own subject analytics' },
         { name: 'analytics:read-all', description: 'View all analytics' },
         { name: 'rbac:manage', description: 'Manage roles and permissions' },
+        { name: 'user:manage', description: 'Manage user accounts and allowlist' },
       ];
 
       const permissions: Record<string, PermissionOrmEntity> = {};
@@ -97,7 +98,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
       // content inside a subject (documents/chat/flashcards/exams). Keeps
       // rbac:manage, so it can self-grant when truly needed.
       const adminPerms = [
-        'user:create', 'user:read-list', 'user:update', 'user:suspend',
+        'user:create', 'user:read-list', 'user:update', 'user:suspend', 'user:manage',
         'rbac:manage', 'system:manage-settings', 'system:read-audit-log',
         'subject:create', 'subject:update', 'subject:delete', 'subject:read',
         'subject:assign-lecturer', 'analytics:read-all',

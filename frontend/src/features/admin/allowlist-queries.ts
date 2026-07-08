@@ -12,7 +12,7 @@ export const useAllowlist = (params?: { search?: string; status?: string; limit?
 export const useCreateAllowlist = () => {
   const queryClient = useQueryClient()
   const { toast } = useToast()
-  
+
   return useMutation({
     mutationFn: allowlistApi.create,
     onSuccess: () => {
@@ -20,10 +20,10 @@ export const useCreateAllowlist = () => {
       toast({ title: 'Success', description: 'Added email to allowlist.' })
     },
     onError: (err: any) => {
-      toast({ 
-        title: 'Error', 
-        description: err.response?.data?.message || 'Failed to add email', 
-        variant: 'destructive' 
+      toast({
+        title: 'Error',
+        description: err.response?.data?.message || 'Failed to add email',
+        variant: 'destructive'
       })
     }
   })
@@ -32,7 +32,7 @@ export const useCreateAllowlist = () => {
 export const useBulkImportAllowlist = () => {
   const queryClient = useQueryClient()
   const { toast } = useToast()
-  
+
   return useMutation({
     mutationFn: allowlistApi.bulkImport,
     onSuccess: (data) => {
@@ -40,10 +40,10 @@ export const useBulkImportAllowlist = () => {
       toast({ title: 'Success', description: `Imported ${data.importedCount} records successfully.` })
     },
     onError: (err: any) => {
-      toast({ 
-        title: 'Import Failed', 
-        description: err.response?.data?.message || 'Failed to import records', 
-        variant: 'destructive' 
+      toast({
+        title: 'Import Failed',
+        description: err.response?.data?.message || 'Failed to import records',
+        variant: 'destructive'
       })
     }
   })
@@ -52,7 +52,7 @@ export const useBulkImportAllowlist = () => {
 export const useEnableAllowlist = () => {
   const queryClient = useQueryClient()
   const { toast } = useToast()
-  
+
   return useMutation({
     mutationFn: allowlistApi.enable,
     onSuccess: () => {
@@ -65,7 +65,7 @@ export const useEnableAllowlist = () => {
 export const useDisableAllowlist = () => {
   const queryClient = useQueryClient()
   const { toast } = useToast()
-  
+
   return useMutation({
     mutationFn: allowlistApi.disable,
     onSuccess: () => {
