@@ -143,7 +143,7 @@ export default function AdminStudentEmailAllowlistPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border/30">
-              {records.map(record => (
+              {records.map((record: any) => (
                 <tr key={record.id} className="hover:bg-muted/30 transition-colors group">
                   <td className="py-4 px-6">
                     <div className="flex items-center gap-3">

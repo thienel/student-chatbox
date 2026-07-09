@@ -187,6 +187,22 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
         this.logger.log('Admin user created: admin@educhat.local / Admin@123456');
       }
 
+      // Default lecturer user
+      const lecturerEmail = 'lecture@educhat.local';
+      let lecturerUser = await userRepo.findOne({ where: { email: lecturerEmail } });
+      if (!lecturerUser) {
+        const passwordHash = await bcrypt.hash('Lecture@123456', 12);
+        lecturerUser = userRepo.create({
+          email: lecturerEmail,
+          passwordHash,
+          fullName: 'Test Lecturer',
+          roleId: roles['lecturer'].id,
+          status: 'active',
+        });
+        await userRepo.save(lecturerUser);
+        this.logger.log('Lecturer user created: lecture@educhat.local / Lecture@123456');
+      }
+
       // Default student user
       const studentEmail = 'student@educhat.local';
       let studentUser = await userRepo.findOne({ where: { email: studentEmail } });

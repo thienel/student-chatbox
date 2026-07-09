@@ -72,13 +72,13 @@ export const allowlistApi = {
     }),
 
   enable: (id: string) =>
-    axiosInstance.put<ApiResponse<any>>(`/admin/student-email-allowlist/${id}/enable`).then(r => {
+    axiosInstance.put<ApiResponse<any>>(`/admin/student-email-allowlist/${id}/enable`).then(() => {
       // Backend returns { message }
       return {} as AllowlistRecord;
     }),
 
   disable: (id: string) =>
-    axiosInstance.put<ApiResponse<any>>(`/admin/student-email-allowlist/${id}/disable`).then(r => {
+    axiosInstance.put<ApiResponse<any>>(`/admin/student-email-allowlist/${id}/disable`).then(() => {
       // Backend returns { message }
       return {} as AllowlistRecord;
     }),
