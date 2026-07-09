@@ -44,6 +44,8 @@ import { WeakTopicTypeOrmRepository } from './repositories/weak-topic.typeorm-re
 import { StudentStudyPlanOrmEntity } from './orm-entities/student-study-plan.orm-entity';
 import { StudyPlanTypeOrmRepository } from './repositories/study-plan.typeorm-repository';
 import { UserBadgeOrmEntity } from './orm-entities/user-badge.orm-entity';
+import { StudentVerificationRequestOrmEntity } from './orm-entities/student-verification-request.orm-entity';
+import { StudentEmailAllowlistOrmEntity } from './orm-entities/student-email-allowlist.orm-entity';
 import { BadgeTypeOrmRepository } from './repositories/badge.typeorm-repository';
 import { BoardQuestionOrmEntity } from './orm-entities/board-question.orm-entity';
 import { BoardAnswerOrmEntity } from './orm-entities/board-answer.orm-entity';
@@ -51,6 +53,8 @@ import { BoardUpvoteOrmEntity } from './orm-entities/board-upvote.orm-entity';
 import { BoardTypeOrmRepository } from './repositories/board.typeorm-repository';
 import { DatabaseSeederService } from './seeds/seed.service';
 import { TOKENS } from '../../../shared/constants/tokens';
+import { OtpTokenEntity } from './orm-entities/otp-token.orm-entity';
+import { OtpTokenTypeOrmRepository } from './repositories/otp-token.typeorm-repository';
 
 const ormEntities = [
   RoleOrmEntity,
@@ -83,6 +87,9 @@ const ormEntities = [
   BoardQuestionOrmEntity,
   BoardAnswerOrmEntity,
   BoardUpvoteOrmEntity,
+  OtpTokenEntity,
+  StudentVerificationRequestOrmEntity,
+  StudentEmailAllowlistOrmEntity,
 ];
 
 @Module({
@@ -138,6 +145,8 @@ const ormEntities = [
     { provide: TOKENS.STUDY_PLAN_REPO, useClass: StudyPlanTypeOrmRepository },
     { provide: TOKENS.BADGE_REPO, useClass: BadgeTypeOrmRepository },
     { provide: TOKENS.BOARD_REPO, useClass: BoardTypeOrmRepository },
+    { provide: TOKENS.OTP_TOKEN_REPO, useClass: OtpTokenTypeOrmRepository },
+    OtpTokenTypeOrmRepository,
   ],
   exports: [
     TypeOrmModule,
@@ -177,6 +186,8 @@ const ormEntities = [
     StudyPlanTypeOrmRepository,
     BadgeTypeOrmRepository,
     BoardTypeOrmRepository,
+    { provide: TOKENS.OTP_TOKEN_REPO, useClass: OtpTokenTypeOrmRepository },
+    OtpTokenTypeOrmRepository,
   ],
 })
 export class TypeOrmDatabaseModule {}

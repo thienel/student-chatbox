@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dialog'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { useSubject, useAssignLecturer, useRemoveLecturer, useLecturers } from './queries'
-import { usePermission } from '@/store/useAuthStore'
+import { usePermission } from '@/store/useUserStore'
 
 export default function SubjectMembersPage() {
   const { id = '' } = useParams<{ id: string }>()

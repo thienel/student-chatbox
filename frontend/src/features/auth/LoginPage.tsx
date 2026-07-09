@@ -1,30 +1,35 @@
 import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { PasswordInput } from '@/components/ui/password-input'
 import { Label } from '@/components/ui/label'
 import { useAuthStore } from '@/store/useAuthStore'
-import { authApi } from '@/api/endpoints/auth'
 import { getErrorMessage } from '@/lib/errors'
-import { cn } from '@/lib/utils'
+import { AuthCard } from './components/AuthCard'
+import { authApi } from '@/api/endpoints/auth'
 
 const schema = z.object({
-  email: z.string().email('Invalid email'),
-  password: z.string().min(1, 'Password is required'),
+  email: z.string().email('Email không hợp lệ'),
+  password: z.string().min(1, 'Vui lòng nhập mật khẩu'),
 })
 type FormData = z.infer<typeof schema>
 
 export default function LoginPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { setAuth, accessToken } = useAuthStore()
 
   const { register, handleSubmit, formState: { errors, isSubmitting }, setError } = useForm<FormData>({
     resolver: zodResolver(schema),
   })
+
+  // Access success messages passed via navigate state
+  const successMessage = location.state?.message
 
   useEffect(() => {
     if (accessToken) navigate('/home', { replace: true })
@@ -33,76 +38,86 @@ export default function LoginPage() {
   const onSubmit = async (data: FormData) => {
     try {
       const result = await authApi.login(data.email, data.password)
-      setAuth(result.user, result.accessToken, result.refreshToken)
-      navigate('/home', { replace: true })
-    } catch (err) {
-      setError('password', { message: getErrorMessage(err, 'Invalid email or password') })
+      setAuth(result.accessToken)
+      // Use the token to fetch the user
+      // Note: we can't easily set the axios token header synchronously here unless we reload or rely on interceptors,
+      // but wait, the interceptor uses the store. However, we might need a brief delay or just reload.
+      // Wait, let's just reload to '/' and let RootRedirect and Protected handle it!
+      navigate('/', { replace: true })
+      window.location.reload()
+    } catch (err: any) {
+      const msg = getErrorMessage(err, 'Email hoặc mật khẩu không đúng')
+      if (msg === 'Vui lòng xác thực email trước khi đăng nhập') {
+        navigate('/verify-otp', { state: { email: data.email } })
+      } else {
+        setError('password', { message: msg })
+      }
     }
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <div className="w-full max-w-sm">
-        <div className="mb-8 text-center">
-          <div className="inline-flex items-center justify-center h-10 w-10 rounded-sm bg-card border border-border mb-4">
-            <span className="text-lg font-semibold text-foreground">F</span>
+    <AuthCard title="Đăng nhập" subtitle="Chào mừng bạn quay lại EduChat">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        {successMessage && (
+          <div className="bg-green-50 text-green-700 text-sm p-3 rounded-md mb-4 text-center">
+            {successMessage}
           </div>
-          <h1 className="text-3xl font-heading font-medium text-ink tracking-tight">Folio</h1>
-          <p className="text-sm text-muted-foreground mt-1">Sign in to your account</p>
+        )}
+
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            autoComplete="email"
+            placeholder="you@university.edu"
+            {...register('email')}
+          />
+          {errors.email && (
+            <p className="text-xs text-red-500">{errors.email.message}</p>
+          )}
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="email" className="text-sm text-foreground">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              autoComplete="email"
-              placeholder="you@university.edu"
-              className={cn(
-                'bg-secondary border-border text-foreground placeholder:text-muted-foreground',
-                'focus:border-primary focus:ring-0',
-                errors.email && 'border-destructive focus:border-destructive'
-              )}
-              {...register('email')}
-            />
-            {errors.email && (
-              <p className="text-xs text-destructive">{errors.email.message}</p>
-            )}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="password">Mật khẩu</Label>
+            <Link 
+              to="/forgot-password" 
+              className="text-sm text-primary hover:underline font-semibold font-geist"
+            >
+              Quên mật khẩu?
+            </Link>
           </div>
+          <PasswordInput
+            id="password"
+            autoComplete="current-password"
+            placeholder="••••••••"
+            {...register('password')}
+          />
+          {errors.password && (
+            <p className="text-xs text-red-500">{errors.password.message}</p>
+          )}
+        </div>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="password" className="text-sm text-foreground">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              autoComplete="current-password"
-              placeholder="••••••••"
-              className={cn(
-                'bg-secondary border-border text-foreground placeholder:text-muted-foreground',
-                'focus:border-primary focus:ring-0',
-                errors.password && 'border-destructive focus:border-destructive'
-              )}
-              {...register('password')}
-            />
-            {errors.password && (
-              <p className="text-xs text-destructive">{errors.password.message}</p>
-            )}
-          </div>
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full font-bold mt-2"
+        >
+          {isSubmitting ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            'Đăng nhập'
+          )}
+        </Button>
 
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full h-9 bg-primary text-primary-foreground hover:bg-primary/90 font-medium rounded-md mt-2"
-          >
-            {isSubmitting ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              'Sign in'
-            )}
-          </Button>
-        </form>
-      </div>
-    </div>
+        <p className="text-center text-sm text-gray-500 mt-6 font-geist">
+          Chưa có tài khoản?{' '}
+          <Link to="/register" className="text-primary hover:underline font-semibold">
+            Đăng ký
+          </Link>
+        </p>
+      </form>
+    </AuthCard>
   )
 }

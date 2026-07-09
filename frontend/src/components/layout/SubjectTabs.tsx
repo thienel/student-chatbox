@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
 import { FileText, MessageSquare, Users, Layers, ClipboardList, GraduationCap, Target, MessagesSquare, Activity } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { usePermission } from '@/store/useAuthStore'
+import { usePermission } from '@/store/useUserStore'
 
 interface SubjectTabsProps {
   subjectId: string

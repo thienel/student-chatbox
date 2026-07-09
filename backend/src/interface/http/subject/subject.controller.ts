@@ -58,7 +58,7 @@ export class SubjectController {
     @CurrentUser() user: User,
     @Req() req: Request,
   ) {
-    const subject = await this.createSubjectUseCase.execute(dto, user.id);
+    const subject = await this.createSubjectUseCase.execute(dto, user);
     await this.auditLogService.log(user.id, 'SUBJECT_CREATED', 'subject', subject.id, { code: dto.code }, req.ip);
     return subject;
   }

@@ -1,10 +1,19 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useParams, Outlet } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { SubjectClassProvider } from '@/features/classes/ClassContext'
 import { useAuthStore } from '@/store/useAuthStore'
+import { useUserStore } from '@/store/useUserStore'
+import { authApi } from '@/api/endpoints/auth'
 import { AppShell } from '@/components/layout/AppShell'
 import { SubjectShell } from '@/components/layout/SubjectShell'
 import { AdminShell } from '@/components/layout/AdminShell'
+import { LecturerShell } from '@/components/layout/LecturerShell'
 
 import LoginPage from '@/features/auth/LoginPage'
+import RegisterPage from '@/features/auth/RegisterPage'
+import VerifyOtpPage from '@/features/auth/VerifyOtpPage'
+import ForgotPasswordPage from '@/features/auth/ForgotPasswordPage'
+import ResetPasswordPage from '@/features/auth/ResetPasswordPage'
 import HomePage from '@/features/subjects/HomePage'
 import SubjectsPage from '@/features/subjects/SubjectsPage'
 import SubjectDocumentsPage from '@/features/subjects/SubjectDocumentsPage'
@@ -37,6 +46,9 @@ import AdminAuditLogsPage from '@/features/admin/AdminAuditLogsPage'
 import AdminAnalyticsPage from '@/features/admin/AdminAnalyticsPage'
 import AdminRbacPage from '@/features/admin/AdminRbacPage'
 import SettingsPage from '@/features/settings/SettingsPage'
+import AdminStudentVerificationsPage from '@/features/admin/AdminStudentVerificationsPage'
+import AdminStudentEmailAllowlistPage from '@/features/admin/AdminStudentEmailAllowlistPage'
+import LecturerDashboardPage from '@/features/lecturer/LecturerDashboardPage'
 
 interface ProtectedProps {
   children: React.ReactNode
@@ -44,9 +56,27 @@ interface ProtectedProps {
 }
 
 function Protected({ children, roles }: ProtectedProps) {
-  const { accessToken, user } = useAuthStore()
+  const { accessToken } = useAuthStore()
+  const { user, setUser } = useUserStore()
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (accessToken && !user) {
+      authApi.me()
+        .then(data => setUser(data))
+        .catch(() => { })
+        .finally(() => setLoading(false))
+    } else {
+      loading && setLoading(false)
+    }
+  }, [accessToken, user, setUser, loading])
+
   if (!accessToken) return <Navigate to="/login" replace />
+  if (loading) return <div className="flex h-screen items-center justify-center">Loading...</div>
   if (roles && user && !roles.includes(user.role)) return <Navigate to="/home" replace />
+  if (!roles && user && user.role === 'admin') return <Navigate to="/admin" replace />
+  if (!roles && user && user.role === 'lecturer') return <Navigate to="/lecturer" replace />
+
   return <>{children}</>
 }
 
@@ -55,11 +85,24 @@ function RootRedirect() {
   return accessToken ? <Navigate to="/home" replace /> : <Navigate to="/login" replace />
 }
 
+function LecturerSubjectWrapper() {
+  const { id = '' } = useParams<{ id: string }>()
+  return (
+    <SubjectClassProvider subjectId={id}>
+      <Outlet />
+    </SubjectClassProvider>
+  )
+}
+
 export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<RootRedirect />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/verify-otp" element={<VerifyOtpPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
 
       {/* Main shell — all authenticated routes */}
       <Route element={<Protected><AppShell /></Protected>}>
@@ -102,11 +145,33 @@ export default function AppRoutes() {
       <Route element={<Protected roles={['admin']}><AdminShell /></Protected>}>
         <Route path="/admin" element={<AdminDashboardPage />} />
         <Route path="/admin/users" element={<AdminUsersPage />} />
+        <Route path="/admin/verifications" element={<AdminStudentVerificationsPage />} />
+        <Route path="/admin/allowlist" element={<AdminStudentEmailAllowlistPage />} />
         <Route path="/admin/subjects" element={<AdminSubjectsPage />} />
         <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
         <Route path="/admin/rbac" element={<AdminRbacPage />} />
         <Route path="/admin/settings" element={<AdminSettingsPage />} />
         <Route path="/admin/audit-logs" element={<AdminAuditLogsPage />} />
+      </Route>
+
+      {/* Lecturer shell */}
+      <Route element={<Protected roles={['lecturer']}><LecturerShell /></Protected>}>
+        <Route path="/lecturer" element={<Navigate to="dashboard" replace />} />
+        <Route path="/lecturer/dashboard" element={<LecturerDashboardPage />} />
+        <Route path="/lecturer/subjects" element={<SubjectsPage />} />
+        <Route path="/lecturer/settings" element={<SettingsPage />} />
+
+        {/* Nested subject contextual routes */}
+        <Route element={<LecturerSubjectWrapper />}>
+          <Route path="/lecturer/subjects/:id/documents" element={<SubjectDocumentsPage />} />
+          <Route path="/lecturer/subjects/:id/classes" element={<ClassesPage />} />
+          <Route path="/lecturer/subjects/:id/students" element={<StudentsPage />} />
+          <Route path="/lecturer/subjects/:id/engagement" element={<EngagementPage />} />
+          <Route path="/lecturer/subjects/:id/board" element={<BoardPage />} />
+          <Route path="/lecturer/subjects/:id/exams" element={<SubjectExamsPage />} />
+          <Route path="/lecturer/subjects/:id/exams/new" element={<CreateOfficialExamPage />} />
+          <Route path="/lecturer/subjects/:id/flashcards" element={<SubjectFlashcardsPage />} />
+        </Route>
       </Route>
 
       <Route path="*" element={<Navigate to="/home" replace />} />

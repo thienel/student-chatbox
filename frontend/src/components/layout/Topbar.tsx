@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useAuthStore } from '@/store/useAuthStore'
+import { useUserStore } from '@/store/useUserStore'
 import { useBreadcrumbStore } from '@/store/useBreadcrumbStore'
 import { useCommandPalette } from '@/hooks/useCommandPalette'
 import { cn } from '@/lib/utils'
@@ -15,6 +16,7 @@ import { Logo } from '@/components/ui/logo'
 
 function getDefaultCrumb(pathname: string): Array<{ label: string; href?: string }> {
   if (pathname.startsWith('/admin')) return [{ label: 'Admin' }]
+  if (pathname.startsWith('/lecturer')) return [{ label: 'Lecturer' }]
   if (pathname.startsWith('/subjects')) return [{ label: 'Subjects' }]
   if (pathname.startsWith('/chats')) return [{ label: 'My Chats' }]
   if (pathname.startsWith('/settings')) return [{ label: 'Settings' }]
@@ -23,7 +25,7 @@ function getDefaultCrumb(pathname: string): Array<{ label: string; href?: string
 
 export function Topbar() {
   const { open: openCmd } = useCommandPalette()
-  const user = useAuthStore(s => s.user)
+  const user = useUserStore(s => s.user)
   const logout = useAuthStore(s => s.logout)
   const { pathname } = useLocation()
   const crumbs = useBreadcrumbStore(s => s.crumbs)
@@ -92,7 +94,7 @@ export function Topbar() {
             </div>
             <DropdownMenuSeparator className="bg-border mx-2" />
             <DropdownMenuItem asChild className="text-muted-foreground hover:text-foreground hover:bg-secondary cursor-pointer relative z-10 rounded-md mx-1 px-3 h-9">
-              <Link to="/settings">
+              <Link to={user?.role === 'admin' ? '/admin/settings' : user?.role === 'lecturer' ? '/lecturer/settings' : '/settings'}>
                 <User className="h-4 w-4 mr-2" />
                 <span className="font-medium text-sm">Settings</span>
               </Link>

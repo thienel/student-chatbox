@@ -11,12 +11,4 @@ export class LoginDto {
 
 export class LoginResponseDto {
   accessToken: string;
-  refreshToken: string;
-  user: {
-    id: string;
-    email: string;
-    fullName: string;
-    role: string;
-    permissions: string[];
-  };
 }

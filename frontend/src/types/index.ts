@@ -1,11 +1,36 @@
+export type UserStatus = 'pending_email_verification' | 'active' | 'pending_verification' | 'rejected' | 'suspended';
+
 export interface User {
   id: string;
   email: string;
   fullName: string;
   role: 'admin' | 'lecturer' | 'student';
-  status: 'active' | 'suspended';
+  status: UserStatus;
   permissions: string[];
   createdAt: string;
+
+  // New Fields
+  roleName?: string;
+  studentCode?: string;
+  emailVerifiedAt?: string;
+  lastLoginAt?: string;
+}
+
+export type VerificationRequestStatus = 'pending' | 'approved' | 'rejected' | 'need_more_info';
+
+export interface StudentVerificationRequest {
+  id: string;
+  userId: string;
+  user?: User;
+  studentCode: string;
+  campus?: string | null;
+  personalEmail: string;
+  status: VerificationRequestStatus;
+  reviewedBy?: string | null;
+  reviewedAt?: string | null;
+  rejectionReason?: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Subject {

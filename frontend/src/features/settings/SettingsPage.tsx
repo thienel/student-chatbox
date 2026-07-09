@@ -1,4 +1,4 @@
-import { useAuthStore } from '@/store/useAuthStore'
+import { useUserStore } from '@/store/useUserStore'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 
@@ -9,7 +9,7 @@ const roleColor: Record<string, string> = {
 }
 
 export default function SettingsPage() {
-  const user = useAuthStore(s => s.user)
+  const user = useUserStore(s => s.user)
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-6">

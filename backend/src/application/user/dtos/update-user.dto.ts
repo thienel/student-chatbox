@@ -13,7 +13,7 @@ export class UpdateUserDto {
 
 export class UpdateUserStatusDto {
   @IsString()
-  @IsIn(['active', 'suspended'])
+  @IsIn(['active', 'suspended', 'pending_verification', 'rejected'])
   status: string;
 
   @IsOptional()

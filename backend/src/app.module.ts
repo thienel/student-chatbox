@@ -17,6 +17,7 @@ import { BookmarkModule } from './interface/http/bookmark/bookmark.module';
 import { AnalyticsModule } from './interface/http/analytics/analytics.module';
 import { RbacModule } from './interface/http/rbac/rbac.module';
 import { HealthController } from './interface/http/health/health.controller';
+import { EmailModule } from './infrastructure/email/email.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { HealthController } from './interface/http/health/health.controller';
     BookmarkModule,
     AnalyticsModule,
     RbacModule,
+    EmailModule,
   ],
   controllers: [HealthController],
 })

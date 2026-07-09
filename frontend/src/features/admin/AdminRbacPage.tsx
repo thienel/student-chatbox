@@ -83,70 +83,71 @@ export default function AdminRbacPage() {
   }, {})
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="max-w-7xl mx-auto px-8 py-10">
+      <header className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h2 className="text-base font-medium text-foreground">Roles & Permissions</h2>
-          <p className="text-xs text-muted-foreground mt-0.5">{roles.length} roles</p>
+          <h1 className="text-4xl font-serif text-primary-ink mb-2">Roles & Permissions</h1>
+          <p className="text-sm text-muted-foreground font-mono">{roles.length} roles configured</p>
         </div>
         <Button
           onClick={() => setCreateOpen(true)}
-          variant="outline"
-          className="border bg-card hover:bg-secondary text-foreground h-8 px-3 text-sm font-medium rounded-md"
+          className="rounded-full font-mono text-xs tracking-wider uppercase h-10 px-6 shadow-sm"
         >
-          <Plus className="h-3.5 w-3.5 mr-1.5" />
+          <Plus className="h-4 w-4 mr-2" />
           New Role
         </Button>
-      </div>
+      </header>
 
       {rolesLoading ? (
-        <div className="space-y-2">
+        <div className="space-y-4">
           {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-14 rounded-lg bg-muted" />
+            <Skeleton key={i} className="h-20 rounded-3xl bg-muted/50 border border-border/30" />
           ))}
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-4">
           {roles.map(role => (
-            <div key={role.id} className="bg-card border rounded-lg overflow-hidden">
+            <div key={role.id} className="bg-card border border-border/50 rounded-3xl overflow-hidden shadow-sm transition-all duration-300 hover:shadow-md">
               <button
                 onClick={() => handleExpand(role)}
-                className="w-full flex items-center justify-between px-4 py-3 hover:bg-muted/50 transition-colors duration-150"
+                className="w-full flex items-center justify-between px-8 py-5 hover:bg-muted/20 transition-colors duration-150"
               >
                 <div className="text-left">
-                  <p className="text-sm font-medium text-foreground">{role.name}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {role.permissions?.length ?? 0} permissions
+                  <p className="text-lg font-semibold text-foreground">{role.name}</p>
+                  <p className="text-xs text-muted-foreground font-mono mt-1">
+                    <span className="font-semibold text-primary/80">{role.permissions?.length ?? 0}</span> permissions
                     {role.description ? ` · ${role.description}` : ''}
                   </p>
                 </div>
-                {expandedRole === role.id
-                  ? <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
-                  : <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-                }
+                <div className="bg-muted/50 p-2 rounded-full">
+                  {expandedRole === role.id
+                    ? <ChevronDown className="h-5 w-5 text-foreground shrink-0" />
+                    : <ChevronRight className="h-5 w-5 text-foreground shrink-0" />
+                  }
+                </div>
               </button>
 
               {expandedRole === role.id && (
-                <div className="border-t p-4">
-                  <div className="space-y-4">
+                <div className="border-t border-border/40 p-8 bg-muted/5">
+                  <div className="space-y-8">
                     {Object.entries(groupedPerms).map(([group, perms]) => (
-                      <div key={group}>
-                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">{group}</p>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                      <div key={group} className="bg-card p-6 rounded-2xl border border-border/30 shadow-sm">
+                        <p className="text-xs font-semibold text-primary font-mono uppercase tracking-widest mb-4">{group}</p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                           {perms.map(permName => {
                             const checked = (rolePerms[role.id] ?? []).includes(permName)
                             return (
                               <label
                                 key={permName}
-                                className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors duration-150"
+                                className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted/50 cursor-pointer transition-colors duration-150 border border-transparent hover:border-border/50"
                               >
                                 <input
                                   type="checkbox"
                                   checked={checked}
                                   onChange={() => togglePerm(role.id, permName)}
-                                  className="h-3.5 w-3.5 rounded border-muted-foreground bg-secondary accent-primary cursor-pointer"
+                                  className="h-4 w-4 rounded-sm border-muted-foreground bg-card accent-primary cursor-pointer"
                                 />
-                                <span>{permName.split(':')[1]}</span>
+                                <span className="text-sm font-medium text-foreground">{permName.split(':')[1]}</span>
                               </label>
                             )
                           })}
@@ -154,11 +155,11 @@ export default function AdminRbacPage() {
                       </div>
                     ))}
                   </div>
-                  <div className="flex justify-end mt-4 pt-3 border-t">
+                  <div className="flex justify-end mt-8 pt-6 border-t border-border/40">
                     <Button
                       onClick={() => updatePerms.mutate({ roleId: role.id, perms: rolePerms[role.id] ?? [] })}
                       disabled={updatePerms.isPending}
-                      className="bg-primary text-primary-foreground hover:bg-primary/90 h-7 px-3 text-xs font-medium rounded-md"
+                      className="rounded-full font-mono text-xs tracking-wider uppercase h-11 px-8 shadow-sm"
                     >
                       Save permissions
                     </Button>
@@ -171,45 +172,45 @@ export default function AdminRbacPage() {
       )}
 
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="bg-card border shadow-none p-0 max-w-sm">
-          <div className="px-5 py-4 border-b">
-            <DialogTitle className="text-base font-semibold text-foreground">Create Role</DialogTitle>
-            <DialogDescription className="text-sm text-muted-foreground mt-0.5">
+        <DialogContent className="bg-card border border-border/60 rounded-[2rem] shadow-xl p-0 max-w-sm overflow-hidden">
+          <div className="px-8 py-6 border-b border-border/40 bg-muted/10">
+            <DialogTitle className="text-2xl font-serif text-primary-ink">Create Role</DialogTitle>
+            <DialogDescription className="text-sm font-mono text-muted-foreground mt-2">
               Add a new role to the system.
             </DialogDescription>
           </div>
-          <div className="p-5 space-y-3">
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Name</Label>
+          <div className="p-8 space-y-5">
+            <div className="space-y-2">
+              <Label className="text-xs font-mono uppercase tracking-widest text-muted-foreground ml-1">Name</Label>
               <Input
                 value={newName}
                 onChange={e => setNewName(e.target.value)}
                 placeholder="e.g. teaching_assistant"
-                className="bg-secondary border text-foreground placeholder:text-muted-foreground h-9 text-sm rounded-md focus-visible:ring-1 focus-visible:ring-muted-foreground"
+                className="rounded-xl font-mono text-sm border-border/60 bg-muted/5 focus-visible:ring-primary h-11 px-4"
               />
             </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Description (optional)</Label>
+            <div className="space-y-2">
+              <Label className="text-xs font-mono uppercase tracking-widest text-muted-foreground ml-1">Description (optional)</Label>
               <Input
                 value={newDesc}
                 onChange={e => setNewDesc(e.target.value)}
                 placeholder="e.g. Can manage course materials"
-                className="bg-secondary border text-foreground placeholder:text-muted-foreground h-9 text-sm rounded-md focus-visible:ring-1 focus-visible:ring-muted-foreground"
+                className="rounded-xl font-mono text-sm border-border/60 bg-muted/5 focus-visible:ring-primary h-11 px-4"
               />
             </div>
           </div>
-          <div className="px-5 py-4 border-t flex justify-end gap-2">
+          <div className="px-8 py-5 border-t border-border/40 flex justify-end gap-3 bg-muted/10">
             <Button
-              variant="outline"
+              variant="ghost"
               onClick={() => setCreateOpen(false)}
-              className="border bg-transparent text-muted-foreground hover:bg-secondary h-8 px-3 text-sm rounded-md"
+              className="rounded-full font-mono text-xs px-5 hover:bg-muted/50"
             >
               Cancel
             </Button>
             <Button
               onClick={() => createRole.mutate()}
               disabled={!newName.trim() || createRole.isPending}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-3 text-sm font-medium rounded-md"
+              className="rounded-full font-mono text-xs tracking-wider uppercase px-6 shadow-sm"
             >
               Create
             </Button>

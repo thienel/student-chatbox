@@ -11,6 +11,7 @@ export interface ListUsersFilter {
 export interface IUserRepository {
   findById(id: string): Promise<User | null>;
   findByEmail(email: string): Promise<User | null>;
+  findByEmailWithPermissions(email: string): Promise<User | null>;
   findByIdWithPermissions(id: string): Promise<User | null>;
   findAll(filter: ListUsersFilter): Promise<{ items: User[]; total: number }>;
   create(user: Partial<User>): Promise<User>;

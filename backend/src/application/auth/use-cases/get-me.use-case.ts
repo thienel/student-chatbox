@@ -14,6 +14,7 @@ export class GetMeUseCase {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    return user;
+    const { passwordHash, createdBy, ...safeUser } = user;
+    return safeUser as User;
   }
 }

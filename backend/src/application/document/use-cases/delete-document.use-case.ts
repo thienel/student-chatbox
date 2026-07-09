@@ -23,7 +23,11 @@ export class DeleteDocumentUseCase {
       throw new ForbiddenException('You can only delete documents you uploaded');
     }
 
-    await this.aiServiceClient.deleteDocumentVectors(documentId);
+    try {
+      await this.aiServiceClient.deleteDocumentVectors(documentId);
+    } catch (error) {
+      console.warn(`[DeleteDocumentUseCase] Failed to delete document vectors from AI service for document ${documentId}:`, error);
+    }
     await this.fileService.deleteFile(document.storedPath);
     await this.documentRepo.delete(documentId);
   }

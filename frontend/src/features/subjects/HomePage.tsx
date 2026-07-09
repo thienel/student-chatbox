@@ -3,14 +3,15 @@ import { BookOpen, MessageSquare, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { EmptyState } from '@/components/shared/EmptyState'
-import { useAuthStore } from '@/store/useAuthStore'
+import { useUserStore } from '@/store/useUserStore'
 import { useSubjects } from '@/features/subjects/queries'
 import { useChats } from '@/features/chat/queries'
 import { AchievementStamp } from '@/components/ui/achievement-stamp'
 
 export default function HomePage() {
-  const user = useAuthStore(s => s.user)
+  const user = useUserStore(s => s.user)
   const navigate = useNavigate()
+
 
   const { data: subjectsData, isLoading: subjectsLoading } = useSubjects({ limit: 6 })
   const { data: chats = [], isLoading: chatsLoading } = useChats()
@@ -30,7 +31,7 @@ export default function HomePage() {
             {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
           </p>
         </div>
-        
+
         <div className="hidden sm:block relative z-10">
           {/* TODO: Integrate with real study stats endpoint (e.g. GET /study-stats)
               to fetch user's actual current streak instead of hardcoding '3'. */}

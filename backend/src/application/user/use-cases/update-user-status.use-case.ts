@@ -16,6 +16,16 @@ export class UpdateUserStatusUseCase {
       throw new NotFoundException('User not found');
     }
 
-    return this.userRepo.update(id, { status: dto.status as UserStatus });
+    const updateData: Partial<User> = { status: dto.status as UserStatus };
+    
+    if (dto.reason) {
+      updateData.metadata = {
+        ...(user.metadata || {}),
+        statusReason: dto.reason,
+        statusUpdatedAt: new Date().toISOString()
+      };
+    }
+
+    return this.userRepo.update(id, updateData);
   }
 }
