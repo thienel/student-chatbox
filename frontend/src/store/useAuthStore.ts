@@ -29,6 +29,7 @@ export const useAuthStore = create<AuthState>()(
           console.error('Logout API failed:', error);
         }
         set({ accessToken: null });
+        sessionStorage.removeItem('hasSeenWelcome');
         window.location.href = '/login';
       },
     }),

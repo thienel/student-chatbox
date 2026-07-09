@@ -1,4 +1,4 @@
-import { useState, useRef, KeyboardEvent, ClipboardEvent } from 'react'
+import { useRef, KeyboardEvent, ClipboardEvent, useState } from 'react'
 import { cn } from '@/lib/utils'
 
 interface OtpInputProps {
@@ -15,14 +15,13 @@ export function OtpInput({ length = 6, value, onChange, disabled, error }: OtpIn
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const val = e.target.value
-    if (!/^[0-9]*$/.test(val)) return // Only digits
+    if (!/^[0-9]*$/.test(val)) return
 
     const newValue = value.split('')
-    newValue[index] = val.substring(val.length - 1) // Take last character if multiple
+    newValue[index] = val.substring(val.length - 1)
     const combinedValue = newValue.join('')
     onChange(combinedValue)
 
-    // Move to next input
     if (val && index < length - 1) {
       inputRefs.current[index + 1]?.focus()
       setActiveInput(index + 1)
@@ -31,7 +30,6 @@ export function OtpInput({ length = 6, value, onChange, disabled, error }: OtpIn
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>, index: number) => {
     if (e.key === 'Backspace' && !value[index] && index > 0) {
-      // Move to previous input on backspace if current is empty
       inputRefs.current[index - 1]?.focus()
       setActiveInput(index - 1)
     }
@@ -41,18 +39,15 @@ export function OtpInput({ length = 6, value, onChange, disabled, error }: OtpIn
     e.preventDefault()
     const pastedData = e.clipboardData.getData('text/plain').slice(0, length)
     if (!/^[0-9]+$/.test(pastedData)) return
-
     const newValue = pastedData.padEnd(length, ' ').slice(0, length)
     onChange(newValue.trim())
-    
-    // Focus last filled input
     const nextIndex = Math.min(pastedData.length, length - 1)
     inputRefs.current[nextIndex]?.focus()
     setActiveInput(nextIndex)
   }
 
   return (
-    <div className="flex gap-2 justify-between">
+    <div className="flex gap-2.5 justify-center w-full">
       {Array.from({ length }).map((_, index) => (
         <input
           key={index}
@@ -67,9 +62,19 @@ export function OtpInput({ length = 6, value, onChange, disabled, error }: OtpIn
           onFocus={() => setActiveInput(index)}
           disabled={disabled}
           className={cn(
-            'w-12 h-14 text-center text-xl font-semibold border-2 rounded-lg outline-none transition-colors font-geist',
-            error ? 'border-red-500 text-red-500 focus:border-red-600 focus:ring-1 focus:ring-red-600' : 'border-gray-200 text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary',
-            disabled && 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            // Base: square academic card style
+            'w-11 h-14 text-center text-xl font-serif font-bold rounded-xl outline-none transition-all duration-200',
+            'border-2 bg-white/60 backdrop-blur-sm',
+            // Normal state
+            !error && !disabled && 'border-[hsl(40,18%,81%)] text-[hsl(161,88%,13%)] hover:border-primary/40',
+            // Focus state
+            !error && 'focus:border-primary focus:bg-white focus:shadow-[0_0_0_4px_rgba(6,95,70,0.08)]',
+            // Filled state
+            value[index] && !error && 'border-primary/60 bg-primary/5',
+            // Error state
+            error && 'border-destructive/60 text-destructive bg-destructive/5 focus:border-destructive focus:shadow-[0_0_0_4px_rgba(239,68,68,0.08)]',
+            // Disabled state
+            disabled && 'bg-[hsl(40,18%,95%)] text-[hsl(51,3%,60%)] border-[hsl(40,18%,85%)] cursor-not-allowed',
           )}
         />
       ))}

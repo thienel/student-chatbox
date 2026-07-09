@@ -50,6 +50,8 @@ import AdminStudentVerificationsPage from '@/features/admin/AdminStudentVerifica
 import AdminStudentEmailAllowlistPage from '@/features/admin/AdminStudentEmailAllowlistPage'
 import LecturerDashboardPage from '@/features/lecturer/LecturerDashboardPage'
 
+import { GlobalLoader } from '@/components/layout/GlobalLoader'
+
 interface ProtectedProps {
   children: React.ReactNode
   roles?: Array<'admin' | 'lecturer' | 'student'>
@@ -60,19 +62,31 @@ function Protected({ children, roles }: ProtectedProps) {
   const { user, setUser } = useUserStore()
   const [loading, setLoading] = useState(true)
 
+  // Only show the Lottie welcome on the very first login of the session
+  const isFirstLoad = !sessionStorage.getItem('hasSeenWelcome')
+
   useEffect(() => {
+    // 1200ms timeout for a snappy, fast transition on first login, 0ms for F5 refresh
+    const delayMs = isFirstLoad ? 1200 : 0
+    const minDelay = new Promise(resolve => setTimeout(resolve, delayMs))
+    
     if (accessToken && !user) {
-      authApi.me()
-        .then(data => setUser(data))
+      Promise.all([authApi.me(), minDelay])
+        .then(([data]) => {
+          setUser(data)
+          if (isFirstLoad) sessionStorage.setItem('hasSeenWelcome', 'true')
+        })
         .catch(() => { })
         .finally(() => setLoading(false))
     } else {
-      loading && setLoading(false)
+      minDelay.then(() => {
+        if (loading) setLoading(false)
+      })
     }
-  }, [accessToken, user, setUser, loading])
+  }, [accessToken, user, setUser, loading, isFirstLoad])
 
   if (!accessToken) return <Navigate to="/login" replace />
-  if (loading) return <div className="flex h-screen items-center justify-center">Loading...</div>
+  if (loading) return <GlobalLoader showWelcome={isFirstLoad} />
   if (roles && user && !roles.includes(user.role)) return <Navigate to="/home" replace />
   if (!roles && user && user.role === 'admin') return <Navigate to="/admin" replace />
   if (!roles && user && user.role === 'lecturer') return <Navigate to="/lecturer" replace />

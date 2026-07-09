@@ -40,10 +40,6 @@ export default function LoginPage() {
     try {
       const result = await loginMutation.mutateAsync(data)
       setAuth(result.accessToken)
-      // Use the token to fetch the user
-      // Note: we can't easily set the axios token header synchronously here unless we reload or rely on interceptors,
-      // but wait, the interceptor uses the store. However, we might need a brief delay or just reload.
-      // Wait, let's just reload to '/' and let RootRedirect and Protected handle it!
       navigate('/', { replace: true })
       window.location.reload()
     } catch (err: any) {
@@ -57,34 +53,50 @@ export default function LoginPage() {
   }
 
   return (
-    <AuthCard title="Đăng nhập" subtitle="Chào mừng bạn quay lại EduChat">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+    <AuthCard title="Đăng nhập" subtitle="Chào mừng bạn quay lại Folio">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+
+        {/* Success alert */}
         {successMessage && (
-          <div className="bg-green-50 text-green-700 text-sm p-3 rounded-md mb-4 text-center">
-            {successMessage}
+          <div className="flex items-start gap-3 bg-primary/5 border border-primary/20 text-primary text-xs p-4 rounded-2xl font-mono leading-relaxed">
+            <span className="text-base leading-none mt-0.5">✓</span>
+            <span>{successMessage}</span>
           </div>
         )}
 
+        {/* Email field */}
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label
+            htmlFor="email"
+            className="font-mono text-[10px] uppercase tracking-widest text-[hsl(51,3%,41%)] ml-0.5"
+          >
+            Địa chỉ Email
+          </Label>
           <Input
             id="email"
             type="email"
             autoComplete="email"
-            placeholder="you@university.edu"
+            placeholder="you@student.fpt.edu.vn"
             {...register('email')}
+            className="h-12 bg-transparent border-b border-x-0 border-t-0 border-[hsl(40,18%,81%)] rounded-none focus-visible:ring-0 focus-visible:border-primary px-0 text-base shadow-none font-sans placeholder:text-[hsl(51,3%,65%)]"
           />
           {errors.email && (
-            <p className="text-xs text-red-500">{errors.email.message}</p>
+            <p className="text-xs font-mono text-destructive mt-1">{errors.email.message}</p>
           )}
         </div>
 
+        {/* Password field */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label htmlFor="password">Mật khẩu</Label>
-            <Link 
-              to="/forgot-password" 
-              className="text-sm text-primary hover:underline font-semibold font-geist"
+            <Label
+              htmlFor="password"
+              className="font-mono text-[10px] uppercase tracking-widest text-[hsl(51,3%,41%)] ml-0.5"
+            >
+              Mật khẩu
+            </Label>
+            <Link
+              to="/forgot-password"
+              className="font-mono text-[10px] text-[hsl(163,88%,20%)] hover:text-primary tracking-wide border-b border-[hsl(163,88%,20%)]/40 hover:border-primary pb-px transition-colors"
             >
               Quên mật khẩu?
             </Link>
@@ -94,16 +106,18 @@ export default function LoginPage() {
             autoComplete="current-password"
             placeholder="••••••••"
             {...register('password')}
+            className="h-12 bg-transparent border-b border-x-0 border-t-0 border-[hsl(40,18%,81%)] rounded-none focus-visible:ring-0 focus-visible:border-primary px-0 text-base shadow-none placeholder:text-[hsl(51,3%,65%)]"
           />
           {errors.password && (
-            <p className="text-xs text-red-500">{errors.password.message}</p>
+            <p className="text-xs font-mono text-destructive mt-1">{errors.password.message}</p>
           )}
         </div>
 
+        {/* Submit button */}
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="w-full font-bold mt-2"
+          className="w-full h-12 rounded-full font-mono text-xs tracking-widest uppercase mt-2 transition-all hover:scale-[1.01] active:scale-[0.99] shadow-[0_4px_20px_-4px_rgba(6,95,70,0.4)]"
         >
           {isSubmitting ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -112,12 +126,17 @@ export default function LoginPage() {
           )}
         </Button>
 
-        <p className="text-center text-sm text-gray-500 mt-6 font-geist">
+        {/* Register link */}
+        <p className="text-center font-mono text-xs text-[hsl(51,3%,41%)] tracking-wide pt-1">
           Chưa có tài khoản?{' '}
-          <Link to="/register" className="text-primary hover:underline font-semibold">
-            Đăng ký
+          <Link
+            to="/register"
+            className="text-[hsl(161,88%,13%)] border-b border-[hsl(161,88%,13%)]/40 hover:text-primary hover:border-primary pb-px transition-colors font-semibold"
+          >
+            Đăng ký ngay
           </Link>
         </p>
+
       </form>
     </AuthCard>
   )

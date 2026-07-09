@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { ShieldCheck } from 'lucide-react'
 import { useVerifyOtp, useResendOtp } from '@/api/queries/auth'
 import { AuthCard } from './components/AuthCard'
 import { OtpInput } from './components/OtpInput'
@@ -11,20 +12,16 @@ export default function VerifyOtpPage() {
   const email = searchParams.get('email')
   const isManual = searchParams.get('isManual') === 'true'
 
-  // Mutations
   const verifyOtpMutation = useVerifyOtp()
   const resendOtpMutation = useResendOtp()
 
   const [otp, setOtp] = useState('')
   const [error, setError] = useState('')
-  
   const [countdown, setCountdown] = useState(60)
   const [canResend, setCanResend] = useState(false)
 
   useEffect(() => {
-    if (!email) {
-      navigate('/login', { replace: true })
-    }
+    if (!email) navigate('/login', { replace: true })
   }, [email, navigate])
 
   useEffect(() => {
@@ -40,13 +37,11 @@ export default function VerifyOtpPage() {
   const handleVerify = async (e?: React.FormEvent) => {
     e?.preventDefault()
     if (otp.length !== 6 || !email) return
-
     setError('')
     try {
       await verifyOtpMutation.mutateAsync({ email, otp })
-      // On success, redirect to login with a success message
-      const successMessage = isManual 
-        ? 'Xác minh email thành công. Vui lòng chờ quản trị viên phê duyệt.' 
+      const successMessage = isManual
+        ? 'Xác minh email thành công. Vui lòng chờ quản trị viên phê duyệt.'
         : 'Xác thực thành công. Vui lòng đăng nhập.'
       navigate('/login', { state: { message: successMessage } })
     } catch (err: any) {
@@ -67,39 +62,57 @@ export default function VerifyOtpPage() {
     }
   }
 
+  const iconEl = (
+    <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20">
+      <ShieldCheck className="w-6 h-6 text-primary" />
+    </div>
+  )
+
   return (
-    <AuthCard title="Xác thực Email" subtitle={`Mã xác thực 6 số đã được gửi đến ${email || ''}`}>
+    <AuthCard
+      title="Xác thực Email"
+      subtitle={`Mã xác thực 6 số đã được gửi đến\n${email || ''}`}
+      icon={iconEl}
+    >
       <form onSubmit={handleVerify} className="space-y-6 flex flex-col items-center">
         {error && (
-          <div className="bg-red-50 text-red-600 text-sm p-3 rounded-md w-full">
-            {error}
+          <div className="flex items-start gap-3 bg-destructive/5 border border-destructive/20 text-destructive text-xs p-4 rounded-2xl font-mono w-full">
+            <span className="text-base leading-none mt-0.5">✕</span>
+            <span>{error}</span>
           </div>
         )}
-        
+
+        {/* Email reminder */}
+        <div className="w-full bg-primary/5 border border-primary/15 rounded-2xl px-4 py-3">
+          <p className="font-mono text-[10px] uppercase tracking-widest text-[hsl(51,3%,41%)] mb-1">Gửi đến</p>
+          <p className="font-mono text-sm text-[hsl(161,88%,13%)] font-semibold">{email}</p>
+        </div>
+
         <OtpInput value={otp} onChange={setOtp} length={6} disabled={verifyOtpMutation.isPending} error={!!error} />
 
-        <Button 
-          type="submit" 
-          className="w-full font-bold" 
+        <Button
+          type="submit"
+          className="w-full h-12 rounded-full font-mono text-xs tracking-widest uppercase transition-all hover:scale-[1.01] active:scale-[0.99] shadow-[0_4px_20px_-4px_rgba(6,95,70,0.4)]"
           disabled={verifyOtpMutation.isPending || otp.length !== 6}
         >
           {verifyOtpMutation.isPending ? 'Đang xác thực...' : 'Xác thực'}
         </Button>
 
-        <div className="text-center text-sm font-geist text-gray-500">
+        <div className="text-center font-mono text-xs text-[hsl(51,3%,41%)] tracking-wide">
           Chưa nhận được mã?{' '}
           {canResend ? (
             <button
               type="button"
               onClick={handleResend}
               disabled={resendOtpMutation.isPending}
-              className="text-primary hover:underline font-semibold"
+              className="text-[hsl(161,88%,13%)] border-b border-[hsl(161,88%,13%)]/40 hover:text-primary hover:border-primary pb-px transition-colors font-semibold"
             >
               {resendOtpMutation.isPending ? 'Đang gửi...' : 'Gửi lại mã'}
             </button>
           ) : (
-            <span className="text-gray-400">
-              Gửi lại sau {countdown}s
+            <span className="text-[hsl(51,3%,60%)]">
+              Gửi lại sau{' '}
+              <span className="font-semibold text-[hsl(161,88%,13%)]">{countdown}s</span>
             </span>
           )}
         </div>

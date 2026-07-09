@@ -24,6 +24,7 @@ const ResourceIcon: Record<BookmarkResourceType, React.ElementType> = {
   message: MessageSquare,
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function resourceHref(_type: BookmarkResourceType) {
   return '#'
 }
