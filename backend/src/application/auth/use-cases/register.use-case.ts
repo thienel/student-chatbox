@@ -83,14 +83,15 @@ export class RegisterUseCase {
       }
     }
 
-    // 5. Create User (Pending Email Verification)
+    // 5. Create User (Active directly for testing)
     const user = await this.userRepo.create({
       email,
       fullName: dto.fullName,
       passwordHash,
       roleId: role.id,
       studentCode: dto.studentCode,
-      status: UserStatus.PENDING_EMAIL_VERIFICATION,
+      status: UserStatus.ACTIVE,
+      emailVerifiedAt: new Date(),
       registrationSource,
     });
 
@@ -118,10 +119,8 @@ export class RegisterUseCase {
     );
 
     return {
-      message: requiresManualVerification 
-        ? 'Tài khoản đã được tạo. Vui lòng kiểm tra email để xác minh, sau đó chờ admin phê duyệt.'
-        : 'Tài khoản đã được tạo. Vui lòng kiểm tra email để xác minh tài khoản.',
-      code: 'PENDING_EMAIL_VERIFICATION'
+      message: 'Tài khoản đã được tạo và kích hoạt thành công. Bạn có thể đăng nhập ngay.',
+      code: 'ACTIVE'
     };
   }
 }

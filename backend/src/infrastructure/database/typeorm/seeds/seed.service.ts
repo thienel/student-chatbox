@@ -120,6 +120,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
         'ai:summarize-document',
         'exam:read', 'exam:create-official',
         'analytics:read-own',
+        'flashcard:create', 'flashcard:delete', 'flashcard:read', 'flashcard:manage-own', 'ai:generate-flashcard',
       ];
       const lecturerRole = await roleRepo.findOne({
         where: { id: roles['lecturer'].id },
@@ -185,6 +186,22 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
         });
         await userRepo.save(adminUser);
         this.logger.log('Admin user created: admin@educhat.local / Admin@123456');
+      }
+
+      // Default lecturer user
+      const lecturerEmail = 'lecture@educhat.local';
+      let lecturerUser = await userRepo.findOne({ where: { email: lecturerEmail } });
+      if (!lecturerUser) {
+        const passwordHash = await bcrypt.hash('Lecture@123456', 12);
+        lecturerUser = userRepo.create({
+          email: lecturerEmail,
+          passwordHash,
+          fullName: 'Test Lecturer',
+          roleId: roles['lecturer'].id,
+          status: 'active',
+        });
+        await userRepo.save(lecturerUser);
+        this.logger.log('Lecturer user created: lecture@educhat.local / Lecture@123456');
       }
 
       // Default student user

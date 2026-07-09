@@ -34,9 +34,10 @@ export class FlashcardCommunityController {
     @CurrentUser() user: User,
     @Query('subjectId') subjectId?: string,
     @Query('sort') sort?: 'stars' | 'newest',
-    @Query('page', new ParseIntPipe({ optional: true })) page?: number,
+    @Query('page') pageStr?: string,
   ) {
-    return this.discoverUseCase.execute(user, { subjectId, sort, page });
+    const page = pageStr ? parseInt(pageStr, 10) : undefined;
+    return this.discoverUseCase.execute(user, { subjectId, sort, page: isNaN(page as any) ? undefined : page });
   }
 
   @Get('leaderboard')

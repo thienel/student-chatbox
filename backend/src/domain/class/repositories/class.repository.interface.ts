@@ -61,6 +61,13 @@ export interface IClassStats {
   students: IClassStudentStat[];
 }
 
+export interface IAvailableClass {
+  id: string;
+  name: string;
+  lecturerId: string;
+  lecturerName: string;
+}
+
 export interface IClassRepository {
   create(data: { subjectId: string; lecturerId: string; name: string; passwordHash: string }): Promise<Class>;
   findById(id: string): Promise<Class | null>;
@@ -70,6 +77,8 @@ export interface IClassRepository {
   listBySubjectAndLecturer(subjectId: string, lecturerId: string): Promise<Class[]>;
   /** Lecturers that have at least one class in the subject (for the student enroll dropdown). */
   listLecturersWithClasses(subjectId: string): Promise<ISubjectLecturer[]>;
+  /** Available classes in a subject (for student enroll cards). */
+  listAvailableClasses(subjectId: string): Promise<IAvailableClass[]>;
   enrollStudent(classId: string, studentId: string): Promise<void>;
   listStudents(classId: string): Promise<IClassStudent[]>;
   removeStudent(classId: string, studentId: string): Promise<void>;

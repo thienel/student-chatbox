@@ -27,8 +27,9 @@ export class BoardController {
     @CurrentUser() user: User,
     @Query('status') status?: BoardQuestionStatus,
     @Query('sort') sort?: 'upvotes' | 'newest',
-    @Query('page', new ParseIntPipe({ optional: true })) page?: number,
+    @Query('page') pageStr?: string,
   ) {
+    const page = pageStr ? parseInt(pageStr, 10) : undefined;
     return this.board.listQuestions(subjectId, classId, user, { status, sort, page });
   }
 

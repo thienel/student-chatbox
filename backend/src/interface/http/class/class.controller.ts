@@ -18,6 +18,7 @@ import { CurrentUser } from '../../decorators/current-user.decorator';
 import { CreateClassUseCase } from '../../../application/class/use-cases/create-class.use-case';
 import { ListSubjectClassesUseCase } from '../../../application/class/use-cases/list-subject-classes.use-case';
 import { ListSubjectLecturersUseCase } from '../../../application/class/use-cases/list-subject-lecturers.use-case';
+import { ListAvailableClassesUseCase } from '../../../application/class/use-cases/list-available-classes.use-case';
 import { EnrollByPasswordUseCase } from '../../../application/class/use-cases/enroll-by-password.use-case';
 import { UnenrollClassUseCase } from '../../../application/class/use-cases/unenroll-class.use-case';
 import { GetMyClassUseCase } from '../../../application/class/use-cases/get-my-class.use-case';
@@ -37,6 +38,7 @@ export class ClassController {
     private readonly createClassUseCase: CreateClassUseCase,
     private readonly listSubjectClassesUseCase: ListSubjectClassesUseCase,
     private readonly listSubjectLecturersUseCase: ListSubjectLecturersUseCase,
+    private readonly listAvailableClassesUseCase: ListAvailableClassesUseCase,
     private readonly enrollByPasswordUseCase: EnrollByPasswordUseCase,
     private readonly unenrollClassUseCase: UnenrollClassUseCase,
     private readonly getMyClassUseCase: GetMyClassUseCase,
@@ -121,6 +123,12 @@ export class ClassController {
   @RequirePermission('subject:read')
   async listLecturers(@Param('id') subjectId: string) {
     return this.listSubjectLecturersUseCase.execute(subjectId);
+  }
+
+  @Get('classes/available')
+  @RequirePermission('subject:read')
+  async listAvailableClasses(@Param('id') subjectId: string) {
+    return this.listAvailableClassesUseCase.execute(subjectId);
   }
 
   @Get('my-class')
