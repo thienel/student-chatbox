@@ -1,32 +1,26 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { examsApi } from '@/api/endpoints/exams'
-import type { ExamDifficulty, CreateOfficialExamInput } from '@/types'
+import { queryKeys } from '@/api/queryKeys'
+import type { CreateOfficialExamInput, ExamDifficulty } from '@/types'
 
-export const examKeys = {
-  list: (subjectId: string) => ['exams', subjectId] as const,
-  detail: (subjectId: string, examId: string) => ['exams', subjectId, examId] as const,
-  attempts: () => ['exam-attempts'] as const,
-  attempt: (attemptId: string) => ['exam-attempt', attemptId] as const,
-}
-
-export function useExams(subjectId: string, classId?: string) {
+export const useExams = (subjectId: string, classId?: string) => {
   return useQuery({
-    queryKey: [...examKeys.list(subjectId), classId ?? null],
+    queryKey: queryKeys.exams.list(subjectId, classId),
     queryFn: () => examsApi.list(subjectId, classId),
     enabled: !!subjectId && !!classId,
   })
 }
 
-export function useExam(subjectId: string, examId: string) {
+export const useExam = (subjectId: string, examId: string) => {
   return useQuery({
-    queryKey: examKeys.detail(subjectId, examId),
+    queryKey: queryKeys.exams.detail(subjectId, examId),
     queryFn: () => examsApi.get(subjectId, examId),
     enabled: !!subjectId && !!examId,
   })
 }
 
-export function useGenerateExam(subjectId: string, classId?: string) {
-  const qc = useQueryClient()
+export const useGenerateExam = (subjectId: string, classId?: string) => {
+  const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (data: {
       questionCount?: number
@@ -34,26 +28,30 @@ export function useGenerateExam(subjectId: string, classId?: string) {
       topic?: string
       documentIds?: string[]
     }) => examsApi.generate(subjectId, { ...data, classId }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: examKeys.list(subjectId) }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.exams.list(subjectId, classId) })
+    },
   })
 }
 
-export function useCreateOfficialExam(subjectId: string) {
-  const qc = useQueryClient()
+export const useCreateOfficialExam = (subjectId: string) => {
+  const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (data: CreateOfficialExamInput) => examsApi.createOfficial(subjectId, data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: examKeys.list(subjectId) }),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.exams.list(subjectId, variables.classId) })
+    },
   })
 }
 
-export function useStartAttempt(subjectId: string) {
+export const useStartAttempt = (subjectId: string) => {
   return useMutation({
     mutationFn: (examId: string) => examsApi.startAttempt(subjectId, examId),
   })
 }
 
-export function useSubmitAttempt(subjectId: string, examId: string) {
-  const qc = useQueryClient()
+export const useSubmitAttempt = (subjectId: string, examId: string) => {
+  const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({
       attemptId,
@@ -70,29 +68,29 @@ export function useSubmitAttempt(subjectId: string, examId: string) {
         timeSpentSecs,
       }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: examKeys.attempts() })
+      queryClient.invalidateQueries({ queryKey: queryKeys.exams.myAttempts })
     },
   })
 }
 
-export function useMyWeakTopics(subjectId: string) {
+export const useMyWeakTopics = (subjectId: string) => {
   return useQuery({
-    queryKey: ['weak-topics', subjectId],
+    queryKey: queryKeys.exams.myWeakTopics(subjectId),
     queryFn: () => examsApi.getMyWeakTopics(subjectId),
     enabled: !!subjectId,
   })
 }
 
-export function useMyAttempts() {
+export const useMyAttempts = () => {
   return useQuery({
-    queryKey: examKeys.attempts(),
+    queryKey: queryKeys.exams.myAttempts,
     queryFn: () => examsApi.listMyAttempts(),
   })
 }
 
-export function useAttemptResult(attemptId: string) {
+export const useAttemptResult = (attemptId: string) => {
   return useQuery({
-    queryKey: examKeys.attempt(attemptId),
+    queryKey: queryKeys.exams.attemptResult(attemptId),
     queryFn: () => examsApi.getAttemptResult(attemptId),
     enabled: !!attemptId,
   })

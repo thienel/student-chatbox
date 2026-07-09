@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { cn } from '@/lib/utils'
-import { useMyWeakTopics } from './queries'
+import { useMyWeakTopics } from '@/api/queries/exams'
 import type { TopicClassification } from '@/types'
 
 const classMeta: Record<TopicClassification, { label: string; cls: string; bar: string }> = {

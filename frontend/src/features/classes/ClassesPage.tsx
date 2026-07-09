@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
 import { getErrorMessage } from '@/lib/errors'
-import { useClasses, useCreateClass } from './queries'
+import { useClasses, useCreateClass } from '@/api/queries/classes'
 
 const containerVariants = {
   hidden: { opacity: 0 },

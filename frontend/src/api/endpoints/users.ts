@@ -1,5 +1,5 @@
 import axiosInstance from '@/api/axiosInstance'
-import type { ApiResponse, PaginatedResponse, User } from '@/types'
+import type { ApiResponse, PaginatedResponse, User, CreateUserRequest } from '@/types'
 
 export const usersApi = {
   list: (params?: { page?: number; limit?: number; role?: string; status?: string; search?: string }) =>
@@ -8,7 +8,7 @@ export const usersApi = {
   get: (id: string) =>
     axiosInstance.get<ApiResponse<User>>(`/users/${id}`).then(r => r.data.data),
 
-  create: (data: { email: string; temporaryPassword: string; fullName: string; role: string }) =>
+  create: (data: CreateUserRequest) =>
     axiosInstance.post<ApiResponse<User>>('/users', data).then(r => r.data.data),
 
   update: (id: string, data: Partial<Pick<User, 'fullName'>>) =>

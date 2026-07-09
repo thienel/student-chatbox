@@ -8,11 +8,12 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { useUserStore } from '@/store/useUserStore'
-import { useSubjects, subjectKeys } from '@/features/subjects/queries'
+import { useSubjects } from '@/api/queries/subjects'
+import { queryKeys } from '@/api/queryKeys'
 import { classesApi } from '@/api/endpoints/classes'
 import { boardApi } from '@/api/endpoints/board'
 import { subjectsApi } from '@/api/endpoints/subjects'
-import { classKeys } from '@/features/classes/queries'
+// removed classKeys import, already using queryKeys from @/api/queryKeys
 import { cn } from '@/lib/utils'
 
 export default function LecturerDashboardPage() {
@@ -26,7 +27,7 @@ export default function LecturerDashboardPage() {
   // 2. Fetch classes for each subject
   const classQueries = useQueries({
     queries: subjects.map(s => ({
-      queryKey: classKeys.list(s.id),
+      queryKey: queryKeys.classes.list(s.id),
       queryFn: () => classesApi.list(s.id),
       enabled: subjects.length > 0,
     }))
@@ -36,7 +37,7 @@ export default function LecturerDashboardPage() {
   // 3. Fetch RAG documents for each subject
   const documentQueries = useQueries({
     queries: subjects.map(s => ({
-      queryKey: subjectKeys.documents(s.id),
+      queryKey: queryKeys.subjects.documents(s.id),
       queryFn: () => subjectsApi.getDocuments(s.id),
       enabled: subjects.length > 0,
     }))

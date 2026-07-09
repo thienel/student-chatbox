@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label'
 import { useAuthStore } from '@/store/useAuthStore'
 import { getErrorMessage } from '@/lib/errors'
 import { AuthCard } from './components/AuthCard'
-import { authApi } from '@/api/endpoints/auth'
+import { useLogin } from '@/api/queries/auth'
 
 const schema = z.object({
   email: z.string().email('Email không hợp lệ'),
@@ -23,6 +23,7 @@ export default function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const { setAuth, accessToken } = useAuthStore()
+  const loginMutation = useLogin()
 
   const { register, handleSubmit, formState: { errors, isSubmitting }, setError } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -37,7 +38,7 @@ export default function LoginPage() {
 
   const onSubmit = async (data: FormData) => {
     try {
-      const result = await authApi.login(data.email, data.password)
+      const result = await loginMutation.mutateAsync(data)
       setAuth(result.accessToken)
       // Use the token to fetch the user
       // Note: we can't easily set the axios token header synchronously here unless we reload or rely on interceptors,

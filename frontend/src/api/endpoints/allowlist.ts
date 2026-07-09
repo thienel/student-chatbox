@@ -1,5 +1,5 @@
 import axiosInstance from '@/api/axiosInstance'
-import type { ApiResponse } from '@/types'
+import type { ApiResponse, AllowlistRecordInput, BulkImportAllowlistRequest } from '@/types'
 
 export interface AllowlistRecord {
   id: string
@@ -48,7 +48,7 @@ export const allowlistApi = {
         };
       }),
 
-  create: (data: { personalEmail: string; studentCode: string }) =>
+  create: (data: AllowlistRecordInput) =>
     axiosInstance.post<ApiResponse<any>>('/admin/student-email-allowlist', {
       email: data.personalEmail,
       studentCode: data.studentCode,
@@ -57,7 +57,7 @@ export const allowlistApi = {
       return mapBackendRecord(r.data.data.data);
     }),
 
-  bulkImport: (data: { records: { personalEmail: string; studentCode: string }[] }) =>
+  bulkImport: (data: BulkImportAllowlistRequest) =>
     axiosInstance.post<ApiResponse<any>>('/admin/student-email-allowlist/bulk', {
       records: data.records.map(r => ({
         email: r.personalEmail,

@@ -2,7 +2,8 @@ import { Link } from 'react-router-dom'
 import { Users, BookOpen, FileText, Activity, Clock, ArrowRight, ShieldAlert } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
-import { useAdminStats, usePendingVerifications } from './queries'
+import { useAdminStats } from '@/api/queries/system'
+import { usePendingVerifications } from '@/api/queries/users'
 import { cn } from '@/lib/utils'
 
 interface StatCardProps {

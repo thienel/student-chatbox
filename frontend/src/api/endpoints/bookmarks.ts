@@ -1,5 +1,5 @@
 import axiosInstance from '@/api/axiosInstance'
-import type { ApiResponse, Bookmark, BookmarkResourceType } from '@/types'
+import type { ApiResponse, Bookmark, BookmarkResourceType, AddBookmarkRequest } from '@/types'
 
 export const bookmarksApi = {
   list: (resourceType?: BookmarkResourceType) =>
@@ -7,7 +7,7 @@ export const bookmarksApi = {
       .get<ApiResponse<Bookmark[]>>('/bookmarks', { params: resourceType ? { resourceType } : {} })
       .then(r => r.data.data),
 
-  add: (data: { resourceType: BookmarkResourceType; resourceId: string; note?: string }) =>
+  add: (data: AddBookmarkRequest) =>
     axiosInstance.post<ApiResponse<Bookmark>>('/bookmarks', data).then(r => r.data.data),
 
   delete: (id: string) =>

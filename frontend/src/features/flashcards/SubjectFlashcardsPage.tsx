@@ -16,7 +16,14 @@ import { DocumentPicker } from '@/components/shared/DocumentPicker'
 import { NeedClassNotice } from '@/features/classes/NeedClassNotice'
 import { getErrorMessage } from '@/lib/errors'
 import { cn } from '@/lib/utils'
-import { useFlashcardSets, useGenerateFlashcards, useDeleteFlashcardSet, useSetFlashcardVisibility, useDiscoverFlashcards, useToggleStar } from './queries'
+import {
+  useFlashcardSets,
+  useGenerateFlashcards,
+  useDeleteFlashcardSet,
+  useSetFlashcardVisibility,
+  useDiscoverFlashcards,
+  useToggleStar
+} from '@/api/queries/flashcards'
 
 export default function SubjectFlashcardsPage() {
   const { id: subjectId = '' } = useParams<{ id: string }>()

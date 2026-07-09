@@ -1,11 +1,11 @@
 import axiosInstance from '@/api/axiosInstance'
-import type { ApiResponse, Role, Permission } from '@/types'
+import type { ApiResponse, Role, Permission, CreateRoleRequest } from '@/types'
 
 export const rbacApi = {
   listRoles: () =>
     axiosInstance.get<ApiResponse<Role[]>>('/rbac/roles').then(r => r.data.data),
 
-  createRole: (data: { name: string; description?: string }) =>
+  createRole: (data: CreateRoleRequest) =>
     axiosInstance.post<ApiResponse<Role>>('/rbac/roles', data).then(r => r.data.data),
 
   listPermissions: () =>

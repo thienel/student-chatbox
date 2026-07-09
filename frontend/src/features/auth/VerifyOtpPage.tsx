@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { authApi } from '@/api/endpoints/auth'
+import { useVerifyOtp, useResendOtp } from '@/api/queries/auth'
 import { AuthCard } from './components/AuthCard'
 import { OtpInput } from './components/OtpInput'
 import { Button } from '@/components/ui/button'
@@ -11,13 +11,15 @@ export default function VerifyOtpPage() {
   const email = searchParams.get('email')
   const isManual = searchParams.get('isManual') === 'true'
 
+  // Mutations
+  const verifyOtpMutation = useVerifyOtp()
+  const resendOtpMutation = useResendOtp()
+
   const [otp, setOtp] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   
   const [countdown, setCountdown] = useState(60)
   const [canResend, setCanResend] = useState(false)
-  const [resendLoading, setResendLoading] = useState(false)
 
   useEffect(() => {
     if (!email) {
@@ -39,10 +41,9 @@ export default function VerifyOtpPage() {
     e?.preventDefault()
     if (otp.length !== 6 || !email) return
 
-    setIsLoading(true)
     setError('')
     try {
-      await authApi.verifyOtp(email, otp)
+      await verifyOtpMutation.mutateAsync({ email, otp })
       // On success, redirect to login with a success message
       const successMessage = isManual 
         ? 'Xác minh email thành công. Vui lòng chờ quản trị viên phê duyệt.' 
@@ -50,24 +51,19 @@ export default function VerifyOtpPage() {
       navigate('/login', { state: { message: successMessage } })
     } catch (err: any) {
       setError(err.response?.data?.message || 'Mã xác thực không đúng hoặc đã hết hạn.')
-    } finally {
-      setIsLoading(false)
     }
   }
 
   const handleResend = async () => {
     if (!email) return
-    setResendLoading(true)
     setError('')
     try {
-      await authApi.resendOtp(email)
+      await resendOtpMutation.mutateAsync({ email })
       setCountdown(60)
       setCanResend(false)
       setOtp('')
     } catch (err: any) {
       setError(err.response?.data?.message || 'Không thể gửi lại mã. Vui lòng thử lại sau.')
-    } finally {
-      setResendLoading(false)
     }
   }
 
@@ -80,14 +76,14 @@ export default function VerifyOtpPage() {
           </div>
         )}
         
-        <OtpInput value={otp} onChange={setOtp} length={6} disabled={isLoading} error={!!error} />
+        <OtpInput value={otp} onChange={setOtp} length={6} disabled={verifyOtpMutation.isPending} error={!!error} />
 
         <Button 
           type="submit" 
           className="w-full font-bold" 
-          disabled={isLoading || otp.length !== 6}
+          disabled={verifyOtpMutation.isPending || otp.length !== 6}
         >
-          {isLoading ? 'Đang xác thực...' : 'Xác thực'}
+          {verifyOtpMutation.isPending ? 'Đang xác thực...' : 'Xác thực'}
         </Button>
 
         <div className="text-center text-sm font-geist text-gray-500">
@@ -96,10 +92,10 @@ export default function VerifyOtpPage() {
             <button
               type="button"
               onClick={handleResend}
-              disabled={resendLoading}
+              disabled={resendOtpMutation.isPending}
               className="text-primary hover:underline font-semibold"
             >
-              {resendLoading ? 'Đang gửi...' : 'Gửi lại mã'}
+              {resendOtpMutation.isPending ? 'Đang gửi...' : 'Gửi lại mã'}
             </button>
           ) : (
             <span className="text-gray-400">

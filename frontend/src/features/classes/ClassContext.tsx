@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, type ReactNode } from 'react'
 import { usePermission } from '@/store/useUserStore'
 import { useActiveClassStore } from '@/store/useActiveClassStore'
-import { useClasses, useMyClass } from './queries'
+import { useClasses, useMyClass } from '@/api/queries/classes'
 import type { Class } from '@/types'
 
 interface SubjectClassValue {

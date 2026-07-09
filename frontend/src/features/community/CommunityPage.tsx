@@ -9,7 +9,7 @@ import { getErrorMessage } from '@/lib/errors'
 import { cn } from '@/lib/utils'
 import {
   useDiscoverFlashcards, useFlashcardLeaderboard, useToggleStar, useCloneFlashcardSet,
-} from '@/features/flashcards/queries'
+} from '@/api/queries/flashcards'
 
 type Tab = 'discover' | 'leaderboard'
 

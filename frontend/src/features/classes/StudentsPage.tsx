@@ -18,7 +18,7 @@ import { useToast } from '@/hooks/use-toast'
 import { getErrorMessage } from '@/lib/errors'
 import { useSubjectClass } from './ClassContext'
 import { NeedClassNotice } from './NeedClassNotice'
-import { useClassStats, useRemoveClassStudent } from './queries'
+import { useClassStats, useRemoveClassStudent } from '@/api/queries/classes'
 
 function StatCard({ icon: Icon, label, value }: { icon: typeof Users; label: string; value: string }) {
   return (

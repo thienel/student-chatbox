@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Skeleton } from '@/components/ui/skeleton'
 import { EmptyState } from '@/components/shared/EmptyState'
-import { useChats, useChat, useCreateChat, useDeleteChat, chatKeys } from '@/features/chat/queries'
+import { useChats, useChat, useCreateChat, useDeleteChat } from '@/api/queries/chats'
+import { queryKeys } from '@/api/queryKeys'
 import { useSubjectClass } from '@/features/classes/ClassContext'
 import { useChatStream } from '@/hooks/useChatStream'
 import type { Message, MessageSource } from '@/types'
@@ -119,7 +120,7 @@ export default function SubjectChatPage() {
       }
     )
 
-    qc.invalidateQueries({ queryKey: chatKeys.list(subjectId) })
+    qc.invalidateQueries({ queryKey: queryKeys.chats.list({ subjectId }) })
   }, [input, chatId, isStreaming, sendMessage, qc, subjectId])
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

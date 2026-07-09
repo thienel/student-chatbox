@@ -12,7 +12,7 @@ import type { BoardQuestion } from '@/types'
 import {
   useBoardAnswers, useCreateAnswer, useDeleteAnswer, usePinAnswer, useUpvoteAnswer,
   useUpvoteQuestion, useCloseQuestion, useDeleteQuestion,
-} from './queries'
+} from '@/api/queries/board'
 
 interface Props {
   subjectId: string

@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 import { CheckCircle2, XCircle, ChevronLeft } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
-import { useAttemptResult } from './queries'
+import { useAttemptResult } from '@/api/queries/exams'
 
 export default function ExamResultPage() {
   const { id: subjectId, attemptId = '' } = useParams<{ id?: string; attemptId: string }>()

@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
 import { getErrorMessage } from '@/lib/errors'
-import { useAvailableClasses, useEnroll } from './queries'
+import { useAvailableClasses, useEnroll } from '@/api/queries/classes'
 import { cn } from '@/lib/utils'
 
 export function EnrollDialog({

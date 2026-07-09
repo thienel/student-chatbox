@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
 import { getErrorMessage } from '@/lib/errors'
-import { useSubmitAttempt } from './queries'
+import { useSubmitAttempt } from '@/api/queries/exams'
 import type { Question, ExamAttempt, Exam } from '@/types'
 
 interface LocationState {

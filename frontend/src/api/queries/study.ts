@@ -1,16 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { studyApi } from '@/api/endpoints/study'
+import { queryKeys } from '@/api/queryKeys'
 import type { CardRating } from '@/types'
-
-export const studyKeys = {
-  queue: (setId: string) => ['study-queue', setId] as const,
-  settings: () => ['study-settings'] as const,
-  stats: () => ['study-stats'] as const,
-}
 
 export function useStudyQueue(setId: string) {
   return useQuery({
-    queryKey: studyKeys.queue(setId),
+    queryKey: queryKeys.study.queue(setId),
     queryFn: () => studyApi.getQueue(setId),
     enabled: !!setId,
   })
@@ -28,22 +23,22 @@ export function useReviewCard() {
 }
 
 export function useStudySettings() {
-  return useQuery({ queryKey: studyKeys.settings(), queryFn: () => studyApi.getSettings() })
+  return useQuery({ queryKey: queryKeys.study.settings, queryFn: () => studyApi.getSettings() })
 }
 
 export function useUpdateStudySettings() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (newCardsPerDay: number) => studyApi.updateSettings(newCardsPerDay),
-    onSuccess: () => qc.invalidateQueries({ queryKey: studyKeys.settings() }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.study.settings }),
   })
 }
 
 export function useStudyStats() {
-  return useQuery({ queryKey: studyKeys.stats(), queryFn: () => studyApi.getStats() })
+  return useQuery({ queryKey: queryKeys.study.stats, queryFn: () => studyApi.getStats() })
 }
 
 export function useCurrentStudyPlan() {
-  return useQuery({ queryKey: ['study-plan', 'current'], queryFn: () => studyApi.getCurrentPlan() })
+  return useQuery({ queryKey: queryKeys.study.currentPlan, queryFn: () => studyApi.getCurrentPlan() })
 }
 

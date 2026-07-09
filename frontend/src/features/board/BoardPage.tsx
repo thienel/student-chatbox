@@ -15,7 +15,7 @@ import { NeedClassNotice } from '@/features/classes/NeedClassNotice'
 import { getErrorMessage } from '@/lib/errors'
 import { cn } from '@/lib/utils'
 import type { BoardQuestion, BoardQuestionStatus } from '@/types'
-import { useBoardQuestions, useCreateQuestion } from './queries'
+import { useBoardQuestions, useCreateQuestion } from '@/api/queries/board'
 import { BoardQuestionDetail } from './BoardQuestionDetail'
 
 const statusBadge: Record<string, string> = {

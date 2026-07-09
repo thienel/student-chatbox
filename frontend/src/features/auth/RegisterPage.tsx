@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Loader2 } from 'lucide-react'
-import { authApi } from '@/api/endpoints/auth'
+import { useRegister } from '@/api/queries/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/ui/password-input'
@@ -47,7 +47,7 @@ type RegisterForm = z.infer<typeof registerSchema>
 
 export default function RegisterPage() {
   const navigate = useNavigate()
-  const [isLoading, setIsLoading] = useState(false)
+  const registerMutation = useRegister()
   const [error, setError] = useState('')
 
   const { register, handleSubmit, watch, formState: { errors } } = useForm<RegisterForm>({
@@ -62,10 +62,9 @@ export default function RegisterPage() {
   const isPersonalEmail = debouncedEmail && debouncedEmail.includes('@') && !validDomains.some(domain => debouncedEmail.toLowerCase().endsWith(domain))
 
   const onSubmit = async (data: RegisterForm) => {
-    setIsLoading(true)
     setError('')
     try {
-      await authApi.registerStudent({
+      await registerMutation.mutateAsync({
         email: data.email,
         password: data.password,
         fullName: data.fullName,
@@ -76,8 +75,6 @@ export default function RegisterPage() {
       navigate(`/verify-otp?email=${encodeURIComponent(data.email)}`)
     } catch (err: any) {
       setError(err.response?.data?.message || 'Đăng ký thất bại. Vui lòng thử lại.')
-    } finally {
-      setIsLoading(false)
     }
   }
 
@@ -172,9 +169,9 @@ export default function RegisterPage() {
             <Button 
               type="submit" 
               className="w-full h-14 rounded-full font-mono text-sm tracking-widest uppercase mt-8 transition-all hover:scale-[1.02] active:scale-100" 
-              disabled={isLoading}
+              disabled={registerMutation.isPending}
             >
-              {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Đăng ký ngay'}
+              {registerMutation.isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Đăng ký ngay'}
             </Button>
 
             <p className="text-center text-sm font-mono text-muted-foreground mt-8">

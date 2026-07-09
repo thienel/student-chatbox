@@ -3,7 +3,7 @@ import { MessageSquare, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { EmptyState } from '@/components/shared/EmptyState'
-import { useChats, useDeleteChat } from './queries'
+import { useChats, useDeleteChat } from '@/api/queries/chats'
 
 export default function ChatsPage() {
   const navigate = useNavigate()
