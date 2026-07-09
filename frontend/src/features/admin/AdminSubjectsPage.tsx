@@ -12,7 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { BookOpen } from 'lucide-react'
-import { useSubjects, useCreateSubject, useDeleteSubject } from '@/features/subjects/queries'
+import { useSubjects, useCreateSubject, useDeleteSubject } from '@/api/queries/subjects'
 import { cn } from '@/lib/utils'
 
 const createSchema = z.object({

@@ -17,7 +17,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
-import { useSubjectDocuments, useUploadDocument, useDeleteDocument, useDocumentSummary } from './queries'
+import { useSubjectDocuments, useUploadDocument, useDeleteDocument, useDocumentSummary } from '@/api/queries/subjects'
 import { usePermission } from '@/store/useUserStore'
 import { getErrorMessage } from '@/lib/errors'
 import { cn } from '@/lib/utils'
@@ -46,14 +46,14 @@ export default function SubjectDocumentsPage() {
 
   const canUpload = canUploadDocs
   const { data: documents = [], isLoading } = useSubjectDocuments(subjectId)
-  const upload = useUploadDocument(subjectId)
-  const remove = useDeleteDocument(subjectId)
-  const summary = useDocumentSummary(subjectId, summaryDoc?.id ?? null)
+  const upload = useUploadDocument()
+  const remove = useDeleteDocument()
+  const summary = useDocumentSummary(subjectId, summaryDoc?.id ?? '')
   const hasActions = canDelete || canSummarize
 
   const handleFile = (file?: File) => {
     if (file) {
-      upload.mutate(file)
+      upload.mutate({ subjectId, file })
     }
   }
 
@@ -248,7 +248,7 @@ export default function SubjectDocumentsPage() {
             <AlertDialogAction
               className="rounded-full font-mono text-xs tracking-wider px-8 bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-sm"
               onClick={() => {
-                if (confirmId) remove.mutate(confirmId, { onSettled: () => setConfirmId(null) })
+                if (confirmId) remove.mutate({ subjectId, documentId: confirmId }, { onSettled: () => setConfirmId(null) })
               }}
             >
               Confirm Delete

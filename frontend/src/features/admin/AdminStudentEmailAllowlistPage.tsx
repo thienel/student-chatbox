@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/compone
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 
-import { useAllowlist, useCreateAllowlist, useBulkImportAllowlist, useEnableAllowlist, useDisableAllowlist } from './allowlist-queries'
+import { useAllowlist, useCreateAllowlistRecord, useBulkImportAllowlist, useEnableAllowlistRecord, useDisableAllowlistRecord } from '@/api/queries/allowlist'
 import { BulkImportDialog } from './components/BulkImportDialog'
 
 const createSchema = z.object({
@@ -44,10 +44,10 @@ export default function AdminStudentEmailAllowlistPage() {
 
   const { data, isLoading } = useAllowlist({ search: search || undefined, status: statusFilter, limit: 50 })
 
-  const createRecord = useCreateAllowlist()
+  const createRecord = useCreateAllowlistRecord()
   const bulkImport = useBulkImportAllowlist()
-  const enableRecord = useEnableAllowlist()
-  const disableRecord = useDisableAllowlist()
+  const enableRecord = useEnableAllowlistRecord()
+  const disableRecord = useDisableAllowlistRecord()
 
   const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm<CreateForm>({
     resolver: zodResolver(createSchema),

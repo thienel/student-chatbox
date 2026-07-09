@@ -1,5 +1,5 @@
 import axiosInstance from '@/api/axiosInstance'
-import type { ApiResponse, PaginatedResponse, Subject, Document, DocumentSummary } from '@/types'
+import type { ApiResponse, PaginatedResponse, Subject, Document, DocumentSummary, CreateSubjectRequest, UpdateSubjectRequest } from '@/types'
 
 export const subjectsApi = {
   list: (params?: { page?: number; limit?: number; search?: string; status?: string }) =>
@@ -8,10 +8,10 @@ export const subjectsApi = {
   get: (id: string) =>
     axiosInstance.get<ApiResponse<Subject>>(`/subjects/${id}`).then(r => r.data.data),
 
-  create: (data: { code: string; name: string; description?: string }) =>
+  create: (data: CreateSubjectRequest) =>
     axiosInstance.post<ApiResponse<Subject>>('/subjects', data).then(r => r.data.data),
 
-  update: (id: string, data: Partial<Pick<Subject, 'name' | 'description' | 'status'>>) =>
+  update: (id: string, data: UpdateSubjectRequest) =>
     axiosInstance.patch<ApiResponse<Subject>>(`/subjects/${id}`, data).then(r => r.data.data),
 
   delete: (id: string) =>

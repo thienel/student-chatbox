@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { useUserStore } from '@/store/useUserStore'
-import { useSubjects } from '@/features/subjects/queries'
-import { useChats } from '@/features/chat/queries'
+import { useSubjects } from '@/api/queries/subjects'
+import { useChats } from '@/api/queries/chats'
 import { AchievementStamp } from '@/components/ui/achievement-stamp'
 
 export default function HomePage() {

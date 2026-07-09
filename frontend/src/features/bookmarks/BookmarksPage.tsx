@@ -6,7 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { useToast } from '@/hooks/use-toast'
 import { getErrorMessage } from '@/lib/errors'
-import { useBookmarks, useDeleteBookmark } from './queries'
+import { useBookmarks, useDeleteBookmark } from '@/api/queries/bookmarks'
 import type { BookmarkResourceType } from '@/types'
 
 const FILTERS: { label: string; value: BookmarkResourceType | undefined }[] = [

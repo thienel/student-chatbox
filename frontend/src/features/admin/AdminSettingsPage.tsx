@@ -5,11 +5,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { EmptyState } from '@/components/shared/EmptyState'
-import { useSystemSettings, useUpdateSettings } from './queries'
+import { useSystemSettings, useUpdateSystemSettings } from '@/api/queries/system'
 
 export default function AdminSettingsPage() {
   const { data: settings = [], isLoading } = useSystemSettings()
-  const updateSettings = useUpdateSettings()
+  const updateSettings = useUpdateSystemSettings()
 
   const encodeKey = (k: string) => k.replace(/\./g, '․')
   const decodeKey = (k: string) => k.replace(/․/g, '.')

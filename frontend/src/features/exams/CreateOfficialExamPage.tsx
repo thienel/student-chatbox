@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast'
 import { useSubjectClass } from '@/features/classes/ClassContext'
 import { NeedClassNotice } from '@/features/classes/NeedClassNotice'
 import { getErrorMessage } from '@/lib/errors'
-import { useCreateOfficialExam } from './queries'
+import { useCreateOfficialExam } from '@/api/queries/exams'
 import type { OfficialQuestionInput } from '@/types'
 
 const OPTION_KEYS = ['A', 'B', 'C', 'D'] as const

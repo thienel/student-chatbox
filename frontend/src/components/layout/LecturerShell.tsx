@@ -9,7 +9,7 @@ import { Dock } from './Dock'
 import { Toaster } from '@/components/ui/toaster'
 import { CommandPalette } from '@/components/shared/CommandPalette'
 import { cn } from '@/lib/utils'
-import { useSubject } from '@/features/subjects/queries'
+import { useSubject } from '@/api/queries/subjects'
 
 export function LecturerShell() {
   const { pathname } = useLocation()

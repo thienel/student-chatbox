@@ -1,6 +1,7 @@
 import axiosInstance from '@/api/axiosInstance'
 import type {
   ApiResponse, FlashcardSet, FlashcardSetWithCards, DiscoverSetsResult, LeaderboardResult, Flashcard,
+  GenerateFlashcardsRequest,
 } from '@/types'
 
 export const flashcardsApi = {
@@ -20,7 +21,7 @@ export const flashcardsApi = {
 
   generate: (
     subjectId: string,
-    data: { topic?: string; cardCount?: number; classId?: string; documentIds?: string[] },
+    data: GenerateFlashcardsRequest,
   ) =>
     axiosInstance
       // AI generation runs an LLM call — override the short global timeout.

@@ -1,5 +1,5 @@
 import axiosInstance from '@/api/axiosInstance'
-import type { ApiResponse, Chat, Message } from '@/types'
+import type { ApiResponse, Chat, Message, CreateChatRequest } from '@/types'
 
 export const chatsApi = {
   list: (params?: { subjectId?: string }) =>
@@ -8,7 +8,7 @@ export const chatsApi = {
   get: (id: string) =>
     axiosInstance.get<ApiResponse<Chat & { messages: Message[] }>>(`/chats/${id}`).then(r => r.data.data),
 
-  create: (data: { subjectId: string; classId?: string; title?: string }) =>
+  create: (data: CreateChatRequest) =>
     axiosInstance.post<ApiResponse<Chat>>('/chats', data).then(r => r.data.data),
 
   delete: (id: string) =>

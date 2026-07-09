@@ -2,7 +2,7 @@ import { CalendarCheck, Layers, Target, ClipboardList, Clock } from 'lucide-reac
 import { Skeleton } from '@/components/ui/skeleton'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { cn } from '@/lib/utils'
-import { useCurrentStudyPlan } from '@/features/flashcards/study-queries'
+import { useCurrentStudyPlan } from '@/api/queries/study'
 import type { StudyTaskType } from '@/types'
 
 const taskIcon: Record<StudyTaskType, typeof Layers> = {

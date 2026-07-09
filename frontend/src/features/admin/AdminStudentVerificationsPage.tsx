@@ -9,11 +9,9 @@ import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 
 import {
-  usePendingVerifications,
-  useApproveVerification,
-  useRejectVerification,
-  useRequestMoreInfoVerification,
-} from './queries'
+  usePendingVerifications, useApproveVerification,
+  useRejectVerification, useRequestMoreInfoVerification
+} from '@/api/queries/users'
 import type { StudentVerificationRequest } from '@/types'
 
 export default function AdminStudentVerificationsPage() {

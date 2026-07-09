@@ -2,7 +2,7 @@ import { ScrollText } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { EmptyState } from '@/components/shared/EmptyState'
-import { useAuditLogs } from './queries'
+import { useAuditLogs } from '@/api/queries/system'
 
 export default function AdminAuditLogsPage() {
   const { data, isLoading } = useAuditLogs({ page: 1, limit: 50 })

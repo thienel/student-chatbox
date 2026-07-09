@@ -4,7 +4,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { cn } from '@/lib/utils'
-import { useMyBadges } from './queries'
+import { useMyBadges } from '@/api/queries/badges'
 
 const ICONS: Record<string, typeof Award> = {
   footprints: Footprints,

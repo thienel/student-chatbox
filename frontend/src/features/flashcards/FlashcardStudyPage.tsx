@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { usePermission } from '@/store/useUserStore'
 import type { Flashcard } from '@/types'
-import { useFlashcardSet } from './queries'
+import { useFlashcardSet } from '@/api/queries/flashcards'
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr]

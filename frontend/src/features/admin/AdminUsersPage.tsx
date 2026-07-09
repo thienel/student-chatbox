@@ -12,7 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-import { useUsers, useCreateUser, useUpdateUserStatus } from './queries'
+import { useUsers, useCreateUser, useUpdateUserStatus } from '@/api/queries/users'
 import { Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
 

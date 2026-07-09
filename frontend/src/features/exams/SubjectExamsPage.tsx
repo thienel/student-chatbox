@@ -14,7 +14,7 @@ import { useSubjectClass } from '@/features/classes/ClassContext'
 import { DocumentPicker } from '@/components/shared/DocumentPicker'
 import { NeedClassNotice } from '@/features/classes/NeedClassNotice'
 import { getErrorMessage } from '@/lib/errors'
-import { useExams, useGenerateExam, useMyAttempts } from './queries'
+import { useExams, useGenerateExam, useMyAttempts } from '@/api/queries/exams'
 import type { ExamDifficulty } from '@/types'
 
 const difficultyLabel: Record<ExamDifficulty, string> = {

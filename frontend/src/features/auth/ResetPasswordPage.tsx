@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { authApi } from '@/api/endpoints/auth'
+import { useVerifyResetOtp, useResetPassword } from '@/api/queries/auth'
 import { AuthCard } from './components/AuthCard'
 import { OtpInput } from './components/OtpInput'
 import { Button } from '@/components/ui/button'
@@ -13,6 +13,10 @@ export default function ResetPasswordPage() {
   const [searchParams] = useSearchParams()
   const email = searchParams.get('email')
 
+  // Mutations
+  const verifyResetOtpMutation = useVerifyResetOtp()
+  const resetPasswordMutation = useResetPassword()
+
   // Step 1: OTP
   const [step, setStep] = useState<1 | 2>(1)
   const [otp, setOtp] = useState('')
@@ -21,7 +25,6 @@ export default function ResetPasswordPage() {
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   
-  const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -37,17 +40,14 @@ export default function ResetPasswordPage() {
       return
     }
 
-    setIsLoading(true)
     setError('')
     try {
-      await authApi.verifyResetOtp(email!, otp)
+      await verifyResetOtpMutation.mutateAsync({ email: email!, otp })
       // OTP is valid, proceed to step 2
       setStep(2)
       setError('')
     } catch (err: any) {
       setError(err.response?.data?.message || 'Mã xác thực không đúng hoặc đã hết hạn.')
-    } finally {
-      setIsLoading(false)
     }
   }
 
@@ -63,15 +63,12 @@ export default function ResetPasswordPage() {
       return
     }
 
-    setIsLoading(true)
     setError('')
     try {
-      await authApi.resetPassword(email!, otp, newPassword)
+      await resetPasswordMutation.mutateAsync({ email: email!, otp, newPassword })
       navigate('/login', { state: { message: 'Mật khẩu đã được đặt lại thành công. Vui lòng đăng nhập.' } })
     } catch (err: any) {
       setError(err.response?.data?.message || 'Có lỗi xảy ra khi đổi mật khẩu.')
-    } finally {
-      setIsLoading(false)
     }
   }
 
@@ -90,15 +87,15 @@ export default function ResetPasswordPage() {
           
           <div className="flex flex-col items-center">
             <Label className="self-start mb-2">Mã xác thực 6 số</Label>
-            <OtpInput value={otp} onChange={setOtp} length={6} disabled={isLoading} />
+            <OtpInput value={otp} onChange={setOtp} length={6} disabled={verifyResetOtpMutation.isPending} />
           </div>
 
           <Button 
             type="submit" 
             className="w-full font-bold" 
-            disabled={isLoading || otp.length !== 6}
+            disabled={verifyResetOtpMutation.isPending || otp.length !== 6}
           >
-            {isLoading ? 'Đang kiểm tra...' : 'Tiếp tục'}
+            {verifyResetOtpMutation.isPending ? 'Đang kiểm tra...' : 'Tiếp tục'}
           </Button>
         </form>
       ) : (
@@ -115,7 +112,7 @@ export default function ResetPasswordPage() {
               id="newPassword" 
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              disabled={isLoading}
+              disabled={resetPasswordMutation.isPending}
             />
           </div>
 
@@ -125,16 +122,16 @@ export default function ResetPasswordPage() {
               id="confirmPassword" 
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              disabled={isLoading}
+              disabled={resetPasswordMutation.isPending}
             />
           </div>
 
           <Button 
             type="submit" 
             className="w-full font-bold" 
-            disabled={isLoading || !newPassword || !confirmPassword}
+            disabled={resetPasswordMutation.isPending || !newPassword || !confirmPassword}
           >
-            {isLoading ? 'Đang xử lý...' : 'Đặt lại mật khẩu'}
+            {resetPasswordMutation.isPending ? 'Đang xử lý...' : 'Đặt lại mật khẩu'}
           </Button>
         </form>
       )}

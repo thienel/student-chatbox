@@ -1,5 +1,5 @@
 import axiosInstance from '@/api/axiosInstance'
-import type { ApiResponse, User } from '@/types'
+import type { ApiResponse, User, RegisterStudentRequest } from '@/types'
 
 export interface LoginResponse {
   accessToken: string
@@ -34,7 +34,7 @@ export const authApi = {
   login: (email: string, password: string) =>
     axiosInstance.post<ApiResponse<LoginResponse>>('/auth/login', { email, password }).then(r => r.data.data),
 
-  registerStudent: (data: { email: string; password: string; fullName: string; studentCode?: string; campus?: string; reasonForNoFptEmail?: string; studentCardUrl?: string; }) =>
+  registerStudent: (data: RegisterStudentRequest) =>
     axiosInstance.post<ApiResponse<RegisterResponse>>('/auth/register/student', data).then(r => r.data),
 
   verifyOtp: (email: string, otp: string) =>
