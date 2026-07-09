@@ -28,6 +28,14 @@ export function useSubjectLecturers(subjectId: string, enabled = true) {
   })
 }
 
+export function useAvailableClasses(subjectId: string, enabled = true) {
+  return useQuery({
+    queryKey: ['classes', subjectId, 'available'],
+    queryFn: () => classesApi.availableClasses(subjectId),
+    enabled: !!subjectId && enabled,
+  })
+}
+
 export function useMyClass(subjectId: string, enabled = true) {
   return useQuery({
     queryKey: classKeys.myClass(subjectId),
@@ -91,7 +99,7 @@ export function useCreateClass(subjectId: string) {
 export function useEnroll(subjectId: string) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (data: { lecturerId: string; password: string }) =>
+    mutationFn: (data: { classId: string; password: string }) =>
       classesApi.enroll(subjectId, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: classKeys.myClass(subjectId) })

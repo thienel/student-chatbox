@@ -14,7 +14,7 @@ export class CreateClassDto {
 
 export class EnrollByPasswordDto {
   @IsString()
-  lecturerId: string;
+  classId: string;
 
   @IsString()
   @MinLength(1)
