@@ -1,6 +1,7 @@
-import { useState } from 'react'
-import { Plus, Search, UserX, UserCheck, Key, Loader2 } from 'lucide-react'
-import { useForm } from 'react-hook-form'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import { Plus, Search, Loader2 } from 'lucide-react'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
@@ -8,11 +9,11 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { EmptyState } from '@/components/shared/EmptyState'
-import { useUsers, useCreateUser, useUpdateUserStatus, useResetPassword } from './queries'
-import { Users, MoreHorizontal } from 'lucide-react'
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+
+import { useUsers, useCreateUser, useUpdateUserStatus } from '@/api/queries/users'
+import { Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const createSchema = z.object({
@@ -23,24 +24,25 @@ const createSchema = z.object({
 })
 type CreateForm = z.infer<typeof createSchema>
 
-const roleColor: Record<string, string> = {
-  admin: 'bg-secondary text-foreground border',
-  lecturer: 'bg-secondary text-muted-foreground border',
-  student: 'bg-muted text-muted-foreground border',
-}
-
 export default function AdminUsersPage() {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const initialTab = searchParams.get('tab') || 'all'
+  const [activeTab, setActiveTab] = useState<'all' | 'suspended'>(initialTab === 'suspended' ? 'suspended' : 'all')
   const [search, setSearch] = useState('')
-  const [createOpen, setCreateOpen] = useState(false)
-  const [resetId, setResetId] = useState<string | null>(null)
-  const [newPass, setNewPass] = useState('')
 
-  const { data, isLoading } = useUsers({ search: search || undefined, limit: 50 })
+  const [createOpen, setCreateOpen] = useState(false)
+
+  useEffect(() => {
+    setSearchParams({ tab: activeTab })
+  }, [activeTab, setSearchParams])
+
+  const statusFilter = activeTab === 'suspended' ? 'suspended' : undefined
+  const { data, isLoading } = useUsers({ search: search || undefined, status: statusFilter, limit: 50 })
+
   const createUser = useCreateUser()
   const updateStatus = useUpdateUserStatus()
-  const resetPassword = useResetPassword()
 
-  const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm<CreateForm>({
+  const { register, control, handleSubmit, formState: { isSubmitting }, reset } = useForm<CreateForm>({
     resolver: zodResolver(createSchema),
     defaultValues: { role: 'student' },
   })
@@ -54,110 +56,114 @@ export default function AdminUsersPage() {
   const users = data?.items ?? []
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="max-w-7xl mx-auto px-8 py-10">
+      <header className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">Users</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">{data?.total ?? 0} total</p>
+          <h1 className="text-4xl font-serif text-primary-ink mb-2">User Registry</h1>
+          <p className="text-sm text-muted-foreground font-mono">
+            {data?.total ?? 0} {activeTab} accounts found
+          </p>
         </div>
-        <Button
-          onClick={() => setCreateOpen(true)}
-          variant="outline"
-          className="border bg-card hover:bg-secondary text-foreground h-8 px-3 text-sm font-medium rounded-md"
-        >
-          <Plus className="h-4 w-4 mr-1.5" />
-          New User
-        </Button>
-      </div>
+        <div className="flex items-center gap-4 bg-card p-2 rounded-full border border-border/50 shadow-sm">
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search by name or ID..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="pl-11 w-64 bg-muted/20 border-transparent focus-visible:ring-primary font-mono text-sm rounded-full h-10"
+            />
+          </div>
+          <Button
+            onClick={() => setCreateOpen(true)}
+            className="rounded-full font-mono text-xs tracking-wider uppercase h-10 px-6 shadow-sm"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            New Identity
+          </Button>
+        </div>
+      </header>
 
-      <div className="relative mb-4">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-        <Input
-          placeholder="Search by name or email..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="pl-8 bg-card border text-foreground placeholder:text-muted-foreground h-9 rounded-md"
-        />
+      {/* Tabs */}
+      <div className="flex gap-2 mb-8 bg-muted/20 p-1.5 rounded-full w-fit border border-border/40">
+        <button
+          onClick={() => setActiveTab('all')}
+          className={cn(
+            "px-6 py-2.5 font-mono text-xs uppercase tracking-widest transition-all duration-300 rounded-full",
+            activeTab === 'all' ? "bg-card text-primary shadow-sm font-semibold" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+          )}
+        >
+          All Accounts
+        </button>
+        <button
+          onClick={() => setActiveTab('suspended')}
+          className={cn(
+            "px-6 py-2.5 font-mono text-xs uppercase tracking-widest transition-all duration-300 rounded-full",
+            activeTab === 'suspended' ? "bg-card text-destructive shadow-sm font-semibold" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+          )}
+        >
+          Suspended
+        </button>
       </div>
 
       {isLoading ? (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-14 rounded-lg bg-muted" />
+            <Skeleton key={i} className="h-20 rounded-2xl bg-muted/50 border border-border/30" />
           ))}
         </div>
       ) : users.length === 0 ? (
-        <EmptyState icon={Users} title="No users found" />
+        <div className="border border-border/50 bg-card rounded-3xl p-16 text-center flex flex-col items-center shadow-sm">
+          <div className="p-4 bg-muted/30 rounded-full mb-4">
+            <Users className="w-12 h-12 text-muted-foreground/40" />
+          </div>
+          <p className="text-muted-foreground font-mono text-sm uppercase tracking-widest">No records found</p>
+        </div>
       ) : (
-        <div className="border rounded-lg overflow-hidden bg-card">
+        <div className="border border-border/50 bg-card rounded-3xl overflow-hidden shadow-sm">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b bg-secondary">
-                <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wide">User</th>
-                <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wide hidden sm:table-cell">Role</th>
-                <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wide hidden md:table-cell">Status</th>
-                <th className="text-left py-3 px-4 text-xs font-medium text-muted-foreground uppercase tracking-wide hidden lg:table-cell">Joined</th>
-                <th className="w-10 py-3 px-4" />
+              <tr className="border-b border-border/50 bg-muted/20">
+                <th className="text-left py-5 px-6 text-xs font-mono font-semibold text-muted-foreground uppercase tracking-wider">Identity</th>
+                <th className="text-left pl-10 py-5 px-6 text-xs font-mono font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">Role</th>
+                <th className="text-left py-5 px-6 text-xs font-mono font-semibold text-muted-foreground uppercase tracking-wider hidden lg:table-cell">Registered</th>
+                <th className="w-24 py-5 px-6 text-center text-xs font-mono font-semibold text-muted-foreground uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-border/30">
               {users.map(user => (
-                <tr key={user.id} className="border-b hover:bg-muted/50 transition-colors duration-150">
-                  <td className="py-3 px-4">
-                    <p className="text-foreground font-medium">{user.fullName}</p>
-                    <p className="text-xs text-muted-foreground">{user.email}</p>
+                <tr key={user.id} className="hover:bg-muted/30 transition-colors group">
+                  <td className="py-4 px-6">
+                    <p className="text-foreground font-medium font-serif text-lg">{user.fullName}</p>
+                    <p className="text-xs text-muted-foreground font-mono mt-1">{user.email}</p>
                   </td>
-                  <td className="py-3 px-4 hidden sm:table-cell">
-                    <Badge className={cn('text-[10px] rounded capitalize', roleColor[user.role] ?? roleColor['student'])}>
-                      {user.role}
-                    </Badge>
-                  </td>
-                  <td className="py-3 px-4 hidden md:table-cell">
-                    <Badge className={cn('text-[10px] rounded capitalize border', user.status === 'active'
-                      ? 'bg-secondary text-muted-foreground'
-                      : 'bg-destructive/10 text-destructive border-destructive/20'
+
+                  <td className="py-4 px-6 hidden sm:table-cell">
+                    <Badge variant="outline" className={cn(
+                      'text-[10px] rounded-full uppercase font-mono tracking-wider px-3 py-1',
+                      user.roleName === 'admin' ? 'border-primary/50 text-primary bg-primary/5' : 'border-border text-muted-foreground'
                     )}>
-                      {user.status}
+                      {user.roleName}
                     </Badge>
                   </td>
-                  <td className="py-3 px-4 text-muted-foreground text-xs hidden lg:table-cell">
+
+                  <td className="py-4 px-6 text-muted-foreground text-xs font-mono hidden lg:table-cell">
                     {new Date(user.createdAt).toLocaleDateString()}
                   </td>
-                  <td className="py-3 px-4">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="bg-popover border w-44">
-                        {user.status === 'active' ? (
-                          <DropdownMenuItem
-                            onClick={() => updateStatus.mutate({ id: user.id, status: 'suspended' })}
-                            className="text-muted-foreground hover:text-foreground hover:bg-accent cursor-pointer"
-                          >
-                            <UserX className="h-4 w-4 mr-2" />
-                            Suspend
-                          </DropdownMenuItem>
-                        ) : (
-                          <DropdownMenuItem
-                            onClick={() => updateStatus.mutate({ id: user.id, status: 'active' })}
-                            className="text-muted-foreground hover:text-foreground hover:bg-accent cursor-pointer"
-                          >
-                            <UserCheck className="h-4 w-4 mr-2" />
-                            Activate
-                          </DropdownMenuItem>
-                        )}
-                        <DropdownMenuItem
-                          onClick={() => { setResetId(user.id); setNewPass('') }}
-                          className="text-muted-foreground hover:text-foreground hover:bg-accent cursor-pointer"
-                        >
-                          <Key className="h-4 w-4 mr-2" />
-                          Reset password
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+
+                  <td className="py-4 px-6 text-right">
+                    {user.status === 'active' ? (
+                      <Button variant="outline" onClick={() => updateStatus.mutate({ id: user.id, status: 'suspended' })} className="px-3 py-2.5 text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer rounded-xl transition-colors">
+                        Suspend Access
+                      </Button>
+                    ) : (
+                      <Button variant="outline" onClick={() => updateStatus.mutate({ id: user.id, status: 'active' })} className="px-3 py-2.5 text-primary focus:text-primary focus:bg-primary/10 cursor-pointer rounded-xl transition-colors">
+                        Restore Access
+                      </Button>
+                    )}
                   </td>
+
+
                 </tr>
               ))}
             </tbody>
@@ -167,88 +173,56 @@ export default function AdminUsersPage() {
 
       {/* Create User Dialog */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="bg-card border rounded-lg shadow-none p-0 max-w-md">
-          <div className="px-5 py-4 border-b">
-            <DialogTitle className="text-base font-semibold text-foreground">Create User</DialogTitle>
-            <DialogDescription className="text-sm text-muted-foreground mt-0.5">Add a new user to the system.</DialogDescription>
+        <DialogContent className="bg-card border border-border/60 rounded-[2rem] shadow-xl p-0 max-w-md overflow-hidden">
+          <div className="px-8 py-6 border-b border-border/40 bg-muted/10">
+            <DialogTitle className="text-2xl font-serif text-primary-ink">Register Identity</DialogTitle>
           </div>
           <form onSubmit={handleSubmit(onCreateSubmit)}>
-            <div className="p-5 space-y-4">
-              <div className="space-y-1.5">
-                <Label className="text-sm text-foreground">Full Name</Label>
-                <Input {...register('fullName')} className="bg-secondary border text-foreground" />
-                {errors.fullName && <p className="text-xs text-destructive">{errors.fullName.message}</p>}
+            <div className="p-8 space-y-5">
+              <div className="space-y-2">
+                <Label className="text-xs font-mono uppercase tracking-widest text-muted-foreground ml-1">Full Name</Label>
+                <Input {...register('fullName')} className="rounded-xl font-mono text-sm border-border/60 focus-visible:ring-primary h-11 px-4" />
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-sm text-foreground">Email</Label>
-                <Input {...register('email')} type="email" className="bg-secondary border text-foreground" />
-                {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
+              <div className="space-y-2">
+                <Label className="text-xs font-mono uppercase tracking-widest text-muted-foreground ml-1">Email</Label>
+                <Input {...register('email')} type="email" className="rounded-xl font-mono text-sm border-border/60 focus-visible:ring-primary h-11 px-4" />
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-sm text-foreground">Temporary Password</Label>
-                <Input {...register('temporaryPassword')} type="password" className="bg-secondary border text-foreground" />
-                {errors.temporaryPassword && <p className="text-xs text-destructive">{errors.temporaryPassword.message}</p>}
+              <div className="space-y-2">
+                <Label className="text-xs font-mono uppercase tracking-widest text-muted-foreground ml-1">Temp Password</Label>
+                <Input {...register('temporaryPassword')} type="password" className="rounded-xl font-mono text-sm border-border/60 focus-visible:ring-primary h-11 px-4" />
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-sm text-foreground">Role</Label>
-                <select
-                  {...register('role')}
-                  className="w-full h-9 rounded-md bg-secondary border text-foreground text-sm px-3"
-                >
-                  <option value="student">Student</option>
-                  <option value="lecturer">Lecturer</option>
-                  <option value="admin">Admin</option>
-                </select>
+              <div className="space-y-2">
+                <Label className="text-xs font-mono uppercase tracking-widest text-muted-foreground ml-1">Role</Label>
+                <Controller
+                  control={control}
+                  name="role"
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <SelectTrigger className="w-full h-11 rounded-xl bg-card border border-border/60 text-foreground font-mono text-sm px-4 focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:border-transparent transition-all shadow-sm">
+                        <SelectValue placeholder="Select a role" />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-xl border-border/60 bg-card shadow-lg font-mono text-sm">
+                        <SelectItem value="student" className="rounded-lg py-2.5 pl-9 pr-4 cursor-pointer focus:bg-muted/50">Student</SelectItem>
+                        <SelectItem value="lecturer" className="rounded-lg py-2.5 pl-9 pr-4 cursor-pointer focus:bg-muted/50">Lecturer</SelectItem>
+                        <SelectItem value="admin" className="rounded-lg py-2.5 pl-9 pr-4 cursor-pointer focus:bg-muted/50">Admin</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
               </div>
             </div>
-            <div className="px-5 py-4 border-t flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => setCreateOpen(false)} className="border bg-transparent text-muted-foreground hover:bg-secondary h-8 px-3 text-sm rounded-md">
+            <div className="px-8 py-5 border-t border-border/40 flex justify-end gap-3 bg-muted/10">
+              <Button type="button" variant="ghost" onClick={() => setCreateOpen(false)} className="rounded-full font-mono text-xs px-5 hover:bg-muted/50">
                 Cancel
               </Button>
-              <Button type="submit" disabled={isSubmitting} className="bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-3 text-sm rounded-md">
-                {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Create'}
+              <Button type="submit" disabled={isSubmitting} className="rounded-full font-mono text-xs tracking-wider px-6 shadow-sm">
+                {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Register'}
               </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
-
-      {/* Reset Password Dialog */}
-      <Dialog open={!!resetId} onOpenChange={v => !v && setResetId(null)}>
-        <DialogContent className="bg-card border rounded-lg shadow-none p-0 max-w-sm">
-          <div className="px-5 py-4 border-b">
-            <DialogTitle className="text-base font-semibold text-foreground">Reset Password</DialogTitle>
-          </div>
-          <div className="p-5 space-y-4">
-            <div className="space-y-1.5">
-              <Label className="text-sm text-foreground">New Password</Label>
-              <Input
-                type="password"
-                value={newPass}
-                onChange={e => setNewPass(e.target.value)}
-                className="bg-secondary border text-foreground"
-              />
-            </div>
-          </div>
-          <div className="px-5 py-4 border-t flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setResetId(null)} className="border bg-transparent text-muted-foreground hover:bg-secondary h-8 px-3 text-sm rounded-md">
-              Cancel
-            </Button>
-            <Button
-              disabled={!newPass || resetPassword.isPending}
-              onClick={async () => {
-                if (resetId && newPass) {
-                  await resetPassword.mutateAsync({ id: resetId, newPassword: newPass })
-                  setResetId(null)
-                }
-              }}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-3 text-sm rounded-md"
-            >
-              {resetPassword.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Reset'}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }
+

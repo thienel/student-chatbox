@@ -1,6 +1,7 @@
 import axiosInstance from '@/api/axiosInstance'
 import type {
-  ApiResponse, Exam, ExamDifficulty, ExamAttempt, Question, CreateOfficialExamInput, MyWeakTopics,
+  ApiResponse, CreateOfficialExamInput, GenerateExamRequest, SubmitAttemptRequest,
+  Exam, ExamAttempt, Question, MyWeakTopics
 } from '@/types'
 
 export const examsApi = {
@@ -38,13 +39,7 @@ export const examsApi = {
 
   generate: (
     subjectId: string,
-    data: {
-      questionCount?: number
-      difficulty?: ExamDifficulty
-      topic?: string
-      classId?: string
-      documentIds?: string[]
-    },
+    data: GenerateExamRequest,
   ) =>
     axiosInstance
       // AI generation runs an LLM call — override the short global timeout.
@@ -63,11 +58,7 @@ export const examsApi = {
     subjectId: string,
     examId: string,
     attemptId: string,
-    data: {
-      answers: Record<string, string>
-      action: 'save_progress' | 'submit'
-      timeSpentSecs?: number
-    },
+    data: SubmitAttemptRequest,
   ) =>
     axiosInstance
       .post<ApiResponse<ExamAttempt>>(

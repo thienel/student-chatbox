@@ -85,6 +85,17 @@ export class ClassTypeOrmRepository implements IClassRepository {
     return rows as ISubjectLecturer[];
   }
 
+  async listAvailableClasses(subjectId: string): Promise<any[]> {
+    const rows = await this.dataSource.query(
+      `SELECT c.id, c.name, u.id AS "lecturerId", u.full_name AS "lecturerName"
+       FROM classes c JOIN users u ON u.id = c.lecturer_id
+       WHERE c.subject_id = $1
+       ORDER BY c.name ASC`,
+      [subjectId],
+    );
+    return rows;
+  }
+
   async enrollStudent(classId: string, studentId: string): Promise<void> {
     await this.dataSource.query(
       `INSERT INTO class_enrollments (class_id, student_id) VALUES ($1, $2)

@@ -1,4 +1,4 @@
-import React from 'react'
+
 
 export function Logo({ className = '' }: { className?: string }) {
   return (
@@ -14,7 +14,7 @@ export function Logo({ className = '' }: { className?: string }) {
         fontFamily="Fraunces, serif" 
         fontWeight="600" 
         fontSize="48" 
-        fill="#1A1D1B"
+        fill="currentColor"
       >
         Folio
       </text>

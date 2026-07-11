@@ -5,7 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
 import { getErrorMessage } from '@/lib/errors'
-import { useExam, useStartAttempt } from './queries'
+import { useExam, useStartAttempt } from '@/api/queries/exams'
 
 export default function ExamDetailPage() {
   const { id: subjectId = '', examId = '' } = useParams<{ id: string; examId: string }>()

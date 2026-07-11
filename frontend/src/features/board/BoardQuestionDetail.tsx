@@ -5,14 +5,14 @@ import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useToast } from '@/hooks/use-toast'
-import { useAuthStore, usePermission } from '@/store/useAuthStore'
+import { useUserStore, usePermission } from '@/store/useUserStore'
 import { getErrorMessage } from '@/lib/errors'
 import { cn } from '@/lib/utils'
 import type { BoardQuestion } from '@/types'
 import {
   useBoardAnswers, useCreateAnswer, useDeleteAnswer, usePinAnswer, useUpvoteAnswer,
   useUpvoteQuestion, useCloseQuestion, useDeleteQuestion,
-} from './queries'
+} from '@/api/queries/board'
 
 interface Props {
   subjectId: string
@@ -29,7 +29,7 @@ const statusBadge: Record<string, string> = {
 
 export function BoardQuestionDetail({ subjectId, classId, question, onBack }: Props) {
   const { toast } = useToast()
-  const user = useAuthStore(s => s.user)
+  const user = useUserStore(s => s.user)
   const isModerator = usePermission('class:manage')
 
   const answers = useBoardAnswers(subjectId, classId, question.id)

@@ -34,7 +34,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         typeof exceptionResponse === 'string'
           ? exceptionResponse
           : (exceptionResponse as any).message || message;
-      code = this.getErrorCode(status);
+      code = (exceptionResponse as any).code || this.getErrorCode(status);
     } else {
       this.logger.error('Unexpected error:', exception);
     }

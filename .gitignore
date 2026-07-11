@@ -1,6 +1,7 @@
 # Environment
 .env
 .env.local
+.env.example
 
 # Dependencies
 node_modules/
@@ -26,3 +27,7 @@ Thumbs.db
 .idea/
 *.swp
 .gitnexus
+
+# AGENT
+.claude
+.agents

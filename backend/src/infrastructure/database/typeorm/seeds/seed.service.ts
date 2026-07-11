@@ -58,7 +58,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
         { name: 'subject:assign-lecturer', description: 'Assign lecturer to subject' },
         { name: 'subject:enroll', description: 'Self-enroll in subject' },
         { name: 'class:manage', description: 'Create and manage classes' },
-        { name: 'document:upload', description: 'Upload documents' },
+        { name: 'document:create', description: 'Upload/create documents' },
         { name: 'document:delete', description: 'Delete documents' },
         { name: 'document:read', description: 'View document list' },
         { name: 'ai:summarize-document', description: 'AI summarize a document' },
@@ -81,6 +81,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
         { name: 'analytics:read-own', description: 'View own subject analytics' },
         { name: 'analytics:read-all', description: 'View all analytics' },
         { name: 'rbac:manage', description: 'Manage roles and permissions' },
+        { name: 'user:manage', description: 'Manage user accounts and allowlist' },
       ];
 
       const permissions: Record<string, PermissionOrmEntity> = {};
@@ -97,7 +98,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
       // content inside a subject (documents/chat/flashcards/exams). Keeps
       // rbac:manage, so it can self-grant when truly needed.
       const adminPerms = [
-        'user:create', 'user:read-list', 'user:update', 'user:suspend',
+        'user:create', 'user:read-list', 'user:update', 'user:suspend', 'user:manage',
         'rbac:manage', 'system:manage-settings', 'system:read-audit-log',
         'subject:create', 'subject:update', 'subject:delete', 'subject:read',
         'subject:assign-lecturer', 'analytics:read-all',
@@ -114,13 +115,12 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
       // students, and view class stats. Does not study (no chat/flashcards/
       // exams).
       const lecturerPerms = [
-        'subject:read', 'class:manage',
-        'document:upload', 'document:delete', 'document:read',
+        'subject:read', 'subject:create', 'class:manage',
+        'document:create', 'document:delete', 'document:read',
         'ai:summarize-document',
         'exam:read', 'exam:create-official',
         'analytics:read-own',
-        'flashcard:create', 'flashcard:delete', 'flashcard:read', 
-        'flashcard:manage-own', 'flashcard:study', 'ai:generate-flashcard'
+        'flashcard:create', 'flashcard:delete', 'flashcard:read', 'flashcard:manage-own', 'ai:generate-flashcard',
       ];
       const lecturerRole = await roleRepo.findOne({
         where: { id: roles['lecturer'].id },
@@ -186,6 +186,22 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
         });
         await userRepo.save(adminUser);
         this.logger.log('Admin user created: admin@educhat.local / Admin@123456');
+      }
+
+      // Default lecturer user
+      const lecturerEmail = 'lecture@educhat.local';
+      let lecturerUser = await userRepo.findOne({ where: { email: lecturerEmail } });
+      if (!lecturerUser) {
+        const passwordHash = await bcrypt.hash('Lecture@123456', 12);
+        lecturerUser = userRepo.create({
+          email: lecturerEmail,
+          passwordHash,
+          fullName: 'Test Lecturer',
+          roleId: roles['lecturer'].id,
+          status: 'active',
+        });
+        await userRepo.save(lecturerUser);
+        this.logger.log('Lecturer user created: lecture@educhat.local / Lecture@123456');
       }
 
       // Default student user

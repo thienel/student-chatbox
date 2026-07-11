@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ChevronLeft, Loader2, CheckCircle2, Settings2, CalendarClock } from 'lucide-react'
+import { ChevronLeft, Loader2, Settings2, CalendarClock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -14,8 +14,9 @@ import { useQueryClient } from '@tanstack/react-query'
 import { cn } from '@/lib/utils'
 import {
   useStudyQueue, useStartStudySession, useReviewCard, useStudyStats,
-  useStudySettings, useUpdateStudySettings, studyKeys,
-} from './study-queries'
+  useStudySettings, useUpdateStudySettings,
+} from '@/api/queries/study'
+import { queryKeys } from '@/api/queryKeys'
 import type { CardRating } from '@/types'
 
 const RATINGS: { rating: CardRating; label: string; shortcut: string }[] = [
@@ -68,7 +69,7 @@ export default function StudySessionPage() {
       setReviewed(n => n + 1)
       if (res.sessionComplete || index >= cards.length - 1) {
         setDone(true)
-        qc.invalidateQueries({ queryKey: studyKeys.stats() })
+        qc.invalidateQueries({ queryKey: queryKeys.study.stats })
       } else {
         setIndex(i => i + 1)
         setFlipped(false)

@@ -3,6 +3,7 @@ import { ClassController } from './class.controller';
 import { CreateClassUseCase } from '../../../application/class/use-cases/create-class.use-case';
 import { ListSubjectClassesUseCase } from '../../../application/class/use-cases/list-subject-classes.use-case';
 import { ListSubjectLecturersUseCase } from '../../../application/class/use-cases/list-subject-lecturers.use-case';
+import { ListAvailableClassesUseCase } from '../../../application/class/use-cases/list-available-classes.use-case';
 import { EnrollByPasswordUseCase } from '../../../application/class/use-cases/enroll-by-password.use-case';
 import { UnenrollClassUseCase } from '../../../application/class/use-cases/unenroll-class.use-case';
 import { GetMyClassUseCase } from '../../../application/class/use-cases/get-my-class.use-case';
@@ -21,6 +22,7 @@ import { TypeOrmDatabaseModule } from '../../../infrastructure/database/typeorm/
     CreateClassUseCase,
     ListSubjectClassesUseCase,
     ListSubjectLecturersUseCase,
+    ListAvailableClassesUseCase,
     EnrollByPasswordUseCase,
     UnenrollClassUseCase,
     GetMyClassUseCase,

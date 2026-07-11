@@ -3,7 +3,7 @@ import { ClipboardList, ChevronRight, ChevronLeft } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { EmptyState } from '@/components/shared/EmptyState'
-import { useMyAttempts, useExams } from './queries'
+import { useMyAttempts, useExams } from '@/api/queries/exams'
 
 export default function ExamHistoryPage() {
   const { id: subjectId } = useParams<{ id?: string }>()

@@ -3,9 +3,9 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, RotateCcw, Shuffle, ChevronLeft, Brain } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { usePermission } from '@/store/useAuthStore'
+import { usePermission } from '@/store/useUserStore'
 import type { Flashcard } from '@/types'
-import { useFlashcardSet } from './queries'
+import { useFlashcardSet } from '@/api/queries/flashcards'
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr]

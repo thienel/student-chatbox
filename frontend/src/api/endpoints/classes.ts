@@ -1,7 +1,7 @@
 import axiosInstance from '@/api/axiosInstance'
 import type {
   ApiResponse, Class, SubjectLecturer, ClassStudent, ClassStats,
-  StudentEngagement, StudentEngagementDetail,
+  StudentEngagement, StudentEngagementDetail, CreateClassRequest, EnrollClassRequest
 } from '@/types'
 
 export const classesApi = {
@@ -11,7 +11,7 @@ export const classesApi = {
       .get<ApiResponse<Class[]>>(`/subjects/${subjectId}/classes`)
       .then(r => r.data.data),
 
-  create: (subjectId: string, data: { name: string; password: string }) =>
+  create: (subjectId: string, data: CreateClassRequest) =>
     axiosInstance
       .post<ApiResponse<Class>>(`/subjects/${subjectId}/classes`, data)
       .then(r => r.data.data),
@@ -50,13 +50,19 @@ export const classesApi = {
       .get<ApiResponse<SubjectLecturer[]>>(`/subjects/${subjectId}/lecturers`)
       .then(r => r.data.data),
 
+  // Student: available classes in a subject (for the enroll cards).
+  availableClasses: (subjectId: string) =>
+    axiosInstance
+      .get<ApiResponse<any[]>>(`/subjects/${subjectId}/classes/available`)
+      .then(r => r.data.data),
+
   // Student: the class they belong to in a subject (null if not enrolled).
   myClass: (subjectId: string) =>
     axiosInstance
       .get<ApiResponse<Class | null>>(`/subjects/${subjectId}/my-class`)
       .then(r => r.data.data),
 
-  enroll: (subjectId: string, data: { lecturerId: string; password: string }) =>
+  enroll: (subjectId: string, data: EnrollClassRequest) =>
     axiosInstance.post(`/subjects/${subjectId}/enroll`, data),
 
   unenroll: (subjectId: string) =>

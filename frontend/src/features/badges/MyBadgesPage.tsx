@@ -4,7 +4,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { cn } from '@/lib/utils'
-import { useMyBadges } from './queries'
+import { useMyBadges } from '@/api/queries/badges'
 
 const ICONS: Record<string, typeof Award> = {
   footprints: Footprints,
@@ -27,7 +27,7 @@ export default function MyBadgesPage() {
   const { data, isLoading } = useMyBadges()
 
   return (
-    <div className="max-w-3xl mx-auto px-6 py-6">
+    <div className="max-w-5xl mx-auto px-6 py-6">
       <div className="flex items-center gap-2 mb-1">
         <Award className="h-4 w-4 text-muted-foreground" />
         <h1 className="text-2xl font-heading font-medium text-ink tracking-tight">My Badges</h1>
@@ -35,7 +35,7 @@ export default function MyBadgesPage() {
       <p className="text-xs text-muted-foreground mb-6">Earn badges by studying, sharing, and acing exams.</p>
 
       {isLoading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
           {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-24 rounded-lg bg-muted" />)}
         </div>
       ) : !data ? (
@@ -48,7 +48,7 @@ export default function MyBadgesPage() {
           {data.earned.length === 0 ? (
             <p className="text-sm text-muted-foreground mb-6">No badges earned yet.</p>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-8">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 mb-8">
               {data.earned.map(b => {
                 const Icon = iconFor(b.iconKey)
                 return (
@@ -69,7 +69,7 @@ export default function MyBadgesPage() {
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
             Locked ({data.locked.length})
           </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
             {data.locked.map(b => {
               const Icon = iconFor(b.iconKey)
               return (

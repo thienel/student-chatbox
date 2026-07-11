@@ -8,7 +8,7 @@ import { EmptyState } from '@/components/shared/EmptyState'
 import { cn } from '@/lib/utils'
 import { useSubjectClass } from './ClassContext'
 import { NeedClassNotice } from './NeedClassNotice'
-import { useClassEngagement, useStudentEngagement } from './queries'
+import { useClassEngagement, useStudentEngagement } from '@/api/queries/classes'
 
 function fmtDate(d: string | null) {
   return d ? new Date(d).toLocaleDateString() : '—'

@@ -1,6 +1,7 @@
 import axiosInstance from '@/api/axiosInstance'
 import type {
   ApiResponse, BoardQuestion, BoardAnswer, BoardQuestionList, BoardQuestionStatus,
+  CreateBoardQuestionRequest, CreateBoardAnswerRequest,
 } from '@/types'
 
 const base = (subjectId: string, classId: string) =>
@@ -16,7 +17,7 @@ export const boardApi = {
       .get<ApiResponse<BoardQuestionList>>(`${base(subjectId, classId)}/questions`, { params })
       .then(r => r.data.data),
 
-  createQuestion: (subjectId: string, classId: string, data: { title: string; body: string }) =>
+  createQuestion: (subjectId: string, classId: string, data: CreateBoardQuestionRequest) =>
     axiosInstance
       .post<ApiResponse<BoardQuestion>>(`${base(subjectId, classId)}/questions`, data)
       .then(r => r.data.data),
@@ -39,9 +40,9 @@ export const boardApi = {
       .get<ApiResponse<BoardAnswer[]>>(`${base(subjectId, classId)}/questions/${questionId}/answers`)
       .then(r => r.data.data),
 
-  createAnswer: (subjectId: string, classId: string, questionId: string, body: string) =>
+  createAnswer: (subjectId: string, classId: string, questionId: string, data: CreateBoardAnswerRequest) =>
     axiosInstance
-      .post<ApiResponse<BoardAnswer>>(`${base(subjectId, classId)}/questions/${questionId}/answers`, { body })
+      .post<ApiResponse<BoardAnswer>>(`${base(subjectId, classId)}/questions/${questionId}/answers`, data)
       .then(r => r.data.data),
 
   deleteAnswer: (subjectId: string, classId: string, questionId: string, answerId: string) =>

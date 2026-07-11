@@ -1,8 +1,37 @@
-# Feature Specification — Student Chatbox Platform
+# Feature Specification — Folio (Student Chatbox Platform)
 
-**Version:** 1.1  
-**Date:** 2026-06-27  
-**Status:** Approved for development
+**Version:** 2.0  
+**Date:** 2026-07-08  
+**Status:** Implemented — this document reflects the as-built system
+
+> This is the original feature spec, updated to match the shipped code. Where the
+> implementation diverged from the original design, the divergence is called out
+> in a **⚠️ As-built** note. Two features that were added during build but were not
+> in the original spec — **Bookmarks** and **Admin Analytics** — are documented in
+> the "Additional Features" section at the end.
+
+---
+
+## Implementation Status & Key Deviations
+
+| Feature | Status | Deviation from original spec |
+|---------|--------|------------------------------|
+| EF1 — Per lecturer+subject knowledge base | ✅ Shipped | None — `documents.class_id` dropped; Qdrant scoped by `lecturer_id`+`subject_id` |
+| EF2 — Lecturer official exams | ✅ Shipped | `exam:create-official` also granted to **admin** |
+| F1 — FSRS study sessions | ✅ Shipped | None material |
+| F2 — Lecturer engagement stats | ✅ Shipped | Exposed as a **separate `/engagement` endpoint**, not by enhancing the existing students-list endpoint |
+| F3 — Community flashcards | ✅ Shipped | `flashcard:manage-own` is **student-only** (lecturers excluded) |
+| F4 — Badges | ✅ Shipped | **Idempotent lazy-on-read** evaluation, not per-event async |
+| F5 — Personalized study plan | ✅ Shipped | **Rule-based, generated lazily on read** — no Monday cron, no AI call |
+| F6 — Question board | ✅ Shipped | None material; wires the two board badges |
+| F7 — Document summary | ✅ Shipped | None material |
+| F8 — Weak topic detection | ✅ Shipped | `insufficient_data` topics are simply **not stored** (no such enum value) |
+| Bookmarks (new) | ✅ Shipped | Not in original spec |
+| Admin Analytics (new) | ✅ Shipped | Not in original spec |
+
+> **Persistence:** the backend runs TypeORM with `synchronize: true`. All tables below
+> are created from ORM entities on boot — there are **no migration files**. The "DB
+> Migration Order" section at the end is retained as a dependency reference only.
 
 ---
 
@@ -133,6 +162,16 @@ Edit an official exam (title, description, questions). Only allowed if zero atte
 |-----------|-------|
 | `exam:create-official` | lecturer, admin |
 
+> **⚠️ As-built:** `exam:create-official` is granted to **admin** in addition to
+> lecturer (admin may create an official exam targeting any class in the subject; a
+> lecturer must own the target class — resolved via `ClassContextService.resolveClassId`).
+
+#### Taking Exams (existing flow, unchanged)
+Both official and AI-generated exams are taken via the same attempt flow:
+- `POST /subjects/:subjectId/exams/:examId/attempts` — start an attempt.
+- `POST /subjects/:subjectId/exams/:examId/attempts/:attemptId` — submit answers (triggers scoring and F8 weak-topic recompute).
+- `GET /exam-attempts` and `GET /exam-attempts/:id` — the student's own attempt history and result detail.
+
 ---
 
 ## Overview
@@ -147,7 +186,9 @@ Edit an official exam (title, description, questions). Only allowed if zero atte
 | F6 | Question Board | Student, Lecturer | — |
 | F7 | Document Summary | Student, Lecturer | — |
 | F8 | Weak Topic Detection | Student | Exam data |
-| F9 | ~~Export Class Report~~ | ~~Lecturer~~ | Removed |
+| F9 | ~~Export Class Report~~ | ~~Lecturer~~ | Removed (not built) |
+| A1 | Bookmarks (added) | Student | — |
+| A2 | Admin Analytics (added) | Admin | AI usage logs |
 
 ---
 
@@ -241,7 +282,7 @@ See algorithm spec in `docs/fsrs-algorithm.md`. Default pre-trained weights `W[0
 | longest_streak | int | NOT NULL, default 0 |
 | total_sessions | int | NOT NULL, default 0 |
 | total_cards_reviewed | int | NOT NULL, default 0 |
-| last_studied_date | date | nullable, UTC |
+| last_studied_date | date | nullable, ICT calendar date |
 | new_cards_studied_today | int | NOT NULL, default 0 |
 | new_cards_today_date | date | nullable, ICT calendar date |
 
@@ -353,10 +394,15 @@ Give lecturers an all-time view of how each student in their class is engaging w
 - BR-F2-05: Per-exam breakdown shows each attempt with score and timestamp, not just aggregate.
 - BR-F2-06: Stats are computed on-read (no caching required in V1). If performance is an issue, caching is a V2 concern.
 
+> **⚠️ As-built:** Engagement stats are exposed through a **dedicated endpoint**
+> (`GET .../classes/:classId/engagement`) rather than by enhancing the plain
+> students-list endpoint. The students-list endpoint (`GET .../classes/:classId/students`)
+> remains lightweight; a full per-student stats endpoint also exists.
+
 ### API Endpoints
 
-#### `GET /subjects/:subjectId/classes/:classId/students`
-Enhanced endpoint — returns the student list with a `stats` object on each entry.
+#### `GET /subjects/:subjectId/classes/:classId/engagement`
+Returns the class roster with a `stats` object on each entry.
 
 **Permission:** `class:manage`  
 **Response:**
@@ -552,12 +598,18 @@ Award students permanent badges for reaching meaningful milestones across the pl
 
 ### Actors
 - **Student** — earns and views badges
-- **System** — evaluates badge conditions and awards them asynchronously
+- **System** — evaluates badge conditions and awards them idempotently
+
+> **⚠️ As-built:** Badge evaluation is **idempotent and lazy-on-read**
+> (`BadgeService.evaluateForUser` reads the user's current metrics, compares against
+> the `BADGE_CATALOGUE`, and awards any newly-qualified badge that isn't already held).
+> It is invoked on badge-read and after triggering actions; it is **not** a per-event
+> async queue. Because it recomputes from current data, re-running is always safe.
 
 ### Business Rules
-- BR-F4-01: Badges are **system-defined** and hardcoded. No admin UI to add/remove badges in V1.
+- BR-F4-01: Badges are **system-defined** and hardcoded (`domain/badge/badge-catalogue.ts`). No admin UI to add/remove badges in V1.
 - BR-F4-02: Each badge is awarded **at most once** per user. Re-qualifying does not re-award.
-- BR-F4-03: Badge evaluation happens **asynchronously** after the triggering event (not in the critical path of the action).
+- BR-F4-03: Badge evaluation is **idempotent**: it awards a badge only if its condition is met and the badge is not already held.
 - BR-F4-04: Badges are **global** — thresholds count across all subjects and classes.
 - BR-F4-05: Once awarded, a badge **cannot be revoked** by any actor (including admin) in V1.
 - BR-F4-06: Badge conditions are evaluated only for the user who performed the triggering action — not retroactively for all users.
@@ -638,10 +690,17 @@ Each Monday, the system generates a 7-day study plan for each student based on t
 
 ### Actors
 - **Student** — views their own plan
-- **System** — generates plans every Monday at 00:00 UTC
+- **System** — builds the plan on demand
+
+> **⚠️ As-built:** The study plan is **generated lazily on read** by a deterministic
+> **rule-based builder** (`domain/study/services/study-plan-builder.ts`), driven by the
+> student's current due-card count and weak topics (F8). There is **no Monday cron job
+> and no AI call** — BR-F5-01, BR-F5-09, and BR-F5-10 below describe the original
+> design and do not reflect the shipped behaviour. `GET /study-plan/current` builds and
+> persists the current week's plan on first request (BR-F5-03 holds).
 
 ### Business Rules
-- BR-F5-01: Plans are generated every **Monday at 00:00 Asia/Ho_Chi_Minh (ICT)** via a scheduled job for all active students (students who have logged in within the past 30 days).
+- BR-F5-01: ~~Plans are generated every Monday at 00:00 ICT via a scheduled job.~~ **Superseded:** plans are built lazily on first read of the current week (see as-built note).
 - BR-F5-02: A plan covers **Monday through Sunday** of the ICT week it is generated for.
 - BR-F5-03: If a student has no plan for the current week (e.g. new user), a plan is generated on their **first request** to `GET /study-plan/current`.
 - BR-F5-04: Only **one active plan** exists per student at a time. Generating a new plan for a student who already has one for the current week is a no-op (returns the existing plan).
@@ -649,8 +708,8 @@ Each Monday, the system generates a 7-day study plan for each student based on t
 - BR-F5-06: Plans are **private** — only the student themselves can view their own plan. Lecturers and admins cannot access student plans.
 - BR-F5-07: A plan contains exactly **7 daily entries** (one per day, Mon–Sun). A day may have zero tasks if no study is recommended.
 - BR-F5-08: Each task has a `type` (`review_flashcards`, `study_topic`, `take_exam`) and an estimated duration in minutes.
-- BR-F5-09: The AI prompt for plan generation receives: the student's weak topics (from F8), their flashcard sets with due card counts, and their recent exam scores. It does not receive chat history or personal messages.
-- BR-F5-10: If the AI service is unavailable during the Monday batch job, plan generation for affected students is retried once after 1 hour. If still failing, those students receive no plan for the week (graceful degradation).
+- BR-F5-09: ~~The AI prompt for plan generation receives weak topics, due card counts, and recent exam scores.~~ **Superseded:** no AI is used; the rule-based builder consumes the due-card count and weak topics directly.
+- BR-F5-10: ~~AI-unavailability retry/graceful-degradation for the batch job.~~ **Not applicable** — generation is synchronous and rule-based, so there is no AI dependency to degrade.
 - BR-F5-11: Plans are stored as JSON in the DB. The plan schema is versioned (`planVersion`) to handle future schema evolution.
 - BR-F5-12: A student who has no exam attempts and no flashcard progress receives a generic onboarding plan suggesting they upload documents, generate flashcards, and take an exam.
 
@@ -953,7 +1012,7 @@ After each exam submission, analyze the student's performance per topic and flag
 - BR-F8-04: Topics between 60–79% are classified as **developing** (not weak, not strong).
 - BR-F8-05: Topic classification uses **all-time** data across all exams in the subject, not just the most recent attempt.
 - BR-F8-06: The `weak_topics` table is **upserted** (not appended) after each exam — the classification for a topic can change from `weak` → `developing` → `strong` as a student improves.
-- BR-F8-07: If a student has attempted fewer than **5 questions** tagged to a topic across all exams, that topic is classified as `insufficient_data` and is excluded from weak topic recommendations.
+- BR-F8-07: If a student has attempted fewer than **5 questions** tagged to a topic across all exams, that topic has insufficient data. **⚠️ As-built:** such topics are simply **not written** to `student_weak_topics` (there is no `insufficient_data` classification value) — they are filtered out during `recompute`, so they never appear in the profile or recommendations.
 - BR-F8-08: Exam questions must have a `topic` field. Questions generated by the AI are expected to include a `topic` tag. Questions without a `topic` tag are excluded from weak topic analysis.
 
 ### DB Change to `questions`
@@ -968,7 +1027,7 @@ After each exam submission, analyze the student's performance per topic and flag
 | user_id | uuid | FK → users, NOT NULL |
 | subject_id | uuid | FK → subjects, NOT NULL |
 | topic | varchar(100) | NOT NULL |
-| classification | enum | `weak`, `developing`, `strong` |
+| classification | enum | `weak` (<60%), `developing` (60–79%), `strong` (≥80%) — rows for topics with < 5 attempted questions are not inserted |
 | total_questions | int | NOT NULL |
 | correct_count | int | NOT NULL |
 | correct_rate | float | NOT NULL, 0.0–1.0 |
@@ -1018,17 +1077,33 @@ to:
 ## Cross-Cutting Concerns
 
 ### Rate Limiting
-All AI-backed endpoints (`ai:summarize-document`, `ai:generate-flashcard`, `ai:generate-exam`, `ai:chat-rag`) share the existing `AiRateLimitGuard`. New AI feature keys must be registered in the guard's feature key map.
+All AI-backed endpoints share the `AiRateLimitGuard` via the `@AiFeature(...)` decorator. Feature keys and their seeded per-role daily limits (`ai_daily_limit.<role>.<feature>`, `-1` = unlimited):
 
-### Permissions Summary (New)
-| Permission | Feature | Roles |
-|-----------|---------|-------|
+| Feature key | Student | Lecturer | Admin |
+|-------------|:-------:|:--------:|:-----:|
+| `chat_rag` (`ai:chat-rag`) | 20 | 100 | ∞ |
+| `generate_flashcard` (`ai:generate-flashcard`) | 5 | 20 | ∞ |
+| `generate_exam` (`ai:generate-exam`) | 3 | 10 | ∞ |
+| `summarize_document` (`ai:summarize-document`) | 10 | 30 | ∞ |
+
+### Permissions Summary (New / As-built)
+| Permission | Feature | Roles (as seeded) |
+|-----------|---------|-------------------|
 | `flashcard:study` | F1 | student |
-| `flashcard:manage-own` | F3 | student, lecturer |
+| `flashcard:manage-own` | F3 | **student only** (lecturer excluded) |
 | `ai:summarize-document` | F7 | student, lecturer |
+| `exam:create-official` | EF2 | lecturer, **admin** |
+| `bookmark:manage` | A1 | student |
+| `analytics:read-own` | A2 / F2 | lecturer |
+| `analytics:read-all` | A2 | admin |
 
-### DB Migration Order
-Migrations must be applied in this order to respect FK dependencies:
+### Persistence Model (As-built)
+The backend runs TypeORM with `synchronize: true`; the schema is derived from ORM
+entities at boot and there are **no migration files**. The ordered list below is kept
+only as a table-dependency reference and to document the EF1 Qdrant re-index step.
+
+### DB Table Dependency Order (reference)
+Tables are created from ORM entities; this order respects FK dependencies:
 1. **Drop `class_id` from `documents`** (EF1 — knowledge base re-architecture)
 2. Add `topic` column to `questions` (EF2 + F8)
 3. Add `star_count`, `cloned_from_id`, `published_at` to `flashcard_sets` (F3)
@@ -1045,4 +1120,55 @@ Migrations must be applied in this order to respect FK dependencies:
 14. Create `student_weak_topics` (F8)
 15. Create `student_study_plans` (F5)
 
-> **Post-migration re-indexing:** After migration #1, all existing document vectors in Qdrant are stale (they have `class_id` payload but no `lecturer_id`). Reset all `documents.status` to `processing` and re-trigger `processDocument` for each document to re-index with the new `lecturer_id` payload.
+> **EF1 re-indexing:** Because EF1 changes the Qdrant payload from `class_id` to
+> `lecturer_id` + `subject_id`, any documents indexed under the old scheme are stale.
+> Reset affected `documents.status` to `processing` and re-trigger `processDocument`
+> to re-index with the new payload.
+
+---
+
+## Additional Features (added during build, not in original spec)
+
+### A1 — Bookmarks
+
+#### Purpose
+Let students bookmark platform resources for quick return, with an optional note.
+
+#### Business Rules
+- BR-A1-01: Bookmarks are **per-user and private**. A user only ever sees their own.
+- BR-A1-02: A bookmark targets one of four resource types: `document`, `flashcard_set`, `exam`, `message` (`BookmarkResourceType`).
+- BR-A1-03: A bookmark may carry an optional free-text `note`.
+
+#### DB Table: `bookmarks`
+| Column | Type | Constraints |
+|--------|------|-------------|
+| id | uuid | PK |
+| user_id | uuid | FK → users, NOT NULL |
+| resource_type | varchar(30) | NOT NULL (`document`\|`flashcard_set`\|`exam`\|`message`) |
+| resource_id | uuid | NOT NULL |
+| note | text | nullable |
+| created_at | timestamptz | NOT NULL |
+
+#### API Endpoints
+Base path: `/bookmarks` — **Permission:** `bookmark:manage` (student)
+- `GET /bookmarks?resourceType=` — list the caller's bookmarks, optionally filtered by type.
+- `POST /bookmarks` — add a bookmark. Body: `{ resourceType, resourceId, note? }`.
+- `DELETE /bookmarks/:id` — remove one of the caller's bookmarks.
+
+---
+
+### A2 — Admin Analytics
+
+#### Purpose
+Give admins a platform-wide operational view: overall usage/stats and AI consumption.
+
+#### Business Rules
+- BR-A2-01: Analytics endpoints are **admin-only** (`analytics:read-all`) and cover the whole platform (no per-class scoping).
+- BR-A2-02: Lecturer-facing engagement/class stats use `analytics:read-own` and are covered by **F2**.
+
+#### API Endpoints
+Base path: `/analytics` — **Permission:** `analytics:read-all` (admin)
+- `GET /analytics/overview` — platform-wide summary stats (`GetAdminStatsUseCase`).
+- `GET /analytics/ai-usage` — AI usage/consumption breakdown from `ai_usage_log` (`GetAiUsageUseCase`).
+
+> Related admin/system endpoints (pre-existing): `GET /system/stats`, `GET /system/audit-logs`, and `GET|PATCH /system/settings` (which is where AI daily-limit settings are edited).

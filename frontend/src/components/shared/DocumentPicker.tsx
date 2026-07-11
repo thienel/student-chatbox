@@ -1,5 +1,5 @@
 import { Check, FileText } from 'lucide-react'
-import { useSubjectDocuments } from '@/features/subjects/queries'
+import { useSubjectDocuments } from '@/api/queries/subjects'
 import { cn } from '@/lib/utils'
 
 /**

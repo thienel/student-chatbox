@@ -17,19 +17,16 @@ export class EnrollByPasswordUseCase {
       throw new ConflictException('You are already enrolled in a class for this subject');
     }
 
-    const candidates = await this.classRepo.listBySubjectAndLecturer(subjectId, dto.lecturerId);
-    let target: { id: string } | undefined;
-    for (const c of candidates) {
-      if (await bcrypt.compare(dto.password, c.passwordHash)) {
-        target = c;
-        break;
-      }
-    }
-    if (!target) {
-      throw new BadRequestException('Invalid lecturer or class password');
+    const cls = await this.classRepo.findById(dto.classId);
+    if (!cls || cls.subjectId !== subjectId) {
+      throw new BadRequestException('Class not found in this subject');
     }
 
-    await this.classRepo.enrollStudent(target.id, studentId);
-    return { classId: target.id };
+    if (!(await bcrypt.compare(dto.password, cls.passwordHash))) {
+      throw new BadRequestException('Invalid class password');
+    }
+
+    await this.classRepo.enrollStudent(cls.id, studentId);
+    return { classId: cls.id };
   }
 }
