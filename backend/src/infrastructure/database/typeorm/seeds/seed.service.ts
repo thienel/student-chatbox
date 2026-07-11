@@ -119,6 +119,8 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
         'ai:summarize-document',
         'exam:read', 'exam:create-official',
         'analytics:read-own',
+        'flashcard:create', 'flashcard:delete', 'flashcard:read', 
+        'flashcard:manage-own', 'flashcard:study', 'ai:generate-flashcard'
       ];
       const lecturerRole = await roleRepo.findOne({
         where: { id: roles['lecturer'].id },
