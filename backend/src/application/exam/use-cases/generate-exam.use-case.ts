@@ -1,4 +1,4 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { IExamRepository } from '../../../domain/exam/repositories/exam.repository.interface';
 import { ISubjectRepository } from '../../../domain/subject/repositories/subject.repository.interface';
 import { IAiUsageLogRepository } from '../../../domain/system/repositories/ai-usage-log.repository.interface';
@@ -30,6 +30,10 @@ export class GenerateExamUseCase {
     const generatedQuestions = await this.aiServiceClient.generateExam(
       subjectId, lecturerId, questionCount, difficulty, dto.topic, dto.documentIds,
     );
+
+    if (!generatedQuestions || generatedQuestions.length === 0) {
+      throw new UnprocessableEntityException('Failed to generate exam questions. Please check if the subject has processed documents.');
+    }
 
     const title = dto.topic
       ? `Đề thi AI: ${dto.topic} (${difficulty})`

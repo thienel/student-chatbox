@@ -13,8 +13,10 @@ export class OtpTokenEntity {
   @Index()
   email: string;
 
-  @Column()
-  code: string;
+  // Stored in the existing `code` column for a backwards-compatible migration.
+  // Its value is always a bcrypt hash, never the OTP itself.
+  @Column({ name: 'code' })
+  codeHash: string;
 
   @Column()
   type: string;
@@ -24,6 +26,9 @@ export class OtpTokenEntity {
 
   @Column({ name: 'used_at', nullable: true })
   usedAt?: Date;
+
+  @Column({ name: 'failed_attempts', type: 'int', default: 0 })
+  failedAttempts: number;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

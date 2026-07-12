@@ -32,7 +32,7 @@ const ChatContainer = ({ chatId, initialMessages, chatTitle, subjectName }: Chat
       await sendMessage(
         chatId,
         content,
-        (_chunk) => {
+        (_chunk: string) => {
           // chunks are accumulated in currentStreamContent via the hook
         },
         (sources: MessageSource[], fullContent: string) => {

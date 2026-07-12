@@ -116,6 +116,10 @@ export class StudentVerificationService {
     if (request.status === VerificationRequestStatus.APPROVED) {
       throw new BadRequestException('Yêu cầu đã được duyệt trước đó.');
     }
+    const user = await this.userRepo.findById(request.userId);
+    if (!user || user.status !== UserStatus.PENDING_MANUAL_VERIFICATION || !user.emailVerifiedAt) {
+      throw new BadRequestException('The student must verify their email before manual approval.');
+    }
 
     // 1. Update verification request
     request.status = VerificationRequestStatus.APPROVED;

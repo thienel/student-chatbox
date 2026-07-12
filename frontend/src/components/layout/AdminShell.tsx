@@ -26,7 +26,7 @@ export function AdminShell() {
       <Topbar />
       
       {/* Left Sidebar */}
-      <aside className="fixed left-0 top-14 w-64 h-[calc(100vh-3.5rem)] bg-card border-r border-border/50 shadow-sm z-30 flex flex-col rounded-tr-3xl overflow-hidden">
+      <aside className="fixed left-0 top-24 w-64 h-[calc(100vh-6rem)] bg-card border-r border-border/50 shadow-sm z-30 flex flex-col rounded-tr-3xl overflow-hidden">
         <div className="p-6 pb-2">
           <h2 className="text-xs font-mono uppercase tracking-widest text-muted-foreground font-semibold">Admin Panel</h2>
         </div>
@@ -71,7 +71,7 @@ export function AdminShell() {
         </div>
       </aside>
 
-      <main className="ml-64 pt-14 pb-20 min-h-screen">
+      <main className="ml-64 pt-24 pb-20 min-h-screen">
         <Outlet />
       </main>
       <Dock />

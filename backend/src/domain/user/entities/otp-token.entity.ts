@@ -7,10 +7,11 @@ export class OtpToken {
   id: string;
   userId?: string;
   email: string;
-  code: string;
+  codeHash: string;
   type: OtpTokenType;
   expiresAt: Date;
   usedAt?: Date | null;
+  failedAttempts: number;
   createdAt: Date;
   updatedAt: Date;
 

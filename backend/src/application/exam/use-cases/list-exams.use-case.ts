@@ -10,8 +10,9 @@ export class ListExamsUseCase {
   ) {}
 
   async execute(classId: string, user: User) {
-    // Exams are private to the student who generated them.
+    // Official exams are visible to everyone in the class.
+    // AI generated exams are private to the user who generated them.
     const exams = await this.examRepo.findExamsByClassId(classId);
-    return exams.filter((e) => e.createdBy === user.id);
+    return exams.filter((e) => e.type === 'official' || e.createdBy === user.id);
   }
 }

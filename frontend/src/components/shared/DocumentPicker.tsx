@@ -42,7 +42,7 @@ export function DocumentPicker({
               type="button"
               onClick={() => toggle(doc.id)}
               className={cn(
-                'w-full flex items-center gap-2 px-2 py-1.5 rounded text-left text-sm transition-colors duration-150',
+                'w-full flex min-w-0 items-center gap-2 px-2 py-1.5 rounded text-left text-sm transition-colors duration-150',
                 selected ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-secondary/50',
               )}
             >
@@ -55,7 +55,7 @@ export function DocumentPicker({
                 {selected && <Check className="h-3 w-3" />}
               </span>
               <FileText className="h-3.5 w-3.5 opacity-70 shrink-0" />
-              <span className="truncate">{doc.originalName}</span>
+              <span className="truncate flex-1 min-w-0 text-left">{doc.originalName}</span>
             </button>
           )
         })}

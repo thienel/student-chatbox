@@ -8,7 +8,7 @@ import { TOKENS } from '../../../shared/constants/tokens';
 export interface TokenPayload {
   sub: string;
   email: string;
-  role: string;
+  roleName: string;
   permissions: string[];
 }
 

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { IExamRepository } from '../../../../domain/exam/repositories/exam.repository.interface';
 import { Exam } from '../../../../domain/exam/entities/exam.entity';
 import { Question } from '../../../../domain/exam/entities/question.entity';
@@ -18,6 +18,7 @@ export class ExamTypeOrmRepository implements IExamRepository {
     private readonly questionRepo: Repository<QuestionOrmEntity>,
     @InjectRepository(ExamAttemptOrmEntity)
     private readonly attemptRepo: Repository<ExamAttemptOrmEntity>,
+    private readonly dataSource: DataSource,
   ) {}
 
   private toExam(o: ExamOrmEntity): Exam {
@@ -66,6 +67,38 @@ export class ExamTypeOrmRepository implements IExamRepository {
       createdBy: data.createdBy,
     }));
     return this.toExam(saved);
+  }
+
+  async createExamWithQuestions(
+    exam: Partial<Exam>, questions: Array<Partial<Question>>,
+  ): Promise<{ exam: Exam; questions: Question[] }> {
+    return this.dataSource.transaction(async (manager) => {
+      const savedExam = await manager.save(ExamOrmEntity, manager.create(ExamOrmEntity, {
+        subjectId: exam.subjectId,
+        classId: exam.classId,
+        title: exam.title,
+        description: exam.description ?? null,
+        type: exam.type,
+        difficulty: exam.difficulty ?? null,
+        durationMinutes: exam.durationMinutes ?? 0,
+        questionCount: exam.questionCount ?? questions.length,
+        isPublic: exam.isPublic ?? false,
+        createdBy: exam.createdBy,
+      }));
+      const savedQuestions = await manager.save(QuestionOrmEntity, manager.create(
+        QuestionOrmEntity,
+        questions.map((q) => ({
+          examId: savedExam.id,
+          content: q.content,
+          options: q.options as object,
+          correctAnswer: q.correctAnswer,
+          explanation: q.explanation ?? null,
+          topic: q.topic ?? null,
+          position: q.position ?? 0,
+        })),
+      ));
+      return { exam: this.toExam(savedExam), questions: savedQuestions.map((q) => this.toQuestion(q)) };
+    });
   }
 
   async updateExam(id: string, data: Partial<Exam>): Promise<Exam> {
@@ -119,12 +152,68 @@ export class ExamTypeOrmRepository implements IExamRepository {
     return this.attemptRepo.count({ where: { examId } });
   }
 
+  async updateOfficialExamIfUnattempted(
+    id: string,
+    data: Partial<Exam>,
+    replacementQuestions?: Array<Partial<Question>>,
+  ): Promise<{ exam: Exam; questions: Question[] } | null> {
+    return this.dataSource.transaction(async (manager) => {
+      const exam = await manager.findOne(ExamOrmEntity, {
+        where: { id },
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (!exam) return null;
+
+      // Starting an attempt obtains a shared lock on the same exam, so this
+      // check cannot be bypassed by a concurrent attempt creation.
+      const attemptCount = await manager.count(ExamAttemptOrmEntity, { where: { examId: id } });
+      if (attemptCount > 0) return null;
+
+      if (data.title !== undefined) exam.title = data.title;
+      if (data.description !== undefined) exam.description = data.description ?? null;
+      if (data.durationMinutes !== undefined) exam.durationMinutes = data.durationMinutes;
+      if (data.questionCount !== undefined) exam.questionCount = data.questionCount;
+      const savedExam = await manager.save(ExamOrmEntity, exam);
+
+      let savedQuestions: QuestionOrmEntity[];
+      if (replacementQuestions) {
+        await manager.delete(QuestionOrmEntity, { examId: id });
+        savedQuestions = await manager.save(QuestionOrmEntity, manager.create(
+          QuestionOrmEntity,
+          replacementQuestions.map((q) => ({
+            examId: id,
+            content: q.content,
+            options: q.options as object,
+            correctAnswer: q.correctAnswer,
+            explanation: q.explanation ?? null,
+            topic: q.topic ?? null,
+            position: q.position ?? 0,
+          })),
+        ));
+      } else {
+        savedQuestions = await manager.find(QuestionOrmEntity, {
+          where: { examId: id }, order: { position: 'ASC' },
+        });
+      }
+
+      return { exam: this.toExam(savedExam), questions: savedQuestions.map((q) => this.toQuestion(q)) };
+    });
+  }
+
   async createAttempt(data: Partial<ExamAttempt>): Promise<ExamAttempt> {
-    const saved = await this.attemptRepo.save(this.attemptRepo.create({
-      examId: data.examId, userId: data.userId,
-      answers: data.answers ?? {}, status: data.status ?? 'in_progress',
-    }));
-    return this.toAttempt(saved);
+    return this.dataSource.transaction(async (manager) => {
+      // Coordinates with official-exam editing's exclusive lock.
+      await manager.findOneOrFail(ExamOrmEntity, {
+        where: { id: data.examId }, lock: { mode: 'pessimistic_read' },
+      });
+      const saved = await manager.save(ExamAttemptOrmEntity, manager.create(ExamAttemptOrmEntity, {
+        examId: data.examId,
+        userId: data.userId,
+        answers: data.answers ?? {},
+        status: data.status ?? 'in_progress',
+      }));
+      return this.toAttempt(saved);
+    });
   }
 
   async findAttemptById(id: string): Promise<ExamAttempt | null> {
@@ -146,15 +235,30 @@ export class ExamTypeOrmRepository implements IExamRepository {
   }
 
   async updateAttempt(id: string, data: Partial<ExamAttempt>): Promise<ExamAttempt> {
-    await this.attemptRepo.update(id, {
-      answers: data.answers as object,
-      score: data.score ?? undefined,
-      totalQuestions: data.totalQuestions,
-      correctCount: data.correctCount,
-      status: data.status,
-      completedAt: data.completedAt ?? undefined,
-      timeSpentSecs: data.timeSpentSecs,
-    });
+    const updateData: Partial<ExamAttemptOrmEntity> = {};
+    if (data.answers !== undefined) updateData.answers = data.answers as object;
+    if (data.score !== undefined) updateData.score = data.score;
+    if (data.totalQuestions !== undefined) updateData.totalQuestions = data.totalQuestions;
+    if (data.correctCount !== undefined) updateData.correctCount = data.correctCount;
+    if (data.status !== undefined) updateData.status = data.status;
+    if (data.completedAt !== undefined) updateData.completedAt = data.completedAt;
+    if (data.timeSpentSecs !== undefined) updateData.timeSpentSecs = data.timeSpentSecs;
+    await this.attemptRepo.update(id, updateData);
+    const updated = await this.attemptRepo.findOneOrFail({ where: { id } });
+    return this.toAttempt(updated);
+  }
+
+  async updateInProgressAttempt(id: string, data: Partial<ExamAttempt>): Promise<ExamAttempt | null> {
+    const updateData: Partial<ExamAttemptOrmEntity> = {};
+    if (data.answers !== undefined) updateData.answers = data.answers as object;
+    if (data.score !== undefined) updateData.score = data.score;
+    if (data.totalQuestions !== undefined) updateData.totalQuestions = data.totalQuestions;
+    if (data.correctCount !== undefined) updateData.correctCount = data.correctCount;
+    if (data.status !== undefined) updateData.status = data.status;
+    if (data.completedAt !== undefined) updateData.completedAt = data.completedAt;
+    if (data.timeSpentSecs !== undefined) updateData.timeSpentSecs = data.timeSpentSecs;
+    const result = await this.attemptRepo.update({ id, status: 'in_progress' }, updateData);
+    if (result.affected !== 1) return null;
     const updated = await this.attemptRepo.findOneOrFail({ where: { id } });
     return this.toAttempt(updated);
   }

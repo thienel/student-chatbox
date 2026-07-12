@@ -11,8 +11,11 @@ logger = logging.getLogger(__name__)
 
 _SYSTEM_PROMPT = (
     "You are a study assistant. Summarize the course document below into clear "
-    "bullet points capturing the key concepts. Use at most 500 words. Respond in "
-    "the same language as the document. Return only the bullet points."
+    "bullet points capturing the key concepts. Use at most 500 words.\n\n"
+    "CRITICAL INSTRUCTION: You MUST detect the primary language of the document (e.g., English, Vietnamese) "
+    "and write the ENTIRE summary in that exact same primary language. Do NOT translate the summary into "
+    "a random language (like Spanish or French) unless the document is actually written in that language.\n\n"
+    "Return only the bullet points."
 )
 
 

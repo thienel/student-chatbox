@@ -76,6 +76,13 @@ export const useSubjectDocuments = (subjectId: string) => {
     queryKey: queryKeys.subjects.documents(subjectId),
     queryFn: () => subjectsApi.getDocuments(subjectId),
     enabled: !!subjectId,
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      if (Array.isArray(data) && data.some((d: any) => d.status === 'processing')) {
+        return 3000;
+      }
+      return false;
+    }
   })
 }
 

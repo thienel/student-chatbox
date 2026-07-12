@@ -36,7 +36,7 @@ async def generate_exam(
         query_vector: list[float] = await asyncio.to_thread(embeddings.embed_query, topic)
         chunks = await asyncio.to_thread(
             qdrant_service.search_similar,
-            query_vector, lecturer_id, subject_id, min(20, question_count * 2), 0.3, document_ids,
+            query_vector, lecturer_id, subject_id, min(20, question_count * 2), 0.0, document_ids,
         )
     else:
         chunks = await asyncio.to_thread(

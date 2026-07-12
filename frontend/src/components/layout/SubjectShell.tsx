@@ -37,11 +37,13 @@ export function SubjectShell() {
     <SubjectClassProvider subjectId={id}>
       <div className="min-h-screen bg-background">
         <Topbar />
-        <div className="fixed top-12 left-0 right-0 z-[39]">
-          <SubjectTabs subjectId={id} />
-          <ClassBar />
+        <div className="fixed top-[5.5rem] left-0 right-0 z-[39] flex justify-center pointer-events-none px-4 sm:px-6">
+          <div className="w-full max-w-5xl bg-background/95 backdrop-blur-md border border-border shadow-sm rounded-2xl pointer-events-auto overflow-hidden flex flex-col transition-all duration-200">
+            <SubjectTabs subjectId={id} />
+            <ClassBar />
+          </div>
         </div>
-        <main className="pt-[7.75rem] pb-20 min-h-screen">
+        <main className="pt-[12rem] pb-20 min-h-screen">
           <SubjectBody subjectId={id} />
         </main>
         <Dock />

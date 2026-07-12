@@ -1,9 +1,11 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useLayoutEffect, useEffect, useCallback } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { ArrowLeft, ArrowRight, RotateCcw, Shuffle, ChevronLeft, Brain } from 'lucide-react'
+import { ArrowLeft, ArrowRight, RotateCcw, Shuffle, ChevronLeft, Brain, Layers } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { EmptyState } from '@/components/shared/EmptyState'
 import { usePermission } from '@/store/useUserStore'
+import { useSubjectClass } from '@/features/classes/ClassContext'
 import type { Flashcard } from '@/types'
 import { useFlashcardSet } from '@/api/queries/flashcards'
 
@@ -20,17 +22,23 @@ export default function FlashcardStudyPage() {
   const { id: subjectId = '', setId = '' } = useParams<{ id: string; setId: string }>()
   const navigate = useNavigate()
   const canStudy = usePermission('flashcard:study')
+  const { basePath } = useSubjectClass()
   const { data, isLoading } = useFlashcardSet(subjectId, setId)
 
-  const [cards, setCards] = useState<Flashcard[]>([])
+  // displayCards is initialized from data when first available and supports shuffle mutation
+  const [displayCards, setDisplayCards] = useState<Flashcard[]>([])
   const [index, setIndex] = useState(0)
   const [flipped, setFlipped] = useState(false)
   const [isAnimating, setIsAnimating] = useState(false)
 
-  useEffect(() => {
-    if (data?.cards) setCards(data.cards)
-  }, [data])
+  // useLayoutEffect syncs state from external data without triggering cascading renders
+  useLayoutEffect(() => {
+    if (!data?.cards) return
+    setDisplayCards(data.cards)
+    setIndex(0)
+  }, [data?.cards])
 
+  const cards = displayCards
   const total = cards.length
   const card = cards[index]
 
@@ -54,13 +62,13 @@ export default function FlashcardStudyPage() {
   }, [isAnimating])
 
   const doShuffle = () => {
-    setCards(c => shuffle(c))
+    setDisplayCards(c => shuffle(c))
     setIndex(0)
     setFlipped(false)
   }
 
   const doReset = () => {
-    if (data?.cards) setCards(data.cards)
+    setDisplayCards(data?.cards ?? [])
     setIndex(0)
     setFlipped(false)
   }
@@ -84,14 +92,31 @@ export default function FlashcardStudyPage() {
     )
   }
 
-  if (!data || total === 0) return null
+  if (!data || total === 0) {
+    return (
+      <div className="max-w-2xl mx-auto px-6 py-6">
+        <button
+          onClick={() => navigate(`${basePath}/flashcards`)}
+          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors duration-150 mb-8"
+        >
+          <ChevronLeft className="h-4 w-4" />
+          {data?.set?.title ?? 'Flashcards'}
+        </button>
+        <EmptyState
+          icon={Layers}
+          title="No cards yet"
+          description="This flashcard set is empty. Add some cards to start studying."
+        />
+      </div>
+    )
+  }
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <button
-          onClick={() => navigate(`/subjects/${subjectId}/flashcards`)}
+          onClick={() => navigate(`${basePath}/flashcards`)}
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors duration-150"
         >
           <ChevronLeft className="h-4 w-4" />
@@ -103,7 +128,7 @@ export default function FlashcardStudyPage() {
               asChild
               className="bg-primary text-primary-foreground hover:bg-primary/90 h-7 px-2.5 text-xs font-medium rounded-md"
             >
-              <Link to={`/subjects/${subjectId}/flashcards/${setId}/study`}>
+              <Link to={`${basePath}/flashcards/${setId}/study`}>
                 <Brain className="h-3.5 w-3.5 mr-1.5" />
                 Study (SRS)
               </Link>

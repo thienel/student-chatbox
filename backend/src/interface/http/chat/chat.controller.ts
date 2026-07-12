@@ -62,14 +62,14 @@ export class ChatController {
   @Get(':id')
   @RequirePermission('chat:read-own')
   async getChat(@Param('id') id: string, @CurrentUser() user: any) {
-    return this.getChatUseCase.execute(id, user.id, user.role === 'admin');
+    return this.getChatUseCase.execute(id, user.id, user.roleName === 'admin');
   }
 
   @Delete(':id')
   @RequirePermission('chat:read-own')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteChat(@Param('id') id: string, @CurrentUser() user: any) {
-    await this.deleteChatUseCase.execute(id, user.id, user.role === 'admin');
+    await this.deleteChatUseCase.execute(id, user.id, user.roleName === 'admin');
   }
 
   @Post(':id/messages')

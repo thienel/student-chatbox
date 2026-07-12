@@ -8,7 +8,7 @@ import { TOKENS } from '../../shared/constants/tokens';
 export interface JwtPayload {
   sub: string;
   email: string;
-  role: string;
+  roleName: string;
   permissions: string[];
 }
 
@@ -21,7 +21,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: config.get<string>('JWT_SECRET', 'default-secret'),
+      secretOrKey: config.getOrThrow<string>('JWT_SECRET'),
     });
   }
 
@@ -39,7 +39,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     return {
       id: user.id,
       email: user.email,
-      role: user.roleId, // or whatever role field is needed
+      roleId: user.roleId,
       permissions: user.permissions || [],
       roleName: user.roleName,
     };

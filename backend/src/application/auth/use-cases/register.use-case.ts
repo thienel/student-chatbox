@@ -83,15 +83,16 @@ export class RegisterUseCase {
       }
     }
 
-    // 5. Create User (Active directly for testing)
+    // 5. Every new account must prove ownership of its email before it can
+    // access the system. Domain/allowlist checks only decide the state after
+    // that proof succeeds.
     const user = await this.userRepo.create({
       email,
       fullName: dto.fullName,
       passwordHash,
       roleId: role.id,
       studentCode: dto.studentCode,
-      status: UserStatus.ACTIVE,
-      emailVerifiedAt: new Date(),
+      status: UserStatus.PENDING_EMAIL_VERIFICATION,
       registrationSource,
     });
 
@@ -120,7 +121,7 @@ export class RegisterUseCase {
 
     return {
       message: 'Tài khoản đã được tạo và kích hoạt thành công. Bạn có thể đăng nhập ngay.',
-      code: 'ACTIVE'
+      code: 'PENDING_EMAIL_VERIFICATION'
     };
   }
 }

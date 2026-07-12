@@ -53,11 +53,7 @@ export const authApi = {
     axiosInstance.post<ApiResponse<ResetPasswordResponse>>('/auth/reset-password', { email, otp, newPassword }).then(r => r.data),
 
   me: () =>
-    axiosInstance.get<ApiResponse<any>>('/auth/me').then(r => {
-      const u = r.data.data
-      if (u.roleName && !u.role) u.role = u.roleName
-      return u as User
-    }),
+    axiosInstance.get<ApiResponse<User>>('/auth/me').then(r => r.data.data),
 
   logout: () =>
     axiosInstance.post('/auth/logout', {}, { withCredentials: true }),

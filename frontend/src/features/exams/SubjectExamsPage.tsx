@@ -26,7 +26,8 @@ const difficultyLabel: Record<ExamDifficulty, string> = {
 export default function SubjectExamsPage() {
   const { id: subjectId = '' } = useParams<{ id: string }>()
   const user = useUserStore(s => s.user)
-  const canGenerate = user?.permissions?.includes('ai:generate-exam')
+  const { classId, isLecturer, needsClass, basePath } = useSubjectClass()
+  const canGenerate = user?.permissions?.includes('ai:generate-exam') && !isLecturer
   const canCreateOfficial = user?.permissions?.includes('exam:create-official')
   const { toast } = useToast()
 
@@ -36,7 +37,6 @@ export default function SubjectExamsPage() {
   const [difficulty, setDifficulty] = useState<ExamDifficulty>('medium')
   const [documentIds, setDocumentIds] = useState<string[]>([])
 
-  const { classId, isLecturer, needsClass } = useSubjectClass()
   const { data: exams = [], isLoading } = useExams(subjectId, classId)
   const generate = useGenerateExam(subjectId, classId)
   const { data: attempts = [] } = useMyAttempts()
@@ -80,7 +80,7 @@ export default function SubjectExamsPage() {
               variant="outline"
               className="border bg-transparent text-muted-foreground hover:bg-secondary hover:text-foreground h-8 px-3 text-sm rounded-md"
             >
-              <Link to={`/subjects/${subjectId}/exams/new`}>
+              <Link to={`${basePath}/exams/new`}>
                 <Plus className="h-3.5 w-3.5 mr-1.5" />
                 Create exam
               </Link>
@@ -126,7 +126,7 @@ export default function SubjectExamsPage() {
           {exams.map(exam => (
             <Link
               key={exam.id}
-              to={`/subjects/${subjectId}/exams/${exam.id}`}
+              to={`${basePath}/exams/${exam.id}`}
               className="bg-card border rounded-lg p-4 flex items-center gap-3 group hover:border-primary/50 transition-colors duration-150"
             >
               <div className="h-8 w-8 rounded-md bg-secondary flex items-center justify-center shrink-0">
@@ -168,7 +168,7 @@ export default function SubjectExamsPage() {
             {subjectAttempts.map(attempt => (
               <Link
                 key={attempt.id}
-                to={`/subjects/${subjectId}/exams/${attempt.examId}/result/${attempt.id}`}
+                to={`${basePath}/exams/${attempt.examId}/result/${attempt.id}`}
                 className="bg-card border rounded-lg p-3.5 flex items-center gap-3 group hover:border-primary/50 transition-colors duration-150"
               >
                 <div className="min-w-0 flex-1">
@@ -200,7 +200,7 @@ export default function SubjectExamsPage() {
               AI will create questions from subject documents.
             </DialogDescription>
           </div>
-          <div className="p-5 space-y-4">
+          <div className="p-5 space-y-4 min-w-0">
             <div className="space-y-1.5">
               <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Topic (optional)</Label>
               <Input

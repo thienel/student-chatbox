@@ -43,8 +43,8 @@ function DockItem({ to, icon: Icon, label, exact }: DockItemProps) {
 
 export function Dock() {
   const user = useUserStore(s => s.user)
-  const isAdmin = user?.role === 'admin'
-  const isLecturer = user?.role === 'lecturer'
+  const isAdmin = user?.roleName === 'admin'
+  const isLecturer = user?.roleName === 'lecturer'
   const canCommunity = usePermission('flashcard:read')
   const canStudyPlan = usePermission('flashcard:study')
 

@@ -24,7 +24,7 @@ export class CreateOfficialExamUseCase {
 
     validateOfficialQuestions(dto.questions);
 
-    const exam = await this.examRepo.createExam({
+    return this.examRepo.createExamWithQuestions({
       subjectId,
       classId,
       title: dto.title,
@@ -34,11 +34,8 @@ export class CreateOfficialExamUseCase {
       questionCount: dto.questions.length,
       isPublic: false,
       createdBy: user.id,
-    });
-
-    const questions = await this.examRepo.createQuestions(
+    },
       dto.questions.map((q, i) => ({
-        examId: exam.id,
         content: q.content,
         options: q.options,
         correctAnswer: q.correctAnswer,
@@ -47,7 +44,5 @@ export class CreateOfficialExamUseCase {
         position: i,
       })),
     );
-
-    return { exam, questions };
   }
 }

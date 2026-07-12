@@ -3,6 +3,8 @@ import { IOtpTokenRepository } from '../../../domain/user/repositories/otp-token
 import { TOKENS } from '../../../shared/constants/tokens';
 import { OtpTokenType } from '../../../domain/user/entities/otp-token.entity';
 import { EmailService } from '../../../infrastructure/email/email.service';
+import { randomInt } from 'crypto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class OtpService {
@@ -18,7 +20,8 @@ export class OtpService {
     expiresInMinutes: number = 10,
     emailTemplate: 'email_verify' | 'password_reset'
   ): Promise<string> {
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otp = randomInt(100000, 1_000_000).toString();
+    const codeHash = await bcrypt.hash(otp, 12);
     const expiresAt = new Date(Date.now() + expiresInMinutes * 60 * 1000);
 
     // Revoke old tokens
@@ -28,7 +31,7 @@ export class OtpService {
     await this.otpRepo.create({
       userId,
       email,
-      code: otp,
+      codeHash,
       type,
       expiresAt,
     });

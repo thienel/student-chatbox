@@ -11,6 +11,7 @@ import { GetAttemptResultUseCase } from '../../../application/exam/use-cases/get
 import { ListMyAttemptsUseCase } from '../../../application/exam/use-cases/list-my-attempts.use-case';
 import { CreateOfficialExamUseCase } from '../../../application/exam/use-cases/create-official-exam.use-case';
 import { UpdateOfficialExamUseCase } from '../../../application/exam/use-cases/update-official-exam.use-case';
+import { PreviewAiExamUseCase } from '../../../application/exam/use-cases/preview-ai-exam.use-case';
 import { TypeOrmDatabaseModule } from '../../../infrastructure/database/typeorm/typeorm.module';
 import { AiModule } from '../../../infrastructure/ai/ai.module';
 import { ClassModule } from '../class/class.module';
@@ -28,6 +29,7 @@ import { ClassModule } from '../class/class.module';
     ListMyAttemptsUseCase,
     CreateOfficialExamUseCase,
     UpdateOfficialExamUseCase,
+    PreviewAiExamUseCase,
     GetMyWeakTopicsUseCase,
   ],
 })

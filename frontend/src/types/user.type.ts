@@ -1,16 +1,14 @@
-export type UserStatus = 'pending_email_verification' | 'active' | 'pending_verification' | 'rejected' | 'suspended';
+export type UserStatus = 'pending_email_verification' | 'pending_manual_verification' | 'active' | 'rejected' | 'suspended';
 
 export interface User {
   id: string;
   email: string;
   fullName: string;
-  role: 'admin' | 'lecturer' | 'student';
+  roleName: 'admin' | 'lecturer' | 'student';
   status: UserStatus;
   permissions: string[];
   createdAt: string;
 
-  // New Fields
-  roleName?: string;
   studentCode?: string;
   emailVerifiedAt?: string;
   lastLoginAt?: string;

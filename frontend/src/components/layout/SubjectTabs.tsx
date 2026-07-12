@@ -37,22 +37,22 @@ export function SubjectTabs({ subjectId }: SubjectTabsProps) {
   ].filter(Boolean) as { label: string; href: string; icon: typeof FileText }[]
 
   return (
-    <div className="flex items-center gap-0 border-b px-5 bg-background">
+    <div className="border-b border-border/60 bg-transparent flex items-center gap-0 px-4 sm:px-6 overflow-x-auto no-scrollbar">
       {tabs.map(tab => (
-        <Link
-          key={tab.href}
-          to={tab.href}
-          className={cn(
-            'flex items-center gap-1.5 h-10 px-3 text-sm border-b-2 -mb-px',
-            'transition-colors duration-150',
-            pathname.startsWith(tab.href)
-              ? 'border-primary text-primary'
-              : 'border-transparent text-muted-foreground hover:text-foreground'
-          )}
-        >
-          <tab.icon className="h-3.5 w-3.5" />
-          {tab.label}
-        </Link>
+          <Link
+            key={tab.href}
+            to={tab.href}
+            className={cn(
+              'flex items-center gap-1.5 h-10 px-3 text-sm border-b-2 -mb-px',
+              'transition-colors duration-150',
+              pathname.startsWith(tab.href)
+                ? 'border-primary text-primary'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            )}
+          >
+            <tab.icon className="h-3.5 w-3.5" />
+            {tab.label}
+          </Link>
       ))}
     </div>
   )

@@ -5,6 +5,26 @@
 
 # Dependencies
 node_modules/
+__pycache__/
+*.pyc
+*.sqlite
+
+# Build outputs
+dist/
+*.tsbuildinfo
+
+# Uploads
+uploads/
+
+# Nginx SSL certs
+nginx/ssl/*.pem
+nginx/ssl/*.key
+nginx/ssl/*.crt
+
+# OS
+.DS_Store
+Thumbs.db
+
 
 # Build outputs
 dist/
@@ -31,3 +51,6 @@ Thumbs.db
 # AGENT
 .claude
 .agents
+
+# Debug/test scripts (should not be committed)
+test_*.py

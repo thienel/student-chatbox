@@ -13,10 +13,12 @@ import {
   UseInterceptors,
   UploadedFile,
   Req,
+  BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Request } from 'express';
-import { memoryStorage } from 'multer';
+import { diskStorage } from 'multer';
+import { randomUUID } from 'crypto';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { PermissionGuard } from '../../guards/permission.guard';
 import { AiRateLimitGuard } from '../../guards/ai-rate-limit.guard';
@@ -49,8 +51,11 @@ export class DocumentController {
   @HttpCode(HttpStatus.ACCEPTED)
   @UseInterceptors(
     FileInterceptor('file', {
-      storage: memoryStorage(),
-      limits: { fileSize: 50 * 1024 * 1024 },
+      storage: diskStorage({
+        destination: process.env.UPLOAD_TMP_DIR ?? './uploads/tmp',
+        filename: (_request, file, callback) => callback(null, `${randomUUID()}-${file.originalname}`),
+      }),
+      limits: { fileSize: 50 * 1024 * 1024, files: 1, fields: 10, parts: 12 },
     }),
   )
   async uploadDocument(
@@ -59,6 +64,7 @@ export class DocumentController {
     @CurrentUser() user: User,
     @Req() req: Request,
   ) {
+    if (!file) throw new BadRequestException('A document file is required');
     const document = await this.uploadDocumentUseCase.execute(subjectId, file, user);
     await this.auditLogService.log(
       user.id,

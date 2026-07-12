@@ -17,6 +17,7 @@ export interface StudyQueue {
 export interface CardProgress {
   stability: number;
   difficulty: number;
+  interval: number;
   reps: number;
   lastReviewedAt: Date;
 }
@@ -77,6 +78,8 @@ export interface IStudyRepository {
   createSession(userId: string, setId: string): Promise<StudySession>;
   getSessionById(id: string): Promise<StudySession | null>;
   updateSession(id: string, data: Partial<StudySession>): Promise<StudySession>;
+  incrementSessionCounters(id: string, rating: number): Promise<void>;
+  incrementSessionLapse(sessionId: string, flashcardId: string): Promise<number>;
 
   getStats(userId: string): Promise<StudyStats | null>;
   saveStats(stats: StudyStats): Promise<StudyStats>;

@@ -34,8 +34,8 @@ export default function SettingsPage() {
         <div className="px-5 py-4 flex items-center justify-between">
           <div>
             <p className="text-xs text-muted-foreground mb-0.5">Role</p>
-            <Badge className={cn('text-[10px] rounded capitalize mt-1', roleColor[user?.role ?? 'student'])}>
-              {user?.role}
+            <Badge className={cn('text-[10px] rounded capitalize mt-1', roleColor[user?.roleName ?? 'student'])}>
+              {user?.roleName}
             </Badge>
           </div>
         </div>

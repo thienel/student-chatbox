@@ -33,6 +33,7 @@ import { VerifyOtpDto } from '../../../application/auth/dtos/verify-otp.dto';
 import { ResendOtpDto } from '../../../application/auth/dtos/resend-otp.dto';
 import { ForgotPasswordDto } from '../../../application/auth/dtos/forgot-password.dto';
 import { ResetPasswordDto } from '../../../application/auth/dtos/reset-password.dto';
+import { AuthRateLimitGuard } from '../../guards/auth-rate-limit.guard';
 
 @Controller('auth')
 @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
@@ -52,6 +53,7 @@ export class AuthController {
   ) {}
 
   @Post('login')
+  @UseGuards(AuthRateLimitGuard)
   @HttpCode(HttpStatus.OK)
   async login(@Body() dto: LoginDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
     try {
@@ -98,12 +100,14 @@ export class AuthController {
   }
 
   @Post('resend-otp')
+  @UseGuards(AuthRateLimitGuard)
   @HttpCode(HttpStatus.OK)
   async resendOtp(@Body() dto: ResendOtpDto) {
     return this.resendOtpUseCase.execute(dto);
   }
 
   @Post('forgot-password')
+  @UseGuards(AuthRateLimitGuard)
   @HttpCode(HttpStatus.OK)
   async forgotPassword(@Body() dto: ForgotPasswordDto) {
     return this.forgotPasswordUseCase.execute(dto);
@@ -116,6 +120,7 @@ export class AuthController {
   }
 
   @Post('reset-password')
+  @UseGuards(AuthRateLimitGuard)
   @HttpCode(HttpStatus.OK)
   async resetPassword(@Body() dto: ResetPasswordDto) {
     return this.resetPasswordUseCase.execute(dto);

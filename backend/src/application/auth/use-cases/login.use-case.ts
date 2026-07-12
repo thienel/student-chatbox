@@ -56,7 +56,7 @@ export class LoginUseCase {
     const payload: TokenPayload = {
       sub: user.id,
       email: user.email,
-      role: user.roleName || '',
+      roleName: user.roleName || '',
       permissions: user.permissions ?? [],
     };
 

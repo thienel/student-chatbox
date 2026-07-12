@@ -34,12 +34,37 @@ export const useGenerateExam = (subjectId: string, classId?: string) => {
   })
 }
 
+/** Lecturer-only: generates AI questions as a draft without saving an exam. */
+export const useGenerateExamPreview = (subjectId: string) => {
+  return useMutation({
+    mutationFn: (data: {
+      questionCount?: number
+      difficulty?: ExamDifficulty
+      topic?: string
+      documentIds?: string[]
+      classId?: string
+    }) => examsApi.generatePreview(subjectId, data),
+  })
+}
+
 export const useCreateOfficialExam = (subjectId: string) => {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (data: CreateOfficialExamInput) => examsApi.createOfficial(subjectId, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.exams.list(subjectId, variables.classId) })
+    },
+  })
+}
+
+export const useUpdateOfficialExam = (subjectId: string, examId: string) => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (data: Partial<Omit<CreateOfficialExamInput, 'classId'>>) =>
+      examsApi.updateOfficial(subjectId, examId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.exams.detail(subjectId, examId) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.exams.all })
     },
   })
 }

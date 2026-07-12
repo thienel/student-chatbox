@@ -11,11 +11,13 @@ class Settings(BaseSettings):
 
     qdrant_url: str = "http://localhost:6333"
     qdrant_collection: str = "documents"
+    qdrant_api_key: str
 
     ai_service_secret: str
     nestjs_url: str = "http://localhost:3000/api/v1"
 
     port: int = 8000
+    cors_origins: str = "http://localhost:5173"
 
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=False)
 

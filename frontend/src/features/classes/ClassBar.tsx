@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils'
 import { useSubjectClass } from './ClassContext'
 
 export function ClassBar() {
-  const { subjectId, isStudent, isLecturer, myClass, classes, activeClassId, setActiveClass, loading } =
+  const { isStudent, isLecturer, myClass, classes, activeClassId, setActiveClass, loading, basePath } =
     useSubjectClass()
 
   if (loading) return null
@@ -19,7 +19,7 @@ export function ClassBar() {
   if (isStudent) {
     if (!myClass) return null
     return (
-      <div className="flex items-center gap-1.5 px-5 h-9 bg-secondary border-b text-xs text-muted-foreground">
+      <div className="flex items-center gap-1.5 px-4 sm:px-6 h-9 bg-secondary/50 text-xs text-muted-foreground border-b-0">
         <GraduationCap className="h-3.5 w-3.5" />
         <span>
           Class: <span className="text-foreground">{myClass.name}</span>
@@ -34,10 +34,10 @@ export function ClassBar() {
   const active = classes.find(c => c.id === activeClassId)
 
   return (
-    <div className="flex items-center justify-between px-5 h-9 bg-secondary border-b">
+    <div className="flex items-center justify-between px-4 sm:px-6 h-9 bg-secondary/30">
       {classes.length === 0 ? (
         <Link
-          to={`/subjects/${subjectId}/classes`}
+          to={`${basePath}/classes`}
           className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
         >
           <GraduationCap className="h-3.5 w-3.5" />
@@ -77,7 +77,7 @@ export function ClassBar() {
       )}
 
       <Link
-        to={`/subjects/${subjectId}/classes`}
+        to={`${basePath}/classes`}
         className="text-xs text-muted-foreground hover:text-foreground"
       >
         Manage classes

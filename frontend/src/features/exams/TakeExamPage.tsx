@@ -28,21 +28,22 @@ export default function TakeExamPage() {
   const [answers, setAnswers] = useState<Record<string, string>>({})
   const [currentIndex, setCurrentIndex] = useState(0)
   const [elapsed, setElapsed] = useState(0)
-  const startRef = useRef(Date.now())
+  const startRef = useRef(0)
   const advanceTimerRef = useRef<ReturnType<typeof setTimeout>>()
   // ref so the keyboard handler always reads fresh state without re-registering
   const currentIndexRef = useRef(0)
-  currentIndexRef.current = currentIndex
-
-  const questions = state?.questions ?? []
-  const total = questions.length
-
-  const submit = useSubmitAttempt(subjectId, examId)
 
   useEffect(() => {
+    // Initialize start time inside effect to avoid calling impure Date.now() during render
+    startRef.current = Date.now()
     const interval = setInterval(() => setElapsed(Math.floor((Date.now() - startRef.current) / 1000)), 1000)
     return () => clearInterval(interval)
   }, [])
+
+  useEffect(() => {
+    // Keep ref in sync with state inside effect to avoid updating ref during render
+    currentIndexRef.current = currentIndex
+  })
 
   useEffect(() => () => clearTimeout(advanceTimerRef.current), [])
 
@@ -51,6 +52,11 @@ export default function TakeExamPage() {
     const s = (secs % 60).toString().padStart(2, '0')
     return `${m}:${s}`
   }
+
+  const questions = state?.questions ?? []
+  const total = questions.length
+
+  const submit = useSubmitAttempt(subjectId, examId)
 
   const handleSubmit = useCallback(async () => {
     try {

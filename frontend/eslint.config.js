@@ -28,6 +28,18 @@ export default tseslint.config(
       ],
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/ban-ts-comment': 'off',
+      // Ignore underscore-prefixed variables and parameters that are intentionally unused
+      '@typescript-eslint/no-unused-vars': ['error', {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_',
+      }],
+      // Downgrade overly aggressive rules to warnings — these flag legitimate React patterns
+      // such as syncing state from server data in effects and reading refs for optimization.
+      'react-hooks/set-state-in-effect': 'warn',
+      'react-hooks/refs': 'warn',
+      'react-hooks/incompatible-library': 'warn',
+      'react-hooks/purity': 'warn',
     },
   }
 );

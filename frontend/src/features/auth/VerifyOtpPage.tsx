@@ -18,19 +18,15 @@ export default function VerifyOtpPage() {
   const [otp, setOtp] = useState('')
   const [error, setError] = useState('')
   const [countdown, setCountdown] = useState(60)
-  const [canResend, setCanResend] = useState(false)
+  const canResend = countdown === 0
 
   useEffect(() => {
     if (!email) navigate('/login', { replace: true })
   }, [email, navigate])
 
   useEffect(() => {
-    let timer: NodeJS.Timeout
-    if (countdown > 0) {
-      timer = setTimeout(() => setCountdown(c => c - 1), 1000)
-    } else {
-      setCanResend(true)
-    }
+    if (countdown <= 0) return
+    const timer = setTimeout(() => setCountdown(c => c - 1), 1000)
     return () => clearTimeout(timer)
   }, [countdown])
 
@@ -55,7 +51,6 @@ export default function VerifyOtpPage() {
     try {
       await resendOtpMutation.mutateAsync({ email })
       setCountdown(60)
-      setCanResend(false)
       setOtp('')
     } catch (err: any) {
       setError(err.response?.data?.message || 'Không thể gửi lại mã. Vui lòng thử lại sau.')

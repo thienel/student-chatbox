@@ -62,6 +62,8 @@ export const useToggleStar = () => {
       // Invalidate both discover and leaderboard where this card might appear
       queryClient.invalidateQueries({ queryKey: queryKeys.flashcards.discover({}) })
       queryClient.invalidateQueries({ queryKey: queryKeys.flashcards.leaderboard() })
+      // Invalidate list queries so "My Sets" tab updates star count
+      queryClient.invalidateQueries({ queryKey: [...queryKeys.flashcards.all, 'list'] })
     },
   })
 }

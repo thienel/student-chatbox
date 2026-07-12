@@ -22,6 +22,7 @@ import { BcryptPasswordService } from '../../../infrastructure/auth/services/bcr
 import { EmailModule } from '../../../infrastructure/email/email.module';
 import { EmailDomainService } from '../../../application/auth/services/email-domain.service';
 import { UserModule } from '../user/user.module';
+import { AuthRateLimitGuard } from '../../guards/auth-rate-limit.guard';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { UserModule } from '../user/user.module';
     TokenService,
     OtpService,
     EmailDomainService,
+    AuthRateLimitGuard,
     {
       provide: 'IPasswordService',
       useClass: BcryptPasswordService,

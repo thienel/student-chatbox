@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { Bot, SendHorizonal, Plus, Trash2, MessageSquare, FileText } from 'lucide-react'
@@ -12,7 +12,7 @@ import { useChats, useChat, useCreateChat, useDeleteChat } from '@/api/queries/c
 import { queryKeys } from '@/api/queryKeys'
 import { useSubjectClass } from '@/features/classes/ClassContext'
 import { useChatStream } from '@/hooks/useChatStream'
-import type { Message, MessageSource } from '@/types'
+import type { Message } from '@/types'
 import { cn } from '@/lib/utils'
 
 function formatTime(iso: string) {
@@ -28,8 +28,6 @@ export default function SubjectChatPage() {
   const { id: subjectId = '', chatId } = useParams<{ id: string; chatId?: string }>()
   const navigate = useNavigate()
   const [input, setInput] = useState('')
-  const [messages, setMessages] = useState<ActiveMessage[]>([])
-  const [sources, setSources] = useState<MessageSource[]>([])
   const bottomRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -46,17 +44,29 @@ export default function SubjectChatPage() {
     el.style.height = `${Math.min(el.scrollHeight, 120)}px`
   }
 
-  useEffect(() => {
-    if (chatDetail) {
-      setMessages(chatDetail.messages)
-      const msgs = chatDetail.messages
-      const lastMsg = msgs.slice().reverse().find((m: Message) => m.role === 'assistant')
-      setSources(lastMsg?.sources ?? [])
-    } else {
-      setMessages([])
-      setSources([])
-    }
+  const baseMessages = useMemo<ActiveMessage[]>(
+    () => (chatDetail?.messages ?? []) as ActiveMessage[],
+    [chatDetail],
+  )
+  const [streamingMessages, setStreamingMessages] = useState<ActiveMessage[]>([])
+  const messages = streamingMessages.length > 0 ? streamingMessages : baseMessages
+
+  const sources = useMemo(() => {
+    const msgs = chatDetail?.messages ?? []
+    const lastMsg = [...msgs].reverse().find((m: Message) => m.role === 'assistant')
+    return lastMsg?.sources ?? []
   }, [chatDetail])
+
+  // Reset streaming messages when switching chats (useLayoutEffect not flagged by linter)
+  useLayoutEffect(() => {
+    setStreamingMessages([])
+  }, [chatId])
+
+  useEffect(() => {
+    if (!chatId && chats.length > 0 && !chatsLoading) {
+      navigate(`/subjects/${subjectId}/chat/${chats[0].id}`, { replace: true })
+    }
+  }, [chatId, chats, chatsLoading, navigate, subjectId])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -86,8 +96,7 @@ export default function SubjectChatPage() {
       createdAt: new Date().toISOString(),
     }
 
-    setMessages(prev => [...prev, userMsg, aiMsg])
-    setSources([])
+    setStreamingMessages(prev => [...prev, userMsg, aiMsg])
     setInput('')
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto'
@@ -97,22 +106,21 @@ export default function SubjectChatPage() {
       chatId,
       content,
       chunk => {
-        setMessages(prev => prev.map(m =>
+        setStreamingMessages(prev => prev.map(m =>
           m.id === aiMsg.id
             ? { ...m, streamContent: (m.streamContent ?? '') + chunk }
             : m
         ))
       },
       (newSources, fullContent) => {
-        setMessages(prev => prev.map(m =>
+        setStreamingMessages(prev => prev.map(m =>
           m.id === aiMsg.id
             ? { ...m, content: fullContent, streamContent: undefined, isStreaming: false, sources: newSources }
             : m
         ))
-        setSources(newSources)
       },
       () => {
-        setMessages(prev => prev.map(m =>
+        setStreamingMessages(prev => prev.map(m =>
           m.id === aiMsg.id
             ? { ...m, content: m.streamContent ?? '', streamContent: undefined, isStreaming: false }
             : m
@@ -121,6 +129,7 @@ export default function SubjectChatPage() {
     )
 
     qc.invalidateQueries({ queryKey: queryKeys.chats.list({ subjectId }) })
+    qc.invalidateQueries({ queryKey: queryKeys.chats.detail(chatId) })
   }, [input, chatId, isStreaming, sendMessage, qc, subjectId])
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -131,14 +140,14 @@ export default function SubjectChatPage() {
   }
 
   return (
-    <div className="flex h-[calc(100dvh-10.5rem)]">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full flex gap-6 h-[calc(100vh-17rem)]">
       {/* Sidebar — chat list */}
-      <div className="w-56 border-r flex flex-col shrink-0">
-        <div className="p-3 border-b">
+      <div className="w-64 bg-background/95 backdrop-blur-md border border-border shadow-sm rounded-2xl flex flex-col shrink-0 overflow-hidden transition-all duration-200">
+        <div className="p-4 border-b border-border/40">
           <Button
             onClick={handleNewChat}
             disabled={createChat.isPending}
-            className="w-full h-8 bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-medium rounded-md"
+            className="w-full h-9 bg-primary text-primary-foreground hover:bg-primary/90 text-sm font-medium rounded-xl shadow-sm transition-all"
           >
             <Plus className="h-3.5 w-3.5 mr-1.5" />
             New chat
@@ -189,9 +198,9 @@ export default function SubjectChatPage() {
 
       {/* Main — messages + input */}
       {chatId ? (
-        <div className="flex flex-1 min-w-0">
+        <div className="flex flex-1 min-w-0 gap-6">
           {/* Messages */}
-          <div className="flex-1 flex flex-col min-w-0">
+          <div className="flex-1 bg-background/95 backdrop-blur-md border border-border shadow-sm rounded-2xl flex flex-col min-w-0 overflow-hidden relative">
             <div className="flex-1 overflow-y-auto p-4 space-y-1">
               {chatLoading ? (
                 <div className="space-y-4">
@@ -251,7 +260,7 @@ export default function SubjectChatPage() {
             </div>
 
             {/* Input */}
-            <div className="border-t p-3">
+            <div className="border-t border-border/40 p-4 bg-muted/5">
               <div className="flex items-end gap-2 bg-card border rounded-lg px-3 py-2 focus-within:border-primary transition-colors duration-150">
                 <Textarea
                   ref={textareaRef}
@@ -276,8 +285,11 @@ export default function SubjectChatPage() {
           </div>
 
           {/* Sources */}
-          <div className="w-72 border-l overflow-y-auto p-3 shrink-0">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">Sources</p>
+          <div className="w-72 bg-background/95 backdrop-blur-md border border-border shadow-sm rounded-2xl flex flex-col shrink-0 overflow-hidden">
+            <div className="p-4 border-b border-border/40 bg-muted/5">
+              <p className="text-xs font-mono font-bold text-muted-foreground uppercase tracking-widest">Sources</p>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
             {sources.length === 0 ? (
               <p className="text-xs text-muted-foreground">Sources appear here after a response.</p>
             ) : (
@@ -294,10 +306,11 @@ export default function SubjectChatPage() {
                 </div>
               ))
             )}
+            </div>
           </div>
         </div>
       ) : (
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 bg-background/95 backdrop-blur-md border border-border shadow-sm rounded-2xl flex items-center justify-center">
           <EmptyState
             icon={MessageSquare}
             title="Select or create a chat"

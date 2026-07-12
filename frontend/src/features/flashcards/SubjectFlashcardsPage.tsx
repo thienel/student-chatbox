@@ -38,7 +38,7 @@ export default function SubjectFlashcardsPage() {
   const [cardCount, setCardCount] = useState('10')
   const [documentIds, setDocumentIds] = useState<string[]>([])
 
-  const { classId, isLecturer, needsClass } = useSubjectClass()
+  const { classId, isLecturer, needsClass, basePath } = useSubjectClass()
   
   // My Sets Data
   const { data: sets = [], isLoading: isSetsLoading } = useFlashcardSets(subjectId, classId)
@@ -154,7 +154,7 @@ export default function SubjectFlashcardsPage() {
                     className="bg-card card-texture border rounded-lg p-4 flex items-center justify-between group hover:border-muted-foreground/30 transition-colors duration-150 synapse-glow"
                   >
                     <Link
-                      to={`/subjects/${subjectId}/flashcards/${set.id}`}
+                      to={`${basePath}/flashcards/${set.id}`}
                       className="flex items-center gap-3 flex-1 min-w-0"
                     >
                       <div className="h-8 w-8 rounded-md bg-secondary flex items-center justify-center shrink-0">
@@ -244,7 +244,7 @@ export default function SubjectFlashcardsPage() {
                     className="bg-card card-texture border rounded-lg p-4 flex items-center justify-between group hover:border-muted-foreground/30 transition-colors duration-150 synapse-glow"
                   >
                     <Link
-                      to={`/subjects/${subjectId}/flashcards/${set.id}`}
+                      to={`${basePath}/flashcards/${set.id}`}
                       className="flex items-center gap-3 flex-1 min-w-0"
                     >
                       <div className="h-8 w-8 rounded-md bg-secondary flex items-center justify-center shrink-0">

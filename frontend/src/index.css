@@ -24,7 +24,7 @@
     --muted: 210 40% 96%; /* surface phụ */
     --muted-foreground: 51 3% 41%; /* text muted #6B6A64 (Pass AA 4.95:1) */
     
-    /* Lưu ý: cặp accent/accent-foreground (Gold) chỉ đạt 4.46:1, chỉ dùng cho label/badge lớn (>=18px bold hoặc >=24px regular), KHÔNG dùng cho body text nhỏ */
+    /* Lưu ý: cặp accent/accent-foreground (Gold) chềEđạt 4.46:1, chềEdùng cho label/badge lớn (>=18px bold hoặc >=24px regular), KHÔNG dùng cho body text nhềE*/
     --accent: 32 94% 44%; /* Gold #D97706 */
     --accent-foreground: 32 94% 13%; /* text đậm #412402 */
     --accent-light: 36 67% 92%; /* nền nhạt #FAEEDA */
@@ -50,7 +50,7 @@
   }
 
   .dark {
-    /* Đã lược bỏ dark mode mặc định do user yêu cầu tập trung vào Light Mode first. Nếu cần thiết sau này sẽ thêm lại tông dark cho hợp với Pine. */
+    /* Đã lược bềEdark mode mặc định do user yêu cầu tập trung vào Light Mode first. Nếu cần thiết sau này sẽ thêm lại tông dark cho hợp với Pine. */
   }
 
   * {
@@ -59,6 +59,7 @@
   }
 
   html {
+    scrollbar-gutter: stable;
     @apply bg-background text-foreground font-sans;
     -webkit-font-smoothing: antialiased;
   }
@@ -94,7 +95,7 @@
     content: "";
     position: absolute;
     inset: 0;
-    /* Mực màu --color-ink (rgb(16, 24, 32)) ở opacity 6% */
+    /* Mực màu --color-ink (rgb(16, 24, 32)) ềEopacity 6% */
     background-image: radial-gradient(circle, rgba(16, 24, 32, 0.06) 1.5px, transparent 1.5px);
     background-size: 16px 16px;
     pointer-events: none;
@@ -116,5 +117,14 @@
   .hover-lift {
     @apply transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md;
   }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
+
 

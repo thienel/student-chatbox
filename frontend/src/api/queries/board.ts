@@ -66,7 +66,7 @@ export const useBoardAnswers = (subjectId: string, classId: string | undefined, 
 export const useCreateAnswer = (subjectId: string, classId: string, questionId: string) => {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (body: string) => boardApi.createAnswer(subjectId, classId, questionId, { content: body }),
+    mutationFn: (body: string) => boardApi.createAnswer(subjectId, classId, questionId, { body }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.board.answers(subjectId, classId, questionId) })
     },

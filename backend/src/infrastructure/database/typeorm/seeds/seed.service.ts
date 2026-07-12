@@ -118,9 +118,9 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
         'subject:read', 'subject:create', 'class:manage',
         'document:create', 'document:delete', 'document:read',
         'ai:summarize-document',
-        'exam:read', 'exam:create-official',
+        'exam:read', 'exam:create-official', 'ai:generate-exam',
         'analytics:read-own',
-        'flashcard:create', 'flashcard:delete', 'flashcard:read', 'flashcard:manage-own', 'ai:generate-flashcard',
+        'flashcard:create', 'flashcard:delete', 'flashcard:read', 'ai:generate-flashcard',
       ];
       const lecturerRole = await roleRepo.findOne({
         where: { id: roles['lecturer'].id },
@@ -172,11 +172,24 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
         }
       }
 
+      // Demo identities are opt-in and always take credentials from the
+      // environment. Production can still seed RBAC roles and permissions.
+      const shouldSeedDemo = process.env.SEED_DEMO_DATA === 'true';
+      if (shouldSeedDemo) {
+        const adminEmail = process.env.DEMO_ADMIN_EMAIL;
+        const adminPassword = process.env.DEMO_ADMIN_PASSWORD;
+        const lecturerEmail = process.env.DEMO_LECTURER_EMAIL;
+        const lecturerPassword = process.env.DEMO_LECTURER_PASSWORD;
+        const studentEmail = process.env.DEMO_STUDENT_EMAIL;
+        const studentPassword = process.env.DEMO_STUDENT_PASSWORD;
+        if (!adminEmail || !adminPassword || !lecturerEmail || !lecturerPassword || !studentEmail || !studentPassword) {
+          throw new Error('SEED_DEMO_DATA=true requires all DEMO_*_EMAIL and DEMO_*_PASSWORD variables');
+        }
+
       // Default admin user
-      const adminEmail = 'admin@educhat.local';
       let adminUser = await userRepo.findOne({ where: { email: adminEmail } });
       if (!adminUser) {
-        const passwordHash = await bcrypt.hash('Admin@123456', 12);
+        const passwordHash = await bcrypt.hash(adminPassword, 12);
         adminUser = userRepo.create({
           email: adminEmail,
           passwordHash,
@@ -185,14 +198,13 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
           status: 'active',
         });
         await userRepo.save(adminUser);
-        this.logger.log('Admin user created: admin@educhat.local / Admin@123456');
+        this.logger.log(`Demo admin user created: ${adminEmail}`);
       }
 
       // Default lecturer user
-      const lecturerEmail = 'lecture@educhat.local';
       let lecturerUser = await userRepo.findOne({ where: { email: lecturerEmail } });
       if (!lecturerUser) {
-        const passwordHash = await bcrypt.hash('Lecture@123456', 12);
+        const passwordHash = await bcrypt.hash(lecturerPassword, 12);
         lecturerUser = userRepo.create({
           email: lecturerEmail,
           passwordHash,
@@ -201,14 +213,13 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
           status: 'active',
         });
         await userRepo.save(lecturerUser);
-        this.logger.log('Lecturer user created: lecture@educhat.local / Lecture@123456');
+        this.logger.log(`Demo lecturer user created: ${lecturerEmail}`);
       }
 
       // Default student user
-      const studentEmail = 'student@educhat.local';
       let studentUser = await userRepo.findOne({ where: { email: studentEmail } });
       if (!studentUser) {
-        const passwordHash = await bcrypt.hash('Student@123456', 12);
+        const passwordHash = await bcrypt.hash(studentPassword, 12);
         studentUser = userRepo.create({
           email: studentEmail,
           passwordHash,
@@ -217,7 +228,8 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
           status: 'active',
         });
         await userRepo.save(studentUser);
-        this.logger.log('Student user created: student@educhat.local / Student@123456');
+        this.logger.log(`Demo student user created: ${studentEmail}`);
+      }
       }
 
       await qr.commitTransaction();
@@ -225,6 +237,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
     } catch (error) {
       await qr.rollbackTransaction();
       this.logger.error('Database seed failed', error);
+      throw error;
     } finally {
       await qr.release();
     }

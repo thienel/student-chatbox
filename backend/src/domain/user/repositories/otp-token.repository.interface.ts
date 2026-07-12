@@ -4,7 +4,7 @@ export interface IOtpTokenRepository {
   create(data: {
     userId?: string;
     email: string;
-    code: string;
+    codeHash: string;
     type: OtpTokenType;
     expiresAt: Date;
   }): Promise<OtpToken>;

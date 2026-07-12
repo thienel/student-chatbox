@@ -16,23 +16,34 @@ export class LocalFileService {
   async saveFile(
     file: Express.Multer.File,
     subjectId: string,
+    mimeType: string,
   ): Promise<{ storedPath: string; mimeType: string; fileSizeBytes: number }> {
     const dir = path.join(this.uploadDir, subjectId);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
+    await fs.promises.mkdir(dir, { recursive: true });
 
-    const fileName = `${uuidv4()}_${file.originalname}`;
+    const safeOriginalName = path.basename(file.originalname).replace(/[^a-zA-Z0-9._-]/g, '_');
+    const fileName = `${uuidv4()}_${safeOriginalName}`;
     const storedPath = path.join(dir, fileName);
 
-    fs.writeFileSync(storedPath, file.buffer);
+    try {
+      await fs.promises.rename(file.path, storedPath);
+    } catch (error: any) {
+      if (error?.code !== 'EXDEV') throw error;
+      await fs.promises.copyFile(file.path, storedPath);
+      await fs.promises.unlink(file.path);
+    }
     this.logger.log(`Saved file to ${storedPath}`);
 
     return {
       storedPath,
-      mimeType: file.mimetype,
+      mimeType,
       fileSizeBytes: file.size,
     };
+  }
+
+  async discardTempFile(file: Express.Multer.File | undefined): Promise<void> {
+    if (!file?.path) return;
+    await fs.promises.unlink(file.path).catch(() => undefined);
   }
 
   async deleteFile(storedPath: string): Promise<void> {

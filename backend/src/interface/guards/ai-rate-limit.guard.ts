@@ -32,7 +32,7 @@ export class AiRateLimitGuard implements CanActivate {
         AI_FEATURE_KEY, context.getHandler()
       ) ?? 'chat_rag';
 
-    const role = user.role;
+    const role = user.roleName;
     const settingKey = `ai_daily_limit.${role}.${feature}`;
     const setting = await this.settingRepo.findByKey(settingKey);
     const limit = setting ? Number(setting.value) : 20;

@@ -63,7 +63,7 @@ export function BulkImportDialog({ open, onOpenChange, onImport }: BulkImportDia
       await onImport(records)
       setTextInput('')
       onOpenChange(false)
-    } catch (err) {
+    } catch (_err) {
       // Error is handled by mutation onError
     } finally {
       setIsSubmitting(false)
@@ -187,7 +187,7 @@ export function BulkImportDialog({ open, onOpenChange, onImport }: BulkImportDia
       try {
         await onImport(records)
         onOpenChange(false)
-      } catch (err) {
+      } catch (_err) {
           // API errors are handled by react query
       } finally {
         setIsSubmitting(false)

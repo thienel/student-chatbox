@@ -146,8 +146,12 @@ export class ClassTypeOrmRepository implements IClassRepository {
          MAX(COALESCE(ea.completed_at, ea.started_at)) AS "lastActiveAt"
        FROM class_enrollments ce
        JOIN users u ON u.id = ce.student_id
-       LEFT JOIN exams e ON e.class_id = ce.class_id AND e.created_by = u.id
-       LEFT JOIN exam_attempts ea ON ea.exam_id = e.id AND ea.user_id = u.id
+       LEFT JOIN (
+           SELECT ea.user_id, ea.id, ea.status, ea.score, ea.completed_at, ea.started_at
+           FROM exam_attempts ea
+           JOIN exams e ON e.id = ea.exam_id
+           WHERE e.class_id = $1
+       ) ea ON ea.user_id = u.id
        WHERE ce.class_id = $1
        GROUP BY u.id, u.full_name, u.email
        ORDER BY u.full_name ASC`,

@@ -7,6 +7,7 @@ import {
 } from '../../../../domain/study/repositories/study.repository.interface';
 import { FlashcardProgressOrmEntity } from '../orm-entities/flashcard-progress.orm-entity';
 import { FlashcardStudySessionOrmEntity } from '../orm-entities/flashcard-study-session.orm-entity';
+import { FlashcardSessionLapseOrmEntity } from '../orm-entities/flashcard-session-lapse.orm-entity';
 import { StudentStudyStatsOrmEntity } from '../orm-entities/student-study-stats.orm-entity';
 import { StudentStudySettingsOrmEntity } from '../orm-entities/student-study-settings.orm-entity';
 import { FlashcardOrmEntity } from '../orm-entities/flashcard.orm-entity';
@@ -78,7 +79,7 @@ export class StudyTypeOrmRepository implements IStudyRepository {
   async getProgress(userId: string, flashcardId: string): Promise<CardProgress | null> {
     const o = await this.progressRepo.findOne({ where: { userId, flashcardId } });
     if (!o) return null;
-    return { stability: o.stability, difficulty: o.difficulty, reps: o.reps, lastReviewedAt: o.lastReviewedAt };
+    return { stability: o.stability, difficulty: o.difficulty, interval: o.interval, reps: o.reps, lastReviewedAt: o.lastReviewedAt };
   }
 
   async upsertProgress(input: UpsertProgressInput): Promise<void> {
@@ -127,17 +128,43 @@ export class StudyTypeOrmRepository implements IStudyRepository {
   }
 
   async updateSession(id: string, data: Partial<StudySession>): Promise<StudySession> {
-    await this.sessionRepo.update(id, {
-      status: data.status,
-      cardsStudied: data.cardsStudied,
-      cardsAgain: data.cardsAgain,
-      cardsHard: data.cardsHard,
-      cardsGood: data.cardsGood,
-      cardsEasy: data.cardsEasy,
-      completedAt: data.completedAt ?? undefined,
-    });
+    const updateData: Partial<FlashcardStudySessionOrmEntity> = {};
+    if (data.status !== undefined) updateData.status = data.status;
+    if (data.cardsStudied !== undefined) updateData.cardsStudied = data.cardsStudied;
+    if (data.cardsAgain !== undefined) updateData.cardsAgain = data.cardsAgain;
+    if (data.cardsHard !== undefined) updateData.cardsHard = data.cardsHard;
+    if (data.cardsGood !== undefined) updateData.cardsGood = data.cardsGood;
+    if (data.cardsEasy !== undefined) updateData.cardsEasy = data.cardsEasy;
+    if (data.completedAt !== undefined) updateData.completedAt = data.completedAt;
+    await this.sessionRepo.update(id, updateData);
     const updated = await this.sessionRepo.findOneOrFail({ where: { id } });
     return this.toSession(updated);
+  }
+
+  async incrementSessionCounters(id: string, rating: number): Promise<void> {
+    const columnByRating: Record<number, string> = {
+      1: 'cards_again', 2: 'cards_hard', 3: 'cards_good', 4: 'cards_easy',
+    };
+    const column = columnByRating[rating];
+    if (!column) return;
+    await this.dataSource.query(
+      `UPDATE flashcard_study_sessions
+       SET cards_studied = cards_studied + 1, ${column} = ${column} + 1
+       WHERE id = $1 AND status = 'active'`,
+      [id],
+    );
+  }
+
+  async incrementSessionLapse(sessionId: string, flashcardId: string): Promise<number> {
+    const [row] = await this.dataSource.query(
+      `INSERT INTO flashcard_session_lapses (session_id, flashcard_id, lapse_count)
+       VALUES ($1, $2, 1)
+       ON CONFLICT (session_id, flashcard_id)
+       DO UPDATE SET lapse_count = flashcard_session_lapses.lapse_count + 1
+       RETURNING lapse_count AS "lapseCount"`,
+      [sessionId, flashcardId],
+    );
+    return Number(row.lapseCount);
   }
 
   async getStats(userId: string): Promise<StudyStats | null> {

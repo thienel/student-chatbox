@@ -10,6 +10,7 @@ import { RequirePermission } from '../../decorators/require-permission.decorator
 import { AiFeature } from '../../decorators/ai-feature.decorator';
 import { CurrentUser } from '../../decorators/current-user.decorator';
 import { GenerateExamUseCase } from '../../../application/exam/use-cases/generate-exam.use-case';
+import { PreviewAiExamUseCase } from '../../../application/exam/use-cases/preview-ai-exam.use-case';
 import { ListExamsUseCase } from '../../../application/exam/use-cases/list-exams.use-case';
 import { GetExamUseCase } from '../../../application/exam/use-cases/get-exam.use-case';
 import { StartAttemptUseCase } from '../../../application/exam/use-cases/start-attempt.use-case';
@@ -30,6 +31,7 @@ import { User } from '../../../domain/user/entities/user.entity';
 export class SubjectExamController {
   constructor(
     private readonly generateExamUseCase: GenerateExamUseCase,
+    private readonly previewAiExamUseCase: PreviewAiExamUseCase,
     private readonly listExamsUseCase: ListExamsUseCase,
     private readonly getExamUseCase: GetExamUseCase,
     private readonly startAttemptUseCase: StartAttemptUseCase,
@@ -64,6 +66,20 @@ export class SubjectExamController {
     return this.generateExamUseCase.execute(subjectId, resolvedClassId, dto, user);
   }
 
+  /** Lecturer-only: generate AI questions as a preview draft without saving an exam. */
+  @Post('ai-preview')
+  @RequirePermission('ai:generate-exam')
+  @AiFeature('generate_exam')
+  @UseGuards(AiRateLimitGuard)
+  @HttpCode(HttpStatus.OK)
+  async previewAi(
+    @Param('subjectId') subjectId: string,
+    @Body() dto: GenerateExamDto,
+    @CurrentUser() user: User,
+  ) {
+    return this.previewAiExamUseCase.execute(subjectId, dto, user);
+  }
+
   @Post()
   @RequirePermission('exam:create-official')
   @HttpCode(HttpStatus.CREATED)
@@ -88,15 +104,23 @@ export class SubjectExamController {
 
   @Get(':examId')
   @RequirePermission('exam:read')
-  async getExam(@Param('examId') examId: string, @CurrentUser() user: User) {
-    return this.getExamUseCase.execute(examId, user);
+  async getExam(
+    @Param('subjectId') subjectId: string,
+    @Param('examId') examId: string,
+    @CurrentUser() user: User,
+  ) {
+    return this.getExamUseCase.execute(subjectId, examId, user);
   }
 
   @Post(':examId/attempts')
   @RequirePermission('exam:take')
   @HttpCode(HttpStatus.CREATED)
-  async startAttempt(@Param('examId') examId: string, @CurrentUser() user: User) {
-    return this.startAttemptUseCase.execute(examId, user);
+  async startAttempt(
+    @Param('subjectId') subjectId: string,
+    @Param('examId') examId: string,
+    @CurrentUser() user: User,
+  ) {
+    return this.startAttemptUseCase.execute(subjectId, examId, user);
   }
 
   @Post(':examId/attempts/:attemptId')

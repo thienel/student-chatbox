@@ -1,7 +1,7 @@
 import axiosInstance from '@/api/axiosInstance'
 import type {
   ApiResponse, CreateOfficialExamInput, GenerateExamRequest, SubmitAttemptRequest,
-  Exam, ExamAttempt, Question, MyWeakTopics
+  Exam, ExamAttempt, Question, MyWeakTopics, GeneratedQuestion
 } from '@/types'
 
 export const examsApi = {
@@ -44,6 +44,19 @@ export const examsApi = {
     axiosInstance
       // AI generation runs an LLM call — override the short global timeout.
       .post<ApiResponse<Exam>>(`/subjects/${subjectId}/exams/generate`, data, { timeout: 120000 })
+      .then(r => r.data.data),
+
+  /** Generate AI questions as a draft preview without saving an exam (Lecturer use). */
+  generatePreview: (
+    subjectId: string,
+    data: GenerateExamRequest,
+  ) =>
+    axiosInstance
+      .post<ApiResponse<{ questions: GeneratedQuestion[] }>>(
+        `/subjects/${subjectId}/exams/ai-preview`,
+        data,
+        { timeout: 120000 },
+      )
       .then(r => r.data.data),
 
   startAttempt: (subjectId: string, examId: string) =>

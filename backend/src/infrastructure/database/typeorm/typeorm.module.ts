@@ -36,6 +36,7 @@ import { ClassEnrollmentOrmEntity } from './orm-entities/class-enrollment.orm-en
 import { ClassTypeOrmRepository } from './repositories/class.typeorm-repository';
 import { FlashcardProgressOrmEntity } from './orm-entities/flashcard-progress.orm-entity';
 import { FlashcardStudySessionOrmEntity } from './orm-entities/flashcard-study-session.orm-entity';
+import { FlashcardSessionLapseOrmEntity } from './orm-entities/flashcard-session-lapse.orm-entity';
 import { StudentStudyStatsOrmEntity } from './orm-entities/student-study-stats.orm-entity';
 import { StudentStudySettingsOrmEntity } from './orm-entities/student-study-settings.orm-entity';
 import { StudyTypeOrmRepository } from './repositories/study.typeorm-repository';
@@ -79,6 +80,7 @@ const ormEntities = [
   ClassEnrollmentOrmEntity,
   FlashcardProgressOrmEntity,
   FlashcardStudySessionOrmEntity,
+  FlashcardSessionLapseOrmEntity,
   StudentStudyStatsOrmEntity,
   StudentStudySettingsOrmEntity,
   StudentWeakTopicOrmEntity,
@@ -100,7 +102,7 @@ const ormEntities = [
         type: 'postgres',
         url: config.get<string>('DATABASE_URL'),
         entities: ormEntities,
-        synchronize: true,
+        synchronize: config.get('NODE_ENV') === 'development',
         logging: config.get('NODE_ENV') === 'development',
       }),
       inject: [ConfigService],

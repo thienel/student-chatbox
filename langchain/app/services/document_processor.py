@@ -41,8 +41,8 @@ def _extract_text(file_path: str) -> str:
 def _extract_pdf(file_path: str) -> str:
     import fitz  # type: ignore[import]
 
-    doc = fitz.open(file_path)
-    return "\n".join(page.get_text() for page in doc)
+    with fitz.open(file_path) as doc:
+        return "\n".join(page.get_text() for page in doc)
 
 
 def _extract_docx(file_path: str) -> str:
@@ -81,6 +81,11 @@ async def process_document(
     document_id: str, file_path: str, subject_id: str, lecturer_id: str
 ) -> None:
     try:
+        # Resolve path since backend sends relative paths like 'uploads/...'
+        if not os.path.isabs(file_path):
+            project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
+            file_path = os.path.join(project_root, "backend", file_path)
+            
         logger.info(f"Processing document {document_id} at {file_path}")
 
         text = await asyncio.to_thread(_extract_text, file_path)

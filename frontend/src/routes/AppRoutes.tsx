@@ -24,6 +24,7 @@ import FlashcardStudyPage from '@/features/flashcards/FlashcardStudyPage'
 import StudySessionPage from '@/features/flashcards/StudySessionPage'
 import SubjectExamsPage from '@/features/exams/SubjectExamsPage'
 import CreateOfficialExamPage from '@/features/exams/CreateOfficialExamPage'
+import EditOfficialExamPage from '@/features/exams/EditOfficialExamPage'
 import WeakTopicsPage from '@/features/exams/WeakTopicsPage'
 import BoardPage from '@/features/board/BoardPage'
 import ClassesPage from '@/features/classes/ClassesPage'
@@ -87,9 +88,9 @@ function Protected({ children, roles }: ProtectedProps) {
 
   if (!accessToken) return <Navigate to="/login" replace />
   if (loading) return <GlobalLoader showWelcome={isFirstLoad} />
-  if (roles && user && !roles.includes(user.role)) return <Navigate to="/home" replace />
-  if (!roles && user && user.role === 'admin') return <Navigate to="/admin" replace />
-  if (!roles && user && user.role === 'lecturer') return <Navigate to="/lecturer" replace />
+  if (roles && user && !roles.includes(user.roleName)) return <Navigate to="/home" replace />
+  if (!roles && user && user.roleName === 'admin') return <Navigate to="/admin" replace />
+  if (!roles && user && user.roleName === 'lecturer') return <Navigate to="/lecturer" replace />
 
   return <>{children}</>
 }
@@ -184,7 +185,11 @@ export default function AppRoutes() {
           <Route path="/lecturer/subjects/:id/board" element={<BoardPage />} />
           <Route path="/lecturer/subjects/:id/exams" element={<SubjectExamsPage />} />
           <Route path="/lecturer/subjects/:id/exams/new" element={<CreateOfficialExamPage />} />
+          <Route path="/lecturer/subjects/:id/exams/:examId" element={<ExamDetailPage />} />
+          <Route path="/lecturer/subjects/:id/exams/:examId/edit" element={<EditOfficialExamPage />} />
+          <Route path="/lecturer/subjects/:id/exams/:examId/result/:attemptId" element={<ExamResultPage />} />
           <Route path="/lecturer/subjects/:id/flashcards" element={<SubjectFlashcardsPage />} />
+          <Route path="/lecturer/subjects/:id/flashcards/:setId" element={<FlashcardStudyPage />} />
         </Route>
       </Route>
 

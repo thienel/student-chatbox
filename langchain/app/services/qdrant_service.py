@@ -17,7 +17,7 @@ from ..config import settings
 
 class QdrantService:
     def __init__(self) -> None:
-        self._client = QdrantClient(url=settings.qdrant_url)
+        self._client = QdrantClient(url=settings.qdrant_url, api_key=settings.qdrant_api_key)
         self._collection = settings.qdrant_collection
 
     def ensure_collection(self, vector_size: int = 1536) -> None:
@@ -26,8 +26,11 @@ class QdrantService:
             info = self._client.get_collection(self._collection)
             current_size = info.config.params.vectors.size  # type: ignore[union-attr]
             if current_size != vector_size:
-                self._client.delete_collection(self._collection)
-                self._create(vector_size)
+                raise RuntimeError(
+                    f"Collection '{self._collection}' uses dimension {current_size}, "
+                    f"but the configured embedding model uses {vector_size}. "
+                    "Create and migrate to a versioned collection explicitly; existing data was not deleted."
+                )
         else:
             self._create(vector_size)
 

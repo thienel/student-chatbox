@@ -46,6 +46,10 @@ export interface Exam {
   createdBy: string;
   createdAt: string;
   updatedAt: string;
+  /** Only returned for lecturers/admins viewing an official exam */
+  questions?: Question[];
+  /** Only returned for lecturers/admins viewing an official exam */
+  attemptCount?: number;
 }
 
 export interface ExamAttempt {
@@ -66,3 +70,12 @@ export interface ExamAttempt {
 export interface GenerateExamRequest { subjectId?: string; classId?: string; durationMinutes?: number; questionCount?: number; totalQuestions?: number; type?: string; difficulty?: string; topic?: string; documentIds?: string[]; }
 export interface SubmitAttemptRequest { answers: Record<string, string> | any; action?: string; timeSpentSecs?: number; }
 export interface SubmitExamAttemptRequest { answers: { questionId: string; selectedOptionId: string }[] }
+
+/** Question as returned by the AI preview endpoint (before persisting). */
+export interface GeneratedQuestion {
+  content: string;
+  options: QuestionOption[];
+  correct_answer: string; // snake_case from AI service
+  explanation?: string;
+  topic?: string;
+}

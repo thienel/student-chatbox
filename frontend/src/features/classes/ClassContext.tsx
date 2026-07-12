@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, type ReactNode } from 'react'
+import { useLocation } from 'react-router-dom'
 import { usePermission } from '@/store/useUserStore'
 import { useActiveClassStore } from '@/store/useActiveClassStore'
 import { useClasses, useMyClass } from '@/api/queries/classes'
@@ -11,6 +12,7 @@ interface SubjectClassValue {
   /** The class id all content operations should use, or undefined while unresolved. */
   classId?: string
   loading: boolean
+  basePath: string
   // student
   myClass?: Class | null
   needsEnroll: boolean
@@ -37,6 +39,9 @@ export function SubjectClassProvider({
   const isLecturer = usePermission('class:manage')
   const canEnroll = usePermission('subject:enroll')
   const isStudent = canEnroll && !isLecturer
+
+  const location = useLocation()
+  const basePath = location.pathname.startsWith('/lecturer') ? `/lecturer/subjects/${subjectId}` : `/subjects/${subjectId}`
 
   const myClassQ = useMyClass(subjectId, isStudent)
   const classesQ = useClasses(subjectId, isLecturer)
@@ -65,6 +70,7 @@ export function SubjectClassProvider({
     isLecturer,
     classId: isStudent ? myClassQ.data?.id : activeClassId,
     loading: isStudent ? myClassQ.isLoading : classesQ.isLoading,
+    basePath,
     myClass: myClassQ.data,
     needsEnroll: isStudent && !myClassQ.isLoading && !myClassQ.data,
     classes,

@@ -42,6 +42,7 @@ export class FsrsScheduler {
     rating: Rating,
     now: Date = new Date(),
     elapsedDays = 0,
+    maxLapsesReached = false,
   ): ScheduleResult {
     let stability: number;
     let difficulty: number;
@@ -59,6 +60,17 @@ export class FsrsScheduler {
     }
 
     stability = this.clamp(stability, MIN_STABILITY, MAX_INTERVAL_DAYS);
+
+    // Again (1): re-queue the card immediately within the same session so the
+    // student sees it again before the session ends (BR-F1-17). We record
+    // interval=0 so FSRS knows the card is in the "lapse" state; the actual
+    // next spaced-repetition date is the scheduler's next recall.
+    // Once this session has already re-queued the card twice, assign
+    // a real tomorrow interval to stop infinite re-queuing.
+    if (rating === 1 && !maxLapsesReached) {
+      return { stability, difficulty, interval: 0, nextReviewAt: new Date(now.getTime()) };
+    }
+
     const interval = Math.max(1, Math.round(this.clamp(stability, 1, MAX_INTERVAL_DAYS)));
     const nextReviewAt = new Date(now.getTime() + interval * 86_400_000);
 

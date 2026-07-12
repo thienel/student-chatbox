@@ -1,4 +1,4 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { IFlashcardRepository } from '../../../domain/flashcard/repositories/flashcard.repository.interface';
 import { ISubjectRepository } from '../../../domain/subject/repositories/subject.repository.interface';
 import { IAiUsageLogRepository } from '../../../domain/system/repositories/ai-usage-log.repository.interface';
@@ -33,6 +33,10 @@ export class GenerateFlashcardsUseCase {
       dto.documentIds,
     );
 
+    if (!generatedCards || generatedCards.length === 0) {
+      throw new UnprocessableEntityException('Failed to generate flashcards. Please check if the subject has processed documents.');
+    }
+
     const title = dto.topic
       ? `Flashcards: ${dto.topic}`
       : `Flashcards: ${subject.name}`;
@@ -41,7 +45,7 @@ export class GenerateFlashcardsUseCase {
       subjectId,
       classId,
       title,
-      isPublic: true,
+      isPublic: generatedCards.length >= 3,
       createdBy: user.id,
     });
 

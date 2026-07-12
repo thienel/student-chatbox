@@ -40,8 +40,8 @@ export function Topbar() {
     .toUpperCase() ?? '?'
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-40 h-14 bg-background border-b border-border flex justify-center">
-      <div className="w-full max-w-5xl px-6 h-full flex items-center justify-between">
+    <header className="fixed top-4 left-0 right-0 z-40 flex justify-center pointer-events-none px-4 sm:px-6">
+      <div className="w-full max-w-5xl h-14 bg-background/95 backdrop-blur-md border border-border shadow-sm rounded-2xl pointer-events-auto flex items-center justify-between px-5 transition-all duration-200">
         <div className="flex items-center gap-3 min-w-0">
         <Link to="/" className="flex-shrink-0 flex items-center hover:opacity-80 transition-opacity duration-150" title="Home">
           <Logo className="h-10 w-auto" />
@@ -94,7 +94,7 @@ export function Topbar() {
             </div>
             <DropdownMenuSeparator className="bg-border mx-2" />
             <DropdownMenuItem asChild className="text-muted-foreground hover:text-foreground hover:bg-secondary cursor-pointer relative z-10 rounded-md mx-1 px-3 h-9">
-              <Link to={user?.role === 'admin' ? '/admin/settings' : user?.role === 'lecturer' ? '/lecturer/settings' : '/settings'}>
+              <Link to={user?.roleName === 'admin' ? '/admin/settings' : user?.roleName === 'lecturer' ? '/lecturer/settings' : '/settings'}>
                 <User className="h-4 w-4 mr-2" />
                 <span className="font-medium text-sm">Settings</span>
               </Link>

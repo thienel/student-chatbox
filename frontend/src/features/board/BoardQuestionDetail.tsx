@@ -41,11 +41,13 @@ export function BoardQuestionDetail({ subjectId, classId, question, onBack }: Pr
   const closeQuestion = useCloseQuestion(subjectId, classId)
   const deleteQuestion = useDeleteQuestion(subjectId, classId)
 
+  const [localQ, setLocalQ] = useState(question)
+
   const [body, setBody] = useState('')
 
   const authorLabel = (authorId: string) => (authorId === user?.id ? 'You' : 'Member')
   const alreadyAnswered = (answers.data ?? []).some(a => a.authorId === user?.id)
-  const canAnswer = question.status !== 'closed' && question.authorId !== user?.id && !alreadyAnswered
+  const canAnswer = localQ.status !== 'closed' && localQ.authorId !== user?.id && !alreadyAnswered
 
   const handlePost = async () => {
     if (!body.trim()) return
@@ -70,28 +72,34 @@ export function BoardQuestionDetail({ subjectId, classId, question, onBack }: Pr
       <div className="bg-card border rounded-lg p-5">
         <div className="flex items-start gap-3">
           <button
-            onClick={() => run(() => upvoteQuestion.mutateAsync(question.id), 'Failed to vote.')}
-            className={cn('flex flex-col items-center text-xs shrink-0', question.isUpvotedByMe ? 'text-primary' : 'text-muted-foreground hover:text-foreground')}
+            onClick={() => run(async () => {
+              const res = await upvoteQuestion.mutateAsync(localQ.id)
+              setLocalQ(prev => ({ ...prev, isUpvotedByMe: res.upvoted, upvoteCount: res.upvoteCount }))
+            }, 'Failed to vote.')}
+            className={cn('flex flex-col items-center text-xs shrink-0', localQ.isUpvotedByMe ? 'text-primary' : 'text-muted-foreground hover:text-foreground')}
           >
-            <ArrowBigUp className={cn('h-5 w-5', question.isUpvotedByMe && 'fill-primary')} />
-            <span className="tabular-nums">{question.upvoteCount}</span>
+            <ArrowBigUp className={cn('h-5 w-5', localQ.isUpvotedByMe && 'fill-primary')} />
+            <span className="tabular-nums">{localQ.upvoteCount}</span>
           </button>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <h2 className="text-base font-medium text-foreground">{question.title}</h2>
-              <Badge className={cn('text-[10px] rounded capitalize', statusBadge[question.status])}>{question.status}</Badge>
+              <h2 className="text-base font-medium text-foreground">{localQ.title}</h2>
+              <Badge className={cn('text-[10px] rounded capitalize', statusBadge[localQ.status])}>{localQ.status}</Badge>
             </div>
-            <p className="text-sm text-foreground mt-2 whitespace-pre-wrap">{question.body}</p>
-            <p className="text-xs text-muted-foreground mt-2">{authorLabel(question.authorId)} · {new Date(question.createdAt).toLocaleDateString()}</p>
+            <p className="text-sm text-foreground mt-2 whitespace-pre-wrap">{localQ.body}</p>
+            <p className="text-xs text-muted-foreground mt-2">{authorLabel(localQ.authorId)} · {new Date(localQ.createdAt).toLocaleDateString()}</p>
           </div>
           {isModerator && (
             <div className="flex items-center gap-1 shrink-0">
-              {question.status !== 'closed' && (
-                <Button variant="ghost" size="sm" onClick={() => run(() => closeQuestion.mutateAsync(question.id), 'Failed to close.')} className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground hover:bg-secondary rounded-md">
+              {localQ.status !== 'closed' && (
+                <Button variant="ghost" size="sm" onClick={() => run(async () => {
+                  await closeQuestion.mutateAsync(localQ.id)
+                  setLocalQ(prev => ({ ...prev, status: 'closed' }))
+                }, 'Failed to close.')} className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground hover:bg-secondary rounded-md">
                   Close
                 </Button>
               )}
-              <Button variant="ghost" size="icon" onClick={() => run(async () => { await deleteQuestion.mutateAsync(question.id); onBack() }, 'Failed to delete.')} className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md">
+              <Button variant="ghost" size="icon" onClick={() => run(async () => { await deleteQuestion.mutateAsync(localQ.id); onBack() }, 'Failed to delete.')} className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md">
                 <Trash2 className="h-3.5 w-3.5" />
               </Button>
             </div>

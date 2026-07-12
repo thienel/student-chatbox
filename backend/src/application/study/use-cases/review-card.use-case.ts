@@ -11,13 +11,6 @@ import {
   defaultStats, applyReview, applySessionCompletion, remainingNewAllowance,
 } from './study-stats.helpers';
 
-const RATING_BUCKET: Record<Rating, 'cardsAgain' | 'cardsHard' | 'cardsGood' | 'cardsEasy'> = {
-  1: 'cardsAgain',
-  2: 'cardsHard',
-  3: 'cardsGood',
-  4: 'cardsEasy',
-};
-
 @Injectable()
 export class ReviewCardUseCase {
   private readonly scheduler = new FsrsScheduler();
@@ -45,11 +38,20 @@ export class ReviewCardUseCase {
       ? Math.max(0, (now.getTime() - progress.lastReviewedAt.getTime()) / 86_400_000)
       : 0;
 
+    // BR-F1-17: only the first two Again ratings re-queue a card.  This is
+    // state for this session/card pair, not an inference from durable FSRS
+    // interval state that would accidentally carry into another session.
+    const lapseCount = rating === 1
+      ? await this.studyRepo.incrementSessionLapse(sessionId, dto.flashcardId)
+      : 0;
+    const maxLapsesReached = lapseCount > 2;
+
     const result = this.scheduler.schedule(
       progress ? { stability: progress.stability, difficulty: progress.difficulty, reps: progress.reps } : null,
       rating,
       now,
       elapsedDays,
+      maxLapsesReached,
     );
 
     await this.studyRepo.upsertProgress({
@@ -64,11 +66,8 @@ export class ReviewCardUseCase {
       nextReviewAt: result.nextReviewAt,
     });
 
-    // Update running session counters.
-    await this.studyRepo.updateSession(sessionId, {
-      cardsStudied: session.cardsStudied + 1,
-      [RATING_BUCKET[rating]]: session[RATING_BUCKET[rating]] + 1,
-    } as Parameters<IStudyRepository['updateSession']>[1]);
+    // Atomic increment avoids lost counts for two concurrent review requests.
+    await this.studyRepo.incrementSessionCounters(sessionId, rating);
 
     const today = ictDateString();
     let stats = (await this.studyRepo.getStats(user.id)) ?? defaultStats(user.id);

@@ -25,39 +25,28 @@ export class UpdateOfficialExamUseCase {
       throw new ForbiddenException('You can only edit exams you created');
     }
 
-    // Locked once any student has started an attempt (BR-EF2-07).
-    const attemptCount = await this.examRepo.countAttemptsByExamId(examId);
-    if (attemptCount > 0) {
-      throw new ConflictException('Exam is locked: students have already attempted it');
-    }
-
     if (dto.questions) {
       validateOfficialQuestions(dto.questions);
     }
 
-    const updated = await this.examRepo.updateExam(examId, {
+    const result = await this.examRepo.updateOfficialExamIfUnattempted(examId, {
       title: dto.title,
       description: dto.description,
       durationMinutes: dto.durationMinutes,
       questionCount: dto.questions ? dto.questions.length : undefined,
-    });
-
-    let questions = await this.examRepo.findQuestionsByExamId(examId);
-    if (dto.questions) {
-      await this.examRepo.deleteQuestionsByExamId(examId);
-      questions = await this.examRepo.createQuestions(
-        dto.questions.map((q, i) => ({
-          examId,
-          content: q.content,
-          options: q.options,
-          correctAnswer: q.correctAnswer,
-          explanation: q.explanation,
-          topic: q.topic,
-          position: i,
-        })),
-      );
+    }, dto.questions?.map((q, i) => (
+      {
+        content: q.content,
+        options: q.options,
+        correctAnswer: q.correctAnswer,
+        explanation: q.explanation,
+        topic: q.topic,
+        position: i,
+      }
+    )));
+    if (!result) {
+      throw new ConflictException('Exam is locked: students have already attempted it');
     }
-
-    return { exam: updated, questions };
+    return result;
   }
 }

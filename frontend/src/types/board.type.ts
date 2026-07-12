@@ -34,4 +34,4 @@ export interface BoardQuestionList {
 }
 
 export interface CreateBoardQuestionRequest { title: string; body?: string; content?: string; subjectId?: string; classId?: string; isAnonymous?: boolean; }
-export interface CreateBoardAnswerRequest { content?: string | any; isAnonymous?: boolean; }
+export interface CreateBoardAnswerRequest { body: string; isAnonymous?: boolean; }

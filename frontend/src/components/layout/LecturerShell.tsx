@@ -15,7 +15,7 @@ export function LecturerShell() {
   const { pathname } = useLocation()
 
   // Contextual parsing: check if URL contains a subject ID
-  const match = pathname.match(/\/lecturer\/subjects\/([^\/]+)/)
+  const match = pathname.match(/\/lecturer\/subjects\/([^/]+)/)
   const subjectId = match ? match[1] : null
 
   // Fetch subject details if in subject context
@@ -43,7 +43,7 @@ export function LecturerShell() {
       <Topbar />
 
       {/* Left Sidebar */}
-      <aside className="fixed left-0 top-14 w-64 h-[calc(100vh-3.5rem)] bg-card border-r border-border/50 shadow-sm z-30 flex flex-col rounded-tr-3xl overflow-hidden">
+      <aside className="fixed left-0 top-24 w-64 h-[calc(100vh-6rem)] bg-card border-r border-border/50 shadow-sm z-30 flex flex-col rounded-tr-3xl overflow-hidden">
         {subjectId && subject ? (
           // Subject context header
           <div className="p-6 pb-2 border-b border-border/40 bg-muted/5">
@@ -135,7 +135,7 @@ export function LecturerShell() {
       </aside>
 
       {/* Main Content Area */}
-      <main className="ml-64 pt-14 pb-20 min-h-screen">
+      <main className="ml-64 pt-24 pb-20 min-h-screen">
         <Outlet />
       </main>
 

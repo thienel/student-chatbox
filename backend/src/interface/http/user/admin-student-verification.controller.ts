@@ -1,16 +1,14 @@
 import { Controller, Get, Patch, Param, Body, UseGuards, UsePipes, ValidationPipe, HttpCode, HttpStatus } from '@nestjs/common';
 import { StudentVerificationService } from '../../../application/user/services/student-verification.service';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
-// Assuming RolesGuard exists for admin checking, we can add it later or rely on the plan constraints
-// import { RolesGuard } from '../../guards/roles.guard';
-// import { Roles } from '../../decorators/roles.decorator';
+import { PermissionGuard } from '../../guards/permission.guard';
+import { RequirePermission } from '../../decorators/require-permission.decorator';
 import { AdminReviewRequestDto } from '../../../application/user/dtos/admin-review-request.dto';
 import { CurrentUser } from '../../decorators/current-user.decorator';
 
 @Controller('admin/student-verifications')
-@UseGuards(JwtAuthGuard)
-// @UseGuards(RolesGuard)
-// @Roles('admin', 'staff')
+@UseGuards(JwtAuthGuard, PermissionGuard)
+@RequirePermission('user:manage')
 @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
 export class AdminStudentVerificationController {
   constructor(

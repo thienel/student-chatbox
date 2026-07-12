@@ -6,6 +6,7 @@ import { Document } from '../../../domain/document/entities/document.entity';
 import { LocalFileService } from '../../../infrastructure/storage/local-file.service';
 import { AiServiceClient } from '../../../infrastructure/ai/ai-service.client';
 import { User } from '../../../domain/user/entities/user.entity';
+import { fileTypeFromFile } from 'file-type';
 
 @Injectable()
 export class UploadDocumentUseCase {
@@ -21,42 +22,52 @@ export class UploadDocumentUseCase {
     file: Express.Multer.File,
     uploadedBy: User,
   ): Promise<Document> {
-    const subject = await this.subjectRepo.findById(subjectId);
-    if (!subject) throw new NotFoundException('Subject not found');
+    if (!file?.path) throw new BadRequestException('A document file is required');
+    let storedPath: string | undefined;
+    try {
+      const subject = await this.subjectRepo.findById(subjectId);
+      if (!subject) throw new NotFoundException('Subject not found');
 
-    if (uploadedBy.roleName === 'lecturer') {
-      const isAssigned = await this.subjectRepo.isLecturerAssigned(subjectId, uploadedBy.id);
-      if (!isAssigned) throw new ForbiddenException('You are not assigned to this subject');
-    }
+      if (uploadedBy.roleName === 'lecturer') {
+        const isAssigned = await this.subjectRepo.isLecturerAssigned(subjectId, uploadedBy.id);
+        if (!isAssigned) throw new ForbiddenException('You are not assigned to this subject');
+      }
 
-    const allowed = [
-      'application/pdf',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-    ];
-    if (!allowed.includes(file.mimetype)) {
-      throw new BadRequestException('Only PDF, DOCX, and PPTX files are allowed');
-    }
+      const allowed = [
+        'application/pdf',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      ];
+      const detected = await fileTypeFromFile(file.path);
+      if (!detected || !allowed.includes(detected.mime)) {
+        throw new BadRequestException('Only PDF, DOCX, and PPTX files with a valid file signature are allowed');
+      }
 
-    const { storedPath, mimeType, fileSizeBytes } = await this.fileService.saveFile(file, subjectId);
+      const stored = await this.fileService.saveFile(file, subjectId, detected.mime);
+      storedPath = stored.storedPath;
 
-    const document = await this.documentRepo.create({
-      subjectId,
-      originalName: file.originalname,
-      storedPath,
-      mimeType,
-      fileSizeBytes,
-      uploadedBy: uploadedBy.id,
-    });
-
-    // Kick off async processing in Python AI service (fire and forget). The
-    // uploader is the lecturer who owns the subject knowledge base.
-    this.aiServiceClient
-      .processDocument(document.id, storedPath, subjectId, uploadedBy.id)
-      .catch((err) => {
-        console.error(`Failed to queue document ${document.id} for processing:`, err);
+      const document = await this.documentRepo.create({
+        subjectId,
+        originalName: file.originalname,
+        storedPath: stored.storedPath,
+        mimeType: stored.mimeType,
+        fileSizeBytes: stored.fileSizeBytes,
+        uploadedBy: uploadedBy.id,
       });
 
-    return document;
+      // Kick off async processing in Python AI service (fire and forget). The
+      // uploader is the lecturer who owns the subject knowledge base.
+      this.aiServiceClient
+        .processDocument(document.id, stored.storedPath, subjectId, uploadedBy.id)
+        .catch((err) => {
+          console.error(`Failed to queue document ${document.id} for processing:`, err);
+        });
+
+      return document;
+    } catch (error) {
+      if (storedPath) await this.fileService.deleteFile(storedPath);
+      else await this.fileService.discardTempFile(file);
+      throw error;
+    }
   }
 }
