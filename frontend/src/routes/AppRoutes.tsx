@@ -8,6 +8,7 @@ import { AppShell } from '@/components/layout/AppShell'
 import { SubjectShell } from '@/components/layout/SubjectShell'
 import { AdminShell } from '@/components/layout/AdminShell'
 import { LecturerShell } from '@/components/layout/LecturerShell'
+import { ClassBar } from '@/features/classes/ClassBar'
 
 import LoginPage from '@/features/auth/LoginPage'
 import RegisterPage from '@/features/auth/RegisterPage'
@@ -104,6 +105,9 @@ function LecturerSubjectWrapper() {
   const { id = '' } = useParams<{ id: string }>()
   return (
     <SubjectClassProvider subjectId={id}>
+      <div className="px-6 border-b border-border/40 bg-card">
+        <ClassBar />
+      </div>
       <Outlet />
     </SubjectClassProvider>
   )
