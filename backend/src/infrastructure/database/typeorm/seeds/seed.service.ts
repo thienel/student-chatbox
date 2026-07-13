@@ -688,6 +688,8 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
       }
 
       // ─── Exam Attempts ────────────────────────────────────────────────────
+      const midtermQuestions = await questionRepo.find({ where: { examId: midtermExam.id }, order: { position: 'ASC' } });
+      const sdnQuestionsDb = await questionRepo.find({ where: { examId: sdnExam.id }, order: { position: 'ASC' } });
       // student1 đã làm bài thi SWD391 và đạt 6/10 (3/5 câu đúng)
       const student1SWDAttempt = await examAttemptRepo.findOne({
         where: { examId: midtermExam.id, userId: students[0].id, status: 'completed' },
@@ -701,7 +703,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
           examAttemptRepo.create({
             examId: midtermExam.id,
             userId: students[0].id,
-            answers: { [savedQuestions[0].id]: 'B', [savedQuestions[1].id]: 'A', [savedQuestions[2].id]: 'B', [savedQuestions[3].id]: 'B', [savedQuestions[4].id]: 'C' }, // 3 đúng (B,B,B correct), score 6/10
+            answers: { [midtermQuestions[0].id]: 'B', [midtermQuestions[1].id]: 'A', [midtermQuestions[2].id]: 'B', [midtermQuestions[3].id]: 'B', [midtermQuestions[4].id]: 'C' }, // 3 đúng (B,B,B correct), score 6/10
             score: 6,
             totalQuestions: 5,
             correctCount: 3,
@@ -724,7 +726,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
           examAttemptRepo.create({
             examId: sdnExam.id,
             userId: students[1].id,
-            answers: { [savedQuestions[0].id]: 'A', [savedQuestions[1].id]: 'B', [savedQuestions[2].id]: 'C', [savedQuestions[3].id]: 'C', [savedQuestions[4].id]: 'B' }, // 4 đúng
+            answers: { [sdnQuestionsDb[0].id]: 'A', [sdnQuestionsDb[1].id]: 'B', [sdnQuestionsDb[2].id]: 'C', [sdnQuestionsDb[3].id]: 'C', [sdnQuestionsDb[4].id]: 'B' }, // 4 đúng
             score: 8,
             totalQuestions: 5,
             correctCount: 4,
@@ -747,7 +749,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
           examAttemptRepo.create({
             examId: sdnExam.id,
             userId: students[2].id,
-            answers: { [savedQuestions[0].id]: 'A', [savedQuestions[1].id]: 'B', [savedQuestions[2].id]: 'C', [savedQuestions[3].id]: 'C', [savedQuestions[4].id]: 'B' }, // 5 đúng
+            answers: { [sdnQuestionsDb[0].id]: 'A', [sdnQuestionsDb[1].id]: 'B', [sdnQuestionsDb[2].id]: 'C', [sdnQuestionsDb[3].id]: 'C', [sdnQuestionsDb[4].id]: 'B' }, // 5 đúng
             score: 10,
             totalQuestions: 5,
             correctCount: 5,
