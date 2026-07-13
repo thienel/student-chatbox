@@ -38,7 +38,7 @@ export default function ChatsPage() {
               className={`flex items-center gap-3 px-4 py-3 hover:bg-secondary/50 transition-colors duration-150 cursor-pointer group ${
                 i < chats.length - 1 ? 'border-b border-border' : ''
               }`}
-              onClick={() => navigate(`/chats/${chat.id}`)}
+              onClick={() => navigate(`/subjects/${chat.subjectId}/chat/${chat.id}`)}
             >
               <MessageSquare className="h-4 w-4 text-muted-foreground shrink-0" />
               <div className="flex-1 min-w-0">

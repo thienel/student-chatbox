@@ -113,7 +113,7 @@ export default function HomePage() {
               {recentChats.map(chat => (
                 <div
                   key={chat.id}
-                  onClick={() => navigate(`/chats/${chat.id}`)}
+                  onClick={() => navigate(`/subjects/${chat.subjectId}/chat/${chat.id}`)}
                   className="flex items-center gap-3 bg-card border rounded-lg px-4 py-3 hover:border-primary/50 hover-lift cursor-pointer"
                 >
                   <div className="h-8 w-8 rounded-md bg-secondary flex items-center justify-center shrink-0">
