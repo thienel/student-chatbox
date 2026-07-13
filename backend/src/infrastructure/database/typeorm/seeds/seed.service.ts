@@ -920,7 +920,6 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
               chatId: chat.id,
               role: msg.role,
               content: msg.content,
-              sources: null,
             }),
           );
         }
