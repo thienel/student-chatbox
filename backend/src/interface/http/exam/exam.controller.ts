@@ -24,10 +24,12 @@ import {
 } from '../../../application/exam/dtos/exam.dto';
 import { ClassContextService } from '../../../application/class/services/class-context.service';
 import { User } from '../../../domain/user/entities/user.entity';
+import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 
 @Controller('subjects/:subjectId/exams')
 @UseGuards(JwtAuthGuard, PermissionGuard)
 @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+@ApiTags('Subject Exam')
 export class SubjectExamController {
   constructor(
     private readonly generateExamUseCase: GenerateExamUseCase,
@@ -43,6 +45,7 @@ export class SubjectExamController {
 
   @Get()
   @RequirePermission('exam:read')
+    @ApiOperation({ summary: 'List' })
   async list(
     @Param('subjectId') subjectId: string,
     @Query('classId') classId: string,
@@ -57,6 +60,7 @@ export class SubjectExamController {
   @AiFeature('generate_exam')
   @UseGuards(AiRateLimitGuard)
   @HttpCode(HttpStatus.CREATED)
+    @ApiOperation({ summary: 'Generate' })
   async generate(
     @Param('subjectId') subjectId: string,
     @Body() dto: GenerateExamDto,
@@ -72,6 +76,7 @@ export class SubjectExamController {
   @AiFeature('generate_exam')
   @UseGuards(AiRateLimitGuard)
   @HttpCode(HttpStatus.OK)
+    @ApiOperation({ summary: 'Preview ai' })
   async previewAi(
     @Param('subjectId') subjectId: string,
     @Body() dto: GenerateExamDto,
@@ -83,6 +88,7 @@ export class SubjectExamController {
   @Post()
   @RequirePermission('exam:create-official')
   @HttpCode(HttpStatus.CREATED)
+    @ApiOperation({ summary: 'Create official' })
   async createOfficial(
     @Param('subjectId') subjectId: string,
     @Body() dto: CreateOfficialExamDto,
@@ -93,6 +99,7 @@ export class SubjectExamController {
 
   @Patch(':examId')
   @RequirePermission('exam:create-official')
+    @ApiOperation({ summary: 'Update official' })
   async updateOfficial(
     @Param('subjectId') subjectId: string,
     @Param('examId') examId: string,
@@ -104,6 +111,7 @@ export class SubjectExamController {
 
   @Get(':examId')
   @RequirePermission('exam:read')
+    @ApiOperation({ summary: 'Get exam' })
   async getExam(
     @Param('subjectId') subjectId: string,
     @Param('examId') examId: string,
@@ -115,6 +123,7 @@ export class SubjectExamController {
   @Post(':examId/attempts')
   @RequirePermission('exam:take')
   @HttpCode(HttpStatus.CREATED)
+    @ApiOperation({ summary: 'Start attempt' })
   async startAttempt(
     @Param('subjectId') subjectId: string,
     @Param('examId') examId: string,
@@ -125,6 +134,7 @@ export class SubjectExamController {
 
   @Post(':examId/attempts/:attemptId')
   @RequirePermission('exam:take')
+    @ApiOperation({ summary: 'Submit attempt' })
   async submitAttempt(
     @Param('examId') examId: string,
     @Param('attemptId') attemptId: string,

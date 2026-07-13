@@ -32,10 +32,12 @@ import { SummarizeDocumentUseCase } from '../../../application/document/use-case
 import { AuditLogService } from '../../../application/system/services/audit-log.service';
 import { ClassContextService } from '../../../application/class/services/class-context.service';
 import { User } from '../../../domain/user/entities/user.entity';
+import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 
 @Controller('subjects/:subjectId/documents')
 @UseGuards(JwtAuthGuard, PermissionGuard)
 @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+@ApiTags('Document')
 export class DocumentController {
   constructor(
     private readonly uploadDocumentUseCase: UploadDocumentUseCase,
@@ -58,6 +60,7 @@ export class DocumentController {
       limits: { fileSize: 50 * 1024 * 1024, files: 1, fields: 10, parts: 12 },
     }),
   )
+    @ApiOperation({ summary: 'Upload document' })
   async uploadDocument(
     @Param('subjectId') subjectId: string,
     @UploadedFile() file: Express.Multer.File,
@@ -83,6 +86,7 @@ export class DocumentController {
 
   @Get()
   @RequirePermission('document:read')
+    @ApiOperation({ summary: 'List documents' })
   async listDocuments(
     @Param('subjectId') subjectId: string,
     @CurrentUser() user: User,
@@ -96,6 +100,7 @@ export class DocumentController {
   @RequirePermission('ai:summarize-document')
   @AiFeature('summarize_document')
   @UseGuards(AiRateLimitGuard)
+    @ApiOperation({ summary: 'Get summary' })
   async getSummary(
     @Param('subjectId') subjectId: string,
     @Param('id') id: string,
@@ -107,6 +112,7 @@ export class DocumentController {
   @Delete(':id')
   @RequirePermission('document:delete')
   @HttpCode(HttpStatus.NO_CONTENT)
+    @ApiOperation({ summary: 'Delete document' })
   async deleteDocument(
     @Param('subjectId') subjectId: string,
     @Param('id') id: string,

@@ -11,10 +11,12 @@ import { ListBookmarksUseCase } from '../../../application/bookmark/use-cases/li
 import { DeleteBookmarkUseCase } from '../../../application/bookmark/use-cases/delete-bookmark.use-case';
 import { AddBookmarkDto } from '../../../application/bookmark/dtos/bookmark.dto';
 import { User } from '../../../domain/user/entities/user.entity';
+import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 
 @Controller('bookmarks')
 @UseGuards(JwtAuthGuard, PermissionGuard)
 @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+@ApiTags('Bookmark')
 export class BookmarkController {
   constructor(
     private readonly addBookmarkUseCase: AddBookmarkUseCase,
@@ -24,6 +26,7 @@ export class BookmarkController {
 
   @Get()
   @RequirePermission('bookmark:manage')
+    @ApiOperation({ summary: 'List' })
   async list(@CurrentUser() user: User, @Query('resourceType') resourceType?: string) {
     return this.listBookmarksUseCase.execute(user, resourceType);
   }
@@ -31,6 +34,7 @@ export class BookmarkController {
   @Post()
   @RequirePermission('bookmark:manage')
   @HttpCode(HttpStatus.CREATED)
+    @ApiOperation({ summary: 'Add' })
   async add(@Body() dto: AddBookmarkDto, @CurrentUser() user: User) {
     return this.addBookmarkUseCase.execute(dto, user);
   }
@@ -38,6 +42,7 @@ export class BookmarkController {
   @Delete(':id')
   @RequirePermission('bookmark:manage')
   @HttpCode(HttpStatus.NO_CONTENT)
+    @ApiOperation({ summary: 'Remove' })
   async remove(@Param('id') id: string, @CurrentUser() user: User): Promise<void> {
     await this.deleteBookmarkUseCase.execute(id, user);
   }

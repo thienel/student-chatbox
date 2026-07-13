@@ -34,9 +34,11 @@ import { ResendOtpDto } from '../../../application/auth/dtos/resend-otp.dto';
 import { ForgotPasswordDto } from '../../../application/auth/dtos/forgot-password.dto';
 import { ResetPasswordDto } from '../../../application/auth/dtos/reset-password.dto';
 import { AuthRateLimitGuard } from '../../guards/auth-rate-limit.guard';
+import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 
 @Controller('auth')
 @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+@ApiTags('Auth')
 export class AuthController {
   constructor(
     private readonly loginUseCase: LoginUseCase,
@@ -55,6 +57,7 @@ export class AuthController {
   @Post('login')
   @UseGuards(AuthRateLimitGuard)
   @HttpCode(HttpStatus.OK)
+    @ApiOperation({ summary: 'Login' })
   async login(@Body() dto: LoginDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
     try {
       const result = await this.loginUseCase.execute(dto);
@@ -89,12 +92,14 @@ export class AuthController {
   }
 
   @Post('register/student')
+    @ApiOperation({ summary: 'Register student' })
   async registerStudent(@Body() dto: RegisterStudentDto) {
     return this.registerUseCase.execute(dto);
   }
 
   @Post('verify-email')
   @HttpCode(HttpStatus.OK)
+    @ApiOperation({ summary: 'Verify email' })
   async verifyEmail(@Body() dto: VerifyOtpDto) {
     return this.verifyEmailUseCase.execute(dto);
   }
@@ -102,6 +107,7 @@ export class AuthController {
   @Post('resend-otp')
   @UseGuards(AuthRateLimitGuard)
   @HttpCode(HttpStatus.OK)
+    @ApiOperation({ summary: 'Resend otp' })
   async resendOtp(@Body() dto: ResendOtpDto) {
     return this.resendOtpUseCase.execute(dto);
   }
@@ -109,12 +115,14 @@ export class AuthController {
   @Post('forgot-password')
   @UseGuards(AuthRateLimitGuard)
   @HttpCode(HttpStatus.OK)
+    @ApiOperation({ summary: 'Forgot password' })
   async forgotPassword(@Body() dto: ForgotPasswordDto) {
     return this.forgotPasswordUseCase.execute(dto);
   }
 
   @Post('verify-reset-otp')
   @HttpCode(HttpStatus.OK)
+    @ApiOperation({ summary: 'Verify reset otp' })
   async verifyResetOtp(@Body() dto: VerifyOtpDto) {
     return this.verifyResetOtpUseCase.execute(dto);
   }
@@ -122,12 +130,14 @@ export class AuthController {
   @Post('reset-password')
   @UseGuards(AuthRateLimitGuard)
   @HttpCode(HttpStatus.OK)
+    @ApiOperation({ summary: 'Reset password' })
   async resetPassword(@Body() dto: ResetPasswordDto) {
     return this.resetPasswordUseCase.execute(dto);
   }
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
+    @ApiOperation({ summary: 'Refresh' })
   async refresh(@Req() req: Request) {
     const refreshToken = req.cookies?.refreshToken;
     if (!refreshToken) {
@@ -139,6 +149,7 @@ export class AuthController {
   @Post('logout')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
+    @ApiOperation({ summary: 'Logout' })
   async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const refreshToken = req.cookies?.refreshToken;
     if (refreshToken) {
@@ -150,6 +161,7 @@ export class AuthController {
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
+    @ApiOperation({ summary: 'Get me' })
   async getMe(@CurrentUser() user: any) {
     return this.getMeUseCase.execute(user.id);
   }

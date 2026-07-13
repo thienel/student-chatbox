@@ -1,4 +1,4 @@
-import { Injectable, Inject, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, ConflictException, ForbiddenException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { IClassRepository } from '../../../domain/class/repositories/class.repository.interface';
 import { ISubjectRepository } from '../../../domain/subject/repositories/subject.repository.interface';
@@ -15,6 +15,11 @@ export class CreateClassUseCase {
   async execute(subjectId: string, dto: CreateClassDto, lecturerId: string) {
     const subject = await this.subjectRepo.findById(subjectId);
     if (!subject) throw new NotFoundException('Subject not found');
+
+    const isAssigned = await this.subjectRepo.isLecturerAssigned(subjectId, lecturerId);
+    if (!isAssigned) {
+      throw new ForbiddenException('You are not assigned to this subject');
+    }
 
     // A lecturer cannot own two classes with the same password (keeps the
     // lecturer+password lookup used at enroll time unambiguous).

@@ -20,15 +20,18 @@ import {
   GetAllowlistQueryDto,
 } from '../../../application/user/dtos/student-email-allowlist.dto';
 import { StudentEmailAllowlistService } from '../../../application/user/services/student-email-allowlist.service';
+import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 
 @Controller('admin/student-email-allowlist')
 @UseGuards(JwtAuthGuard, PermissionGuard)
 @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+@ApiTags('Admin Student Email Allowlist')
 export class AdminStudentEmailAllowlistController {
   constructor(private readonly allowlistService: StudentEmailAllowlistService) {}
 
   @Get()
   @RequirePermission('user:manage')
+    @ApiOperation({ summary: 'Get allowlist records' })
   async getAllowlistRecords(@Query() query: GetAllowlistQueryDto) {
     const { items, total } = await this.allowlistService.getAllowlistRecords(query);
     return {
@@ -41,6 +44,7 @@ export class AdminStudentEmailAllowlistController {
 
   @Post()
   @RequirePermission('user:manage')
+    @ApiOperation({ summary: 'Create allowlist record' })
   async createAllowlistRecord(
     @Body() dto: CreateStudentEmailAllowlistDto,
     @CurrentUser() admin: any,
@@ -51,6 +55,7 @@ export class AdminStudentEmailAllowlistController {
 
   @Post('bulk')
   @RequirePermission('user:manage')
+    @ApiOperation({ summary: 'Bulk import allowlist' })
   async bulkImportAllowlist(
     @Body() dto: BulkImportStudentEmailAllowlistDto,
     @CurrentUser() admin: any,
@@ -64,6 +69,7 @@ export class AdminStudentEmailAllowlistController {
 
   @Put(':id/disable')
   @RequirePermission('user:manage')
+    @ApiOperation({ summary: 'Disable record' })
   async disableRecord(@Param('id') id: string) {
     await this.allowlistService.disableAllowlistRecord(id);
     return { message: 'Đã vô hiệu hóa record' };
@@ -71,6 +77,7 @@ export class AdminStudentEmailAllowlistController {
 
   @Put(':id/enable')
   @RequirePermission('user:manage')
+    @ApiOperation({ summary: 'Enable record' })
   async enableRecord(@Param('id') id: string) {
     await this.allowlistService.enableAllowlistRecord(id);
     return { message: 'Đã bật lại record' };

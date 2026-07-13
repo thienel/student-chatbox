@@ -1,8 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BookOpen, Plus, Search, Loader2 } from 'lucide-react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
@@ -12,18 +10,11 @@ import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { EmptyState } from '@/components/shared/EmptyState'
-import { useSubjects, useCreateSubject } from '@/api/queries/subjects'
+import { useSubjects } from '@/api/queries/subjects'
 import { useUnenroll } from '@/api/queries/classes'
 import { EnrollDialog } from '@/features/classes/EnrollDialog'
 import { usePermission } from '@/store/useUserStore'
 import { cn } from '@/lib/utils'
-
-const createSchema = z.object({
-  code: z.string().min(1, 'Required'),
-  name: z.string().min(1, 'Required'),
-  description: z.string().optional(),
-})
-type CreateForm = z.infer<typeof createSchema>
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -43,21 +34,7 @@ export default function SubjectsPage() {
   const canCreate = usePermission('subject:create')
   const canEnroll = usePermission('subject:enroll')
   const [search, setSearch] = useState('')
-  const [createOpen, setCreateOpen] = useState(false)
-
   const { data, isLoading } = useSubjects({ search: search || undefined, limit: 50 })
-  const createSubject = useCreateSubject()
-
-  const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm<CreateForm>({
-    resolver: zodResolver(createSchema),
-  })
-
-  const onSubmit = async (data: CreateForm) => {
-    await createSubject.mutateAsync(data)
-    setCreateOpen(false)
-    reset()
-  }
-
   const subjects = data?.items ?? []
 
   return (
@@ -79,15 +56,6 @@ export default function SubjectsPage() {
               className="pl-9 bg-card border-border/50 text-foreground placeholder:text-muted-foreground h-10 rounded-full font-mono text-sm focus-visible:ring-primary shadow-sm"
             />
           </div>
-          {canCreate && (
-            <Button
-              onClick={() => setCreateOpen(true)}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-5 text-sm font-medium rounded-full shadow-sm hover:shadow-md transition-all shrink-0"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              New Subject
-            </Button>
-          )}
         </div>
       </div>
 
@@ -190,56 +158,6 @@ export default function SubjectsPage() {
         </motion.div>
       )}
 
-      {/* Create Subject Dialog */}
-      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="bg-card border border-border/60 rounded-[2rem] shadow-2xl p-0 max-w-md overflow-hidden">
-          <div className="px-8 py-8 border-b border-border/40 bg-muted/10 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-40 h-40 bg-primary/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
-            <DialogTitle className="text-3xl font-serif text-primary-ink relative z-10">New Subject</DialogTitle>
-            <DialogDescription className="text-sm text-muted-foreground font-mono mt-2 relative z-10">
-              Add a new course to the registry
-            </DialogDescription>
-          </div>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="p-8 space-y-6 bg-card relative z-10">
-              <div className="space-y-2">
-                <Label className="text-xs font-mono uppercase tracking-widest text-muted-foreground ml-1">Subject Code</Label>
-                <Input 
-                  {...register('code')} 
-                  placeholder="e.g. PRN231" 
-                  className="rounded-xl font-mono text-sm border-border/60 bg-muted/20 focus-visible:ring-primary focus-visible:bg-transparent h-12 px-4 transition-all" 
-                />
-                {errors.code && <motion.p initial={{opacity:0, y:-5}} animate={{opacity:1, y:0}} className="text-[10px] text-destructive font-mono mt-1 ml-1">{errors.code.message}</motion.p>}
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs font-mono uppercase tracking-widest text-muted-foreground ml-1">Subject Name</Label>
-                <Input 
-                  {...register('name')} 
-                  placeholder="e.g. Java Web Application Development" 
-                  className="rounded-xl font-mono text-sm border-border/60 bg-muted/20 focus-visible:ring-primary focus-visible:bg-transparent h-12 px-4 transition-all" 
-                />
-                {errors.name && <motion.p initial={{opacity:0, y:-5}} animate={{opacity:1, y:0}} className="text-[10px] text-destructive font-mono mt-1 ml-1">{errors.name.message}</motion.p>}
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs font-mono uppercase tracking-widest text-muted-foreground ml-1">Description <span className="text-muted-foreground/50 lowercase">(optional)</span></Label>
-                <Input 
-                  {...register('description')} 
-                  placeholder="Course overview..." 
-                  className="rounded-xl font-mono text-sm border-border/60 bg-muted/20 focus-visible:ring-primary focus-visible:bg-transparent h-12 px-4 transition-all" 
-                />
-              </div>
-            </div>
-            <div className="px-8 py-6 border-t border-border/40 flex justify-end gap-3 bg-muted/5 relative z-10">
-              <Button type="button" variant="ghost" onClick={() => setCreateOpen(false)} className="rounded-full font-mono text-xs px-6 hover:bg-muted/50">
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isSubmitting} className="rounded-full font-mono text-xs tracking-wider px-8 shadow-sm">
-                {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Create Subject'}
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }

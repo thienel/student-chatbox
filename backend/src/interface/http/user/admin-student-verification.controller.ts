@@ -5,28 +5,33 @@ import { PermissionGuard } from '../../guards/permission.guard';
 import { RequirePermission } from '../../decorators/require-permission.decorator';
 import { AdminReviewRequestDto } from '../../../application/user/dtos/admin-review-request.dto';
 import { CurrentUser } from '../../decorators/current-user.decorator';
+import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 
 @Controller('admin/student-verifications')
 @UseGuards(JwtAuthGuard, PermissionGuard)
 @RequirePermission('user:manage')
 @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+@ApiTags('Admin Student Verification')
 export class AdminStudentVerificationController {
   constructor(
     private readonly verificationService: StudentVerificationService,
   ) {}
 
   @Get()
+    @ApiOperation({ summary: 'Get pending requests' })
   async getPendingRequests() {
     return this.verificationService.getPendingRequests();
   }
 
   @Get(':id')
+    @ApiOperation({ summary: 'Get request detail' })
   async getRequestDetail(@Param('id') id: string) {
     return this.verificationService.getRequestDetail(id);
   }
 
   @Patch(':id/approve')
   @HttpCode(HttpStatus.OK)
+    @ApiOperation({ summary: 'Approve request' })
   async approveRequest(
     @Param('id') id: string,
     @CurrentUser() admin: any
@@ -36,6 +41,7 @@ export class AdminStudentVerificationController {
 
   @Patch(':id/reject')
   @HttpCode(HttpStatus.OK)
+    @ApiOperation({ summary: 'Reject request' })
   async rejectRequest(
     @Param('id') id: string,
     @Body() dto: AdminReviewRequestDto,
@@ -46,6 +52,7 @@ export class AdminStudentVerificationController {
 
   @Patch(':id/request-more-info')
   @HttpCode(HttpStatus.OK)
+    @ApiOperation({ summary: 'Request more info' })
   async requestMoreInfo(
     @Param('id') id: string,
     @Body() dto: AdminReviewRequestDto,

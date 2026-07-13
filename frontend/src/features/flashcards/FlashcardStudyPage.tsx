@@ -164,39 +164,46 @@ export default function FlashcardStudyPage() {
 
       {/* Card */}
       <div
-        className="relative cursor-pointer select-none"
+        className="relative cursor-pointer select-none group"
         style={{ perspective: '1200px' }}
         onClick={toggleFlip}
       >
         <div
+          className="grid relative w-full"
           style={{
-            transition: 'transform 0.45s cubic-bezier(0.4,0,0.2,1)',
+            transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
             transformStyle: 'preserve-3d',
             transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
-            position: 'relative',
-            minHeight: '280px',
+            minHeight: '320px',
           }}
         >
           {/* Front */}
           <div
-            style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
-            className="absolute inset-0 bg-card card-texture border rounded-lg flex flex-col items-center justify-center p-8 hover:border-muted-foreground/30 transition-colors duration-150 synapse-glow"
+            style={{ gridArea: '1 / 1', backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
+            className="w-full h-full bg-card card-texture border border-border/60 rounded-2xl flex flex-col p-8 hover:border-primary/40 hover:shadow-lg transition-all duration-300"
           >
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-4">Question</p>
-            <p className="text-base font-medium text-foreground text-center leading-relaxed">{card?.front}</p>
-            <p className="text-xs text-muted-foreground mt-6">Press Space to flip</p>
+            <div className="flex-1 flex flex-col items-center justify-center">
+              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.15em] mb-6">Question</p>
+              <p className="text-lg md:text-xl font-medium text-foreground text-center leading-relaxed max-w-[85%]">{card?.front}</p>
+            </div>
+            <div className="mt-8 flex justify-center">
+              <p className="text-xs text-muted-foreground/60 tracking-wide">Press Space to flip</p>
+            </div>
           </div>
           {/* Back */}
           <div
             style={{
+              gridArea: '1 / 1',
               backfaceVisibility: 'hidden',
               WebkitBackfaceVisibility: 'hidden',
               transform: 'rotateY(180deg)',
             }}
-            className="absolute inset-0 bg-secondary card-texture border rounded-lg flex flex-col items-center justify-center p-8"
+            className="w-full h-full bg-secondary/30 card-texture border border-border/60 rounded-2xl flex flex-col p-8"
           >
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-4">Answer</p>
-            <p className="text-base text-foreground text-center leading-relaxed">{card?.back}</p>
+            <div className="flex-1 flex flex-col items-center justify-center">
+              <p className="text-[11px] font-semibold text-primary/70 uppercase tracking-[0.15em] mb-6">Answer</p>
+              <p className="text-lg md:text-xl text-foreground text-center leading-relaxed max-w-[85%]">{card?.back}</p>
+            </div>
           </div>
         </div>
       </div>

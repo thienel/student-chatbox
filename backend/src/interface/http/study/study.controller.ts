@@ -17,10 +17,12 @@ import { GetCurrentStudyPlanUseCase } from '../../../application/study/use-cases
 import { GetStudyPlanHistoryUseCase } from '../../../application/study/use-cases/get-study-plan-history.use-case';
 import { ReviewCardDto, UpdateStudySettingsDto } from '../../../application/study/dtos/study.dto';
 import { User } from '../../../domain/user/entities/user.entity';
+import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 
 @Controller()
 @UseGuards(JwtAuthGuard, PermissionGuard)
 @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+@ApiTags('Study')
 export class StudyController {
   constructor(
     private readonly getStudyQueueUseCase: GetStudyQueueUseCase,
@@ -36,6 +38,7 @@ export class StudyController {
 
   @Get('flashcard-sets/:setId/study-queue')
   @RequirePermission('flashcard:study')
+    @ApiOperation({ summary: 'Queue' })
   async queue(@Param('setId') setId: string, @CurrentUser() user: User) {
     return this.getStudyQueueUseCase.execute(setId, user);
   }
@@ -43,12 +46,14 @@ export class StudyController {
   @Post('flashcard-sets/:setId/study-sessions')
   @RequirePermission('flashcard:study')
   @HttpCode(HttpStatus.CREATED)
+    @ApiOperation({ summary: 'Start' })
   async start(@Param('setId') setId: string, @CurrentUser() user: User) {
     return this.startStudySessionUseCase.execute(setId, user);
   }
 
   @Post('study-sessions/:sessionId/reviews')
   @RequirePermission('flashcard:study')
+    @ApiOperation({ summary: 'Review' })
   async review(
     @Param('sessionId') sessionId: string,
     @Body() dto: ReviewCardDto,
@@ -59,36 +64,42 @@ export class StudyController {
 
   @Get('study-sessions/:sessionId')
   @RequirePermission('flashcard:study')
+    @ApiOperation({ summary: 'Get session' })
   async getSession(@Param('sessionId') sessionId: string, @CurrentUser() user: User) {
     return this.getStudySessionUseCase.execute(sessionId, user);
   }
 
   @Get('study-settings')
   @RequirePermission('flashcard:study')
+    @ApiOperation({ summary: 'Get settings' })
   async getSettings(@CurrentUser() user: User) {
     return this.getStudySettingsUseCase.execute(user);
   }
 
   @Patch('study-settings')
   @RequirePermission('flashcard:study')
+    @ApiOperation({ summary: 'Update settings' })
   async updateSettings(@Body() dto: UpdateStudySettingsDto, @CurrentUser() user: User) {
     return this.updateStudySettingsUseCase.execute(user, dto);
   }
 
   @Get('study-stats')
   @RequirePermission('flashcard:study')
+    @ApiOperation({ summary: 'Stats' })
   async stats(@CurrentUser() user: User) {
     return this.getStudyStatsUseCase.execute(user);
   }
 
   @Get('study-plan/current')
   @RequirePermission('flashcard:study')
+    @ApiOperation({ summary: 'Current plan' })
   async currentPlan(@CurrentUser() user: User) {
     return this.getCurrentStudyPlanUseCase.execute(user);
   }
 
   @Get('study-plan/history')
   @RequirePermission('flashcard:study')
+    @ApiOperation({ summary: 'Plan history' })
   async planHistory(
     @CurrentUser() user: User,
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,

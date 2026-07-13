@@ -25,10 +25,12 @@ import { DeleteFlashcardSetUseCase } from '../../../application/flashcard/use-ca
 import { GenerateFlashcardsDto } from '../../../application/flashcard/dtos/flashcard.dto';
 import { ClassContextService } from '../../../application/class/services/class-context.service';
 import { User } from '../../../domain/user/entities/user.entity';
+import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 
 @Controller('subjects/:subjectId/flashcard-sets')
 @UseGuards(JwtAuthGuard, PermissionGuard)
 @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+@ApiTags('Flashcard')
 export class FlashcardController {
   constructor(
     private readonly generateFlashcardsUseCase: GenerateFlashcardsUseCase,
@@ -40,6 +42,7 @@ export class FlashcardController {
 
   @Get()
   @RequirePermission('flashcard:read')
+    @ApiOperation({ summary: 'List' })
   async list(
     @Param('subjectId') subjectId: string,
     @Query('classId') classId: string,
@@ -54,6 +57,7 @@ export class FlashcardController {
   @AiFeature('generate_flashcard')
   @UseGuards(AiRateLimitGuard)
   @HttpCode(HttpStatus.CREATED)
+    @ApiOperation({ summary: 'Generate' })
   async generate(
     @Param('subjectId') subjectId: string,
     @Body() dto: GenerateFlashcardsDto,
@@ -65,6 +69,7 @@ export class FlashcardController {
 
   @Get(':id')
   @RequirePermission('flashcard:read')
+    @ApiOperation({ summary: 'Get set' })
   async getSet(@Param('id') id: string, @CurrentUser() user: User) {
     return this.getFlashcardSetUseCase.execute(id, user);
   }
@@ -72,6 +77,7 @@ export class FlashcardController {
   @Delete(':id')
   @RequirePermission('flashcard:delete')
   @HttpCode(HttpStatus.NO_CONTENT)
+    @ApiOperation({ summary: 'Delete set' })
   async deleteSet(@Param('id') id: string, @CurrentUser() user: User): Promise<void> {
     await this.deleteFlashcardSetUseCase.execute(id, user);
   }

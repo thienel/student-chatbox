@@ -12,15 +12,18 @@ import {
 } from '../../../application/board/dtos/board.dto';
 import { User } from '../../../domain/user/entities/user.entity';
 import { BoardQuestionStatus } from '../../../domain/board/board.repository.interface';
+import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 
 @Controller('subjects/:subjectId/classes/:classId/board')
 @UseGuards(JwtAuthGuard, PermissionGuard)
 @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+@ApiTags('Board')
 export class BoardController {
   constructor(private readonly board: BoardService) {}
 
   @Get('questions')
   @RequirePermission('subject:read')
+    @ApiOperation({ summary: 'List questions' })
   listQuestions(
     @Param('subjectId') subjectId: string,
     @Param('classId') classId: string,
@@ -36,6 +39,7 @@ export class BoardController {
   @Post('questions')
   @RequirePermission('subject:read')
   @HttpCode(HttpStatus.CREATED)
+    @ApiOperation({ summary: 'Create question' })
   createQuestion(
     @Param('subjectId') subjectId: string,
     @Param('classId') classId: string,
@@ -47,6 +51,7 @@ export class BoardController {
 
   @Patch('questions/:questionId')
   @RequirePermission('subject:read')
+    @ApiOperation({ summary: 'Update question' })
   updateQuestion(
     @Param('subjectId') subjectId: string,
     @Param('classId') classId: string,
@@ -60,6 +65,7 @@ export class BoardController {
   @Delete('questions/:questionId')
   @RequirePermission('subject:read')
   @HttpCode(HttpStatus.NO_CONTENT)
+    @ApiOperation({ summary: 'Delete question' })
   async deleteQuestion(
     @Param('subjectId') subjectId: string,
     @Param('classId') classId: string,
@@ -71,6 +77,7 @@ export class BoardController {
 
   @Patch('questions/:questionId/close')
   @RequirePermission('class:manage')
+    @ApiOperation({ summary: 'Close question' })
   closeQuestion(
     @Param('subjectId') subjectId: string,
     @Param('classId') classId: string,
@@ -82,6 +89,7 @@ export class BoardController {
 
   @Post('questions/:questionId/upvote')
   @RequirePermission('subject:read')
+    @ApiOperation({ summary: 'Upvote question' })
   upvoteQuestion(
     @Param('subjectId') subjectId: string,
     @Param('classId') classId: string,
@@ -93,6 +101,7 @@ export class BoardController {
 
   @Get('questions/:questionId/answers')
   @RequirePermission('subject:read')
+    @ApiOperation({ summary: 'List answers' })
   listAnswers(
     @Param('subjectId') subjectId: string,
     @Param('classId') classId: string,
@@ -105,6 +114,7 @@ export class BoardController {
   @Post('questions/:questionId/answers')
   @RequirePermission('subject:read')
   @HttpCode(HttpStatus.CREATED)
+    @ApiOperation({ summary: 'Create answer' })
   createAnswer(
     @Param('subjectId') subjectId: string,
     @Param('classId') classId: string,
@@ -117,6 +127,7 @@ export class BoardController {
 
   @Patch('questions/:questionId/answers/:answerId')
   @RequirePermission('subject:read')
+    @ApiOperation({ summary: 'Update answer' })
   updateAnswer(
     @Param('subjectId') subjectId: string,
     @Param('classId') classId: string,
@@ -131,6 +142,7 @@ export class BoardController {
   @Delete('questions/:questionId/answers/:answerId')
   @RequirePermission('subject:read')
   @HttpCode(HttpStatus.NO_CONTENT)
+    @ApiOperation({ summary: 'Delete answer' })
   async deleteAnswer(
     @Param('subjectId') subjectId: string,
     @Param('classId') classId: string,
@@ -143,6 +155,7 @@ export class BoardController {
 
   @Post('questions/:questionId/answers/:answerId/pin')
   @RequirePermission('class:manage')
+    @ApiOperation({ summary: 'Pin answer' })
   pinAnswer(
     @Param('subjectId') subjectId: string,
     @Param('classId') classId: string,
@@ -155,6 +168,7 @@ export class BoardController {
 
   @Post('questions/:questionId/answers/:answerId/upvote')
   @RequirePermission('subject:read')
+    @ApiOperation({ summary: 'Upvote answer' })
   upvoteAnswer(
     @Param('subjectId') subjectId: string,
     @Param('classId') classId: string,

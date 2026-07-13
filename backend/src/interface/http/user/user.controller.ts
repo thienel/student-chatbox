@@ -28,10 +28,12 @@ import { CreateUserDto } from '../../../application/user/dtos/create-user.dto';
 import { ListUsersDto } from '../../../application/user/dtos/list-users.dto';
 import { UpdateUserDto, UpdateUserStatusDto, ResetPasswordDto } from '../../../application/user/dtos/update-user.dto';
 import { AuditLogService } from '../../../application/system/services/audit-log.service';
+import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 
 @Controller('users')
 @UseGuards(JwtAuthGuard, PermissionGuard)
 @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+@ApiTags('User')
 export class UserController {
   constructor(
     private readonly createUserUseCase: CreateUserUseCase,
@@ -46,6 +48,7 @@ export class UserController {
   @Post()
   @RequirePermission('user:create')
   @HttpCode(HttpStatus.CREATED)
+    @ApiOperation({ summary: 'Create user' })
   async createUser(
     @Body() dto: CreateUserDto,
     @CurrentUser() currentUser: any,
@@ -65,24 +68,28 @@ export class UserController {
 
   @Get()
   @RequirePermission('user:read-list')
+    @ApiOperation({ summary: 'List users' })
   async listUsers(@Query() dto: ListUsersDto) {
     return this.listUsersUseCase.execute(dto);
   }
 
   @Get(':id')
   @RequirePermission('user:read-list')
+    @ApiOperation({ summary: 'Get user' })
   async getUser(@Param('id') id: string) {
     return this.getUserUseCase.execute(id);
   }
 
   @Patch(':id')
   @RequirePermission('user:update')
+    @ApiOperation({ summary: 'Update user' })
   async updateUser(@Param('id') id: string, @Body() dto: UpdateUserDto) {
     return this.updateUserUseCase.execute(id, dto);
   }
 
   @Patch(':id/status')
   @RequirePermission('user:update')
+    @ApiOperation({ summary: 'Update user status' })
   async updateUserStatus(
     @Param('id') id: string,
     @Body() dto: UpdateUserStatusDto,
@@ -104,6 +111,7 @@ export class UserController {
   @Post(':id/reset-password')
   @RequirePermission('user:update')
   @HttpCode(HttpStatus.OK)
+    @ApiOperation({ summary: 'Reset password' })
   async resetPassword(@Param('id') id: string, @Body() dto: ResetPasswordDto) {
     await this.resetPasswordUseCase.execute(id, dto);
     return { message: 'Password reset successfully' };

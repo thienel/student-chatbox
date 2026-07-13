@@ -44,19 +44,19 @@ export class AuditLogTypeOrmRepository implements IAuditLogRepository {
     const qb = this.repo.createQueryBuilder('al').leftJoinAndSelect('al.user', 'user');
 
     if (filter.userId) {
-      qb.andWhere('al.user_id = :userId', { userId: filter.userId });
+      qb.andWhere('al.userId = :userId', { userId: filter.userId });
     }
     if (filter.action) {
       qb.andWhere('al.action = :action', { action: filter.action });
     }
     if (filter.from) {
-      qb.andWhere('al.created_at >= :from', { from: filter.from });
+      qb.andWhere('al.createdAt >= :from', { from: filter.from });
     }
     if (filter.to) {
-      qb.andWhere('al.created_at <= :to', { to: filter.to });
+      qb.andWhere('al.createdAt <= :to', { to: filter.to });
     }
 
-    qb.orderBy('al.created_at', 'DESC');
+    qb.orderBy('al.createdAt', 'DESC');
 
     const total = await qb.getCount();
     const items = await qb

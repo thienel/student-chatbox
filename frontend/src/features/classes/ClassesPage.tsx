@@ -144,20 +144,20 @@ export default function ClassesPage() {
                 value={name}
                 onChange={e => setName(e.target.value)}
                 placeholder="e.g. SE1702 — Morning"
-                className="rounded-xl font-mono text-sm border-border/60 bg-muted/20 focus-visible:ring-primary focus-visible:bg-transparent h-12 px-4 transition-all"
+                className="rounded-xl font-mono text-sm border-border/60 bg-card hover:bg-muted/10 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:border-primary h-12 px-4 transition-all duration-300 shadow-sm hover:shadow"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="new-class-password" className="text-xs font-mono uppercase tracking-widest text-muted-foreground ml-1">Enrollment Password</Label>
-              <div className="relative">
-                <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <div className="relative group">
+                <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                 <Input
                   id="new-class-password"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && submit()}
                   placeholder="Shared with students"
-                  className="rounded-xl font-mono text-sm border-border/60 bg-muted/20 focus-visible:ring-primary focus-visible:bg-transparent h-12 pl-11 pr-4 transition-all"
+                  className="rounded-xl font-mono text-sm border-border/60 bg-card hover:bg-muted/10 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:border-primary h-12 pl-11 pr-4 transition-all duration-300 shadow-sm hover:shadow"
                 />
               </div>
               <p className="text-[10px] text-muted-foreground/70 font-mono ml-1 mt-1.5">You cannot reuse a password across your own classes.</p>

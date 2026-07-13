@@ -34,10 +34,12 @@ import {
 } from '../../../application/subject/dtos/subject.dto';
 import { AuditLogService } from '../../../application/system/services/audit-log.service';
 import { User } from '../../../domain/user/entities/user.entity';
+import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 
 @Controller('subjects')
 @UseGuards(JwtAuthGuard, PermissionGuard)
 @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+@ApiTags('Subject')
 export class SubjectController {
   constructor(
     private readonly createSubjectUseCase: CreateSubjectUseCase,
@@ -53,6 +55,7 @@ export class SubjectController {
   @Post()
   @RequirePermission('subject:create')
   @HttpCode(HttpStatus.CREATED)
+    @ApiOperation({ summary: 'Create subject' })
   async createSubject(
     @Body() dto: CreateSubjectDto,
     @CurrentUser() user: User,
@@ -65,18 +68,21 @@ export class SubjectController {
 
   @Get()
   @RequirePermission('subject:read')
+    @ApiOperation({ summary: 'List subjects' })
   async listSubjects(@Query() dto: ListSubjectsDto, @CurrentUser() user: any) {
     return this.listSubjectsUseCase.execute(dto, user);
   }
 
   @Get(':id')
   @RequirePermission('subject:read')
+    @ApiOperation({ summary: 'Get subject' })
   async getSubject(@Param('id') id: string) {
     return this.getSubjectUseCase.execute(id);
   }
 
   @Patch(':id')
   @RequirePermission('subject:update')
+    @ApiOperation({ summary: 'Update subject' })
   async updateSubject(@Param('id') id: string, @Body() dto: UpdateSubjectDto) {
     return this.updateSubjectUseCase.execute(id, dto);
   }
@@ -84,12 +90,14 @@ export class SubjectController {
   @Delete(':id')
   @RequirePermission('subject:delete')
   @HttpCode(HttpStatus.NO_CONTENT)
+    @ApiOperation({ summary: 'Delete subject' })
   async deleteSubject(@Param('id') id: string) {
     await this.deleteSubjectUseCase.execute(id);
   }
 
   @Post(':id/lecturers')
   @RequirePermission('subject:assign-lecturer')
+    @ApiOperation({ summary: 'Assign lecturer' })
   async assignLecturer(
     @Param('id') subjectId: string,
     @Body() dto: AssignLecturerDto,
@@ -104,6 +112,7 @@ export class SubjectController {
   @Delete(':id/lecturers/:lecturerId')
   @RequirePermission('subject:assign-lecturer')
   @HttpCode(HttpStatus.NO_CONTENT)
+    @ApiOperation({ summary: 'Remove lecturer' })
   async removeLecturer(
     @Param('id') subjectId: string,
     @Param('lecturerId') lecturerId: string,

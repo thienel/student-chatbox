@@ -24,10 +24,6 @@ export class CreateSubjectUseCase {
       createdBy: creator.id,
     });
 
-    if (creator.roleName === 'lecturer') {
-      await this.subjectRepo.assignLecturer(subject.id, creator.id, creator.id);
-    }
-
     return subject;
   }
 }

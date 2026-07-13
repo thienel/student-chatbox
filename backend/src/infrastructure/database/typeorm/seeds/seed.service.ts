@@ -115,7 +115,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
       // students, and view class stats. Does not study (no chat/flashcards/
       // exams).
       const lecturerPerms = [
-        'subject:read', 'subject:create', 'class:manage',
+        'subject:read', 'class:manage',
         'document:create', 'document:delete', 'document:read',
         'ai:summarize-document',
         'exam:read', 'exam:create-official', 'ai:generate-exam',

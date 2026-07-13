@@ -29,10 +29,12 @@ import { SaveAssistantMessageUseCase } from '../../../application/rag/use-cases/
 import { AiServiceClient } from '../../../infrastructure/ai/ai-service.client';
 import { CreateChatDto, SendMessageDto, SaveAssistantMessageDto } from '../../../application/rag/dtos/chat.dto';
 import { User } from '../../../domain/user/entities/user.entity';
+import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 
 @Controller('chats')
 @UseGuards(JwtAuthGuard, PermissionGuard)
 @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+@ApiTags('Chat')
 export class ChatController {
   private readonly logger = new Logger(ChatController.name);
 
@@ -49,18 +51,21 @@ export class ChatController {
   @Post()
   @RequirePermission('chat:create')
   @HttpCode(HttpStatus.CREATED)
+    @ApiOperation({ summary: 'Create chat' })
   async createChat(@Body() dto: CreateChatDto, @CurrentUser() user: User) {
     return this.createChatUseCase.execute(dto, user);
   }
 
   @Get()
   @RequirePermission('chat:read-own')
+    @ApiOperation({ summary: 'List chats' })
   async listChats(@CurrentUser() user: User, @Query('subjectId') subjectId?: string) {
     return this.listChatsUseCase.execute(user.id, subjectId);
   }
 
   @Get(':id')
   @RequirePermission('chat:read-own')
+    @ApiOperation({ summary: 'Get chat' })
   async getChat(@Param('id') id: string, @CurrentUser() user: any) {
     return this.getChatUseCase.execute(id, user.id, user.roleName === 'admin');
   }
@@ -68,6 +73,7 @@ export class ChatController {
   @Delete(':id')
   @RequirePermission('chat:read-own')
   @HttpCode(HttpStatus.NO_CONTENT)
+    @ApiOperation({ summary: 'Delete chat' })
   async deleteChat(@Param('id') id: string, @CurrentUser() user: any) {
     await this.deleteChatUseCase.execute(id, user.id, user.roleName === 'admin');
   }
@@ -75,6 +81,7 @@ export class ChatController {
   @Post(':id/messages')
   @RequirePermission('ai:chat-rag')
   @UseGuards(AiRateLimitGuard)
+    @ApiOperation({ summary: 'Stream messages' })
   async streamMessages(
     @Param('id') chatId: string,
     @Body() dto: SendMessageDto,
@@ -123,6 +130,7 @@ export class ChatController {
   @Post(':id/messages/complete')
   @RequirePermission('ai:chat-rag')
   @HttpCode(HttpStatus.NO_CONTENT)
+    @ApiOperation({ summary: 'Save assistant message' })
   async saveAssistantMessage(
     @Param('id') chatId: string,
     @Body() dto: SaveAssistantMessageDto,

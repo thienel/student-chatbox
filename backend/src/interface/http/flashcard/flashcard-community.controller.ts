@@ -14,10 +14,12 @@ import { UnstarFlashcardSetUseCase } from '../../../application/flashcard/use-ca
 import { CloneFlashcardSetUseCase } from '../../../application/flashcard/use-cases/clone-flashcard-set.use-case';
 import { SetVisibilityDto } from '../../../application/flashcard/dtos/flashcard.dto';
 import { User } from '../../../domain/user/entities/user.entity';
+import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 
 @Controller('flashcard-sets')
 @UseGuards(JwtAuthGuard, PermissionGuard)
 @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+@ApiTags('Flashcard Community')
 export class FlashcardCommunityController {
   constructor(
     private readonly discoverUseCase: DiscoverFlashcardSetsUseCase,
@@ -30,6 +32,7 @@ export class FlashcardCommunityController {
 
   @Get('discover')
   @RequirePermission('flashcard:read')
+    @ApiOperation({ summary: 'Discover' })
   async discover(
     @CurrentUser() user: User,
     @Query('subjectId') subjectId?: string,
@@ -42,6 +45,7 @@ export class FlashcardCommunityController {
 
   @Get('leaderboard')
   @RequirePermission('flashcard:read')
+    @ApiOperation({ summary: 'Leaderboard' })
   async leaderboard(
     @CurrentUser() user: User,
     @Query('subjectId') subjectId?: string,
@@ -51,6 +55,7 @@ export class FlashcardCommunityController {
 
   @Patch(':id/visibility')
   @RequirePermission('flashcard:manage-own')
+    @ApiOperation({ summary: 'Set visibility' })
   async setVisibility(
     @Param('id') id: string,
     @Body() dto: SetVisibilityDto,
@@ -62,12 +67,14 @@ export class FlashcardCommunityController {
   @Post(':id/stars')
   @RequirePermission('flashcard:read')
   @HttpCode(HttpStatus.CREATED)
+    @ApiOperation({ summary: 'Star' })
   async star(@Param('id') id: string, @CurrentUser() user: User) {
     return this.starUseCase.execute(id, user);
   }
 
   @Delete(':id/stars')
   @RequirePermission('flashcard:read')
+    @ApiOperation({ summary: 'Unstar' })
   async unstar(@Param('id') id: string, @CurrentUser() user: User) {
     return this.unstarUseCase.execute(id, user);
   }
@@ -75,6 +82,7 @@ export class FlashcardCommunityController {
   @Post(':id/clone')
   @RequirePermission('flashcard:manage-own')
   @HttpCode(HttpStatus.CREATED)
+    @ApiOperation({ summary: 'Clone' })
   async clone(@Param('id') id: string, @CurrentUser() user: User) {
     return this.cloneUseCase.execute(id, user);
   }

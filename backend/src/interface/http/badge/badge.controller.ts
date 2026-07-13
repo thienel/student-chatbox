@@ -5,9 +5,11 @@ import { ListBadgesUseCase } from '../../../application/badge/use-cases/list-bad
 import { GetUserBadgesUseCase } from '../../../application/badge/use-cases/get-user-badges.use-case';
 import { GetMyBadgesUseCase } from '../../../application/badge/use-cases/get-my-badges.use-case';
 import { User } from '../../../domain/user/entities/user.entity';
+import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 
 @Controller()
 @UseGuards(JwtAuthGuard)
+@ApiTags('Badge')
 export class BadgeController {
   constructor(
     private readonly listBadgesUseCase: ListBadgesUseCase,
@@ -16,16 +18,19 @@ export class BadgeController {
   ) {}
 
   @Get('badges')
+    @ApiOperation({ summary: 'List catalogue' })
   listCatalogue() {
     return this.listBadgesUseCase.execute();
   }
 
   @Get('me/badges')
+    @ApiOperation({ summary: 'My badges' })
   myBadges(@CurrentUser() user: User) {
     return this.getMyBadgesUseCase.execute(user);
   }
 
   @Get('users/:userId/badges')
+    @ApiOperation({ summary: 'User badges' })
   userBadges(@Param('userId') userId: string) {
     return this.getUserBadgesUseCase.execute(userId);
   }

@@ -20,10 +20,12 @@ import { ListAuditLogsUseCase } from '../../../application/system/use-cases/list
 import { GetAdminStatsUseCase } from '../../../application/system/use-cases/get-admin-stats.use-case';
 import { ListAuditLogsDto } from '../../../application/system/dtos/system.dto';
 import { AuditLogService } from '../../../application/system/services/audit-log.service';
+import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 
 @Controller('system')
 @UseGuards(JwtAuthGuard, PermissionGuard)
 @UsePipes(new ValidationPipe({ whitelist: false, transform: true }))
+@ApiTags('System')
 export class SystemController {
   constructor(
     private readonly getSettingsUseCase: GetSettingsUseCase,
@@ -35,12 +37,14 @@ export class SystemController {
 
   @Get('settings')
   @RequirePermission('system:manage-settings')
+    @ApiOperation({ summary: 'Get settings' })
   async getSettings() {
     return this.getSettingsUseCase.execute();
   }
 
   @Patch('settings')
   @RequirePermission('system:manage-settings')
+    @ApiOperation({ summary: 'Update settings' })
   async updateSettings(
     @Body() updates: Record<string, unknown>,
     @CurrentUser() user: any,
@@ -60,12 +64,14 @@ export class SystemController {
 
   @Get('audit-logs')
   @RequirePermission('system:read-audit-log')
+    @ApiOperation({ summary: 'List audit logs' })
   async listAuditLogs(@Query() dto: ListAuditLogsDto) {
     return this.listAuditLogsUseCase.execute(dto);
   }
 
   @Get('stats')
   @RequirePermission('system:manage-settings')
+    @ApiOperation({ summary: 'Get stats' })
   async getStats() {
     return this.getAdminStatsUseCase.execute();
   }

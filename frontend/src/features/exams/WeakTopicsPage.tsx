@@ -42,7 +42,7 @@ export default function WeakTopicsPage() {
             const meta = classMeta[t.classification]
             const pct = Math.round(t.correctRate * 100)
             return (
-              <div key={t.topic} className={cn("bg-card border rounded-lg p-4", t.classification === 'weak' ? 'synapse-glow' : '')}>
+              <div key={t.topic} className={cn("bg-card border rounded-xl p-4 transition-all duration-300", t.classification === 'weak' ? 'border-primary/50 shadow-sm' : '')}>
                 <div className="flex items-center justify-between gap-3">
                   <p className="text-sm font-medium text-foreground truncate">{t.topic}</p>
                   <Badge className={cn('shrink-0 text-xs rounded-md', meta.cls)}>{meta.label}</Badge>
