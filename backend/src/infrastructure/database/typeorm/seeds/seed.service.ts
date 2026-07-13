@@ -560,35 +560,35 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
         const examQuestions = [
           {
             content: 'Singleton Pattern đảm bảo điều gì?',
-            options: { A: 'Một class có thể có nhiều instance', B: 'Một class chỉ có duy nhất một instance', C: 'Một interface có nhiều implementations', D: 'Một object có thể clone được' },
+            options: [{key: 'A', text: 'Một class có thể có nhiều instance'}, {key: 'B', text: 'Một class chỉ có duy nhất một instance'}, {key: 'C', text: 'Một interface có nhiều implementations'}, {key: 'D', text: 'Một object có thể clone được'}],
             correctAnswer: 'B',
             explanation: 'Singleton đảm bảo một class chỉ có duy nhất một instance và cung cấp global access point tới instance đó.',
             topic: 'Singleton Pattern',
           },
           {
             content: 'Factory Pattern thuộc nhóm pattern nào?',
-            options: { A: 'Behavioral', B: 'Structural', C: 'Creational', D: 'Architectural' },
+            options: [{key: 'A', text: 'Behavioral'}, {key: 'B', text: 'Structural'}, {key: 'C', text: 'Creational'}, {key: 'D', text: 'Architectural'}],
             correctAnswer: 'C',
             explanation: 'Factory Pattern là Creational Pattern vì nó liên quan đến cách tạo ra objects.',
             topic: 'Factory Pattern',
           },
           {
             content: 'MVC viết tắt của những gì?',
-            options: { A: 'Module-View-Controller', B: 'Model-View-Controller', C: 'Model-View-Component', D: 'Method-View-Class' },
+            options: [{key: 'A', text: 'Module-View-Controller'}, {key: 'B', text: 'Model-View-Controller'}, {key: 'C', text: 'Model-View-Component'}, {key: 'D', text: 'Method-View-Class'}],
             correctAnswer: 'B',
             explanation: 'MVC là Model (data & logic) - View (UI) - Controller (điều phối giữa Model và View).',
             topic: 'MVC Pattern',
           },
           {
             content: 'Repository Pattern có tác dụng gì chính?',
-            options: { A: 'Tăng tốc độ query database', B: 'Tạo lớp trừu tượng giữa domain logic và data access', C: 'Quản lý transaction tự động', D: 'Kết nối nhiều database cùng lúc' },
+            options: [{key: 'A', text: 'Tăng tốc độ query database'}, {key: 'B', text: 'Tạo lớp trừu tượng giữa domain logic và data access'}, {key: 'C', text: 'Quản lý transaction tự động'}, {key: 'D', text: 'Kết nối nhiều database cùng lúc'}],
             correctAnswer: 'B',
             explanation: 'Repository Pattern tách biệt business logic khỏi data access logic, giúp code dễ test và maintain.',
             topic: 'Repository Pattern',
           },
           {
             content: 'Chữ "O" trong SOLID có nghĩa là gì?',
-            options: { A: 'Object Principle', B: 'Optional Dependency', C: 'Open/Closed Principle', D: 'Override Method' },
+            options: [{key: 'A', text: 'Object Principle'}, {key: 'B', text: 'Optional Dependency'}, {key: 'C', text: 'Open/Closed Principle'}, {key: 'D', text: 'Override Method'}],
             correctAnswer: 'C',
             explanation: 'O là Open/Closed Principle: classes nên mở để mở rộng (extension) nhưng đóng để sửa đổi (modification).',
             topic: 'SOLID',
@@ -635,35 +635,35 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
         const sdnQuestions = [
           {
             content: 'NodeJS chạy trên nền tảng nào?',
-            options: { A: 'V8 JavaScript Engine', B: 'SpiderMonkey', C: 'Chakra', D: 'Hermes' },
+            options: [{key: 'A', text: 'V8 JavaScript Engine'}, {key: 'B', text: 'SpiderMonkey'}, {key: 'C', text: 'Chakra'}, {key: 'D', text: 'Hermes'}],
             correctAnswer: 'A',
             explanation: 'NodeJS được xây dựng trên V8 JavaScript Engine của Google Chrome.',
             topic: 'NodeJS Basics',
           },
           {
             content: 'npm là viết tắt của gì?',
-            options: { A: 'Node Package Module', B: 'Node Package Manager', C: 'Node Program Manager', D: 'New Package Manager' },
+            options: [{key: 'A', text: 'Node Package Module'}, {key: 'B', text: 'Node Package Manager'}, {key: 'C', text: 'Node Program Manager'}, {key: 'D', text: 'New Package Manager'}],
             correctAnswer: 'B',
             explanation: 'npm = Node Package Manager, công cụ quản lý thư viện của Node.js.',
             topic: 'NodeJS Basics',
           },
           {
             content: 'HTTP method nào được dùng để tạo mới resource?',
-            options: { A: 'GET', B: 'PUT', C: 'POST', D: 'PATCH' },
+            options: [{key: 'A', text: 'GET'}, {key: 'B', text: 'PUT'}, {key: 'C', text: 'POST'}, {key: 'D', text: 'PATCH'}],
             correctAnswer: 'C',
             explanation: 'POST được dùng để tạo mới resource. PUT dùng để cập nhật toàn bộ, PATCH cập nhật một phần.',
             topic: 'REST API',
           },
           {
             content: 'Middleware trong Express nhận bao nhiêu tham số?',
-            options: { A: '1', B: '2', C: '3', D: '4' },
+            options: [{key: 'A', text: '1'}, {key: 'B', text: '2'}, {key: 'C', text: '3'}, {key: 'D', text: '4'}],
             correctAnswer: 'C',
             explanation: 'Middleware thông thường nhận 3 tham số: (req, res, next). Error handling middleware nhận 4: (err, req, res, next).',
             topic: 'Middleware',
           },
           {
             content: 'async/await là syntax sugar của gì?',
-            options: { A: 'Callback', B: 'Promise', C: 'Event Emitter', D: 'Generator' },
+            options: [{key: 'A', text: 'Callback'}, {key: 'B', text: 'Promise'}, {key: 'C', text: 'Event Emitter'}, {key: 'D', text: 'Generator'}],
             correctAnswer: 'B',
             explanation: 'async/await là syntax sugar trên Promise, giúp viết code bất đồng bộ dễ đọc hơn.',
             topic: 'Async Programming',
@@ -701,7 +701,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
           examAttemptRepo.create({
             examId: midtermExam.id,
             userId: students[0].id,
-            answers: { 0: 'B', 1: 'A', 2: 'B', 3: 'B', 4: 'C' }, // 3 đúng (B,B,B correct), score 6/10
+            answers: { [savedQuestions[0].id]: 'B', [savedQuestions[1].id]: 'A', [savedQuestions[2].id]: 'B', [savedQuestions[3].id]: 'B', [savedQuestions[4].id]: 'C' }, // 3 đúng (B,B,B correct), score 6/10
             score: 6,
             totalQuestions: 5,
             correctCount: 3,
@@ -724,7 +724,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
           examAttemptRepo.create({
             examId: sdnExam.id,
             userId: students[1].id,
-            answers: { 0: 'A', 1: 'B', 2: 'C', 3: 'C', 4: 'B' }, // 4 đúng
+            answers: { [savedQuestions[0].id]: 'A', [savedQuestions[1].id]: 'B', [savedQuestions[2].id]: 'C', [savedQuestions[3].id]: 'C', [savedQuestions[4].id]: 'B' }, // 4 đúng
             score: 8,
             totalQuestions: 5,
             correctCount: 4,
@@ -747,7 +747,7 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
           examAttemptRepo.create({
             examId: sdnExam.id,
             userId: students[2].id,
-            answers: { 0: 'A', 1: 'B', 2: 'C', 3: 'C', 4: 'B' }, // 5 đúng
+            answers: { [savedQuestions[0].id]: 'A', [savedQuestions[1].id]: 'B', [savedQuestions[2].id]: 'C', [savedQuestions[3].id]: 'C', [savedQuestions[4].id]: 'B' }, // 5 đúng
             score: 10,
             totalQuestions: 5,
             correctCount: 5,
