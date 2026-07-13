@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils'
 import type { BoardQuestion, BoardQuestionStatus } from '@/types'
 import { useBoardQuestions, useCreateQuestion } from '@/api/queries/board'
 import { BoardQuestionDetail } from './BoardQuestionDetail'
+import { SimplePagination } from '@/components/shared/SimplePagination'
 
 const statusBadge: Record<string, string> = {
   open: 'bg-secondary text-muted-foreground border-border',
@@ -30,6 +31,7 @@ export default function BoardPage() {
   const { classId, isLecturer, needsClass } = useSubjectClass()
 
   const [status, setStatus] = useState<BoardQuestionStatus | 'all'>('all')
+  const [page, setPage] = useState(1)
   const [selected, setSelected] = useState<BoardQuestion | null>(null)
   const [askOpen, setAskOpen] = useState(false)
   const [title, setTitle] = useState('')
@@ -38,6 +40,7 @@ export default function BoardPage() {
   const questions = useBoardQuestions(subjectId, classId, {
     status: status === 'all' ? undefined : status,
     sort: 'upvotes',
+    page,
   })
   const create = useCreateQuestion(subjectId, classId ?? '')
 
@@ -75,6 +78,9 @@ export default function BoardPage() {
   }
 
   const items = questions.data?.items ?? []
+  const total = questions.data?.total ?? 0
+  const pageSize = questions.data?.pageSize ?? 20
+  const totalPages = Math.ceil(total / pageSize)
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-6">
@@ -92,7 +98,7 @@ export default function BoardPage() {
         {(['all', 'open', 'answered', 'closed'] as const).map(s => (
           <button
             key={s}
-            onClick={() => setStatus(s)}
+            onClick={() => { setStatus(s); setPage(1); }}
             className={cn(
               'h-7 px-2.5 text-xs rounded-md capitalize transition-colors',
               status === s ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50',
@@ -131,6 +137,8 @@ export default function BoardPage() {
           ))}
         </div>
       )}
+
+      <SimplePagination page={page} totalPages={totalPages} onPageChange={setPage} />
 
       <Dialog open={askOpen} onOpenChange={setAskOpen}>
         <DialogContent className="bg-card border rounded-lg shadow-none p-0 max-w-md">
