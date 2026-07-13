@@ -2,10 +2,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { chatsApi } from '@/api/endpoints/chats'
 import { queryKeys } from '@/api/queryKeys'
 
-export const useChats = (subjectId?: string) => {
+export const useChats = (subjectId?: string, opts?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: queryKeys.chats.list(subjectId ? { subjectId } : undefined),
     queryFn: () => chatsApi.list(subjectId ? { subjectId } : undefined),
+    enabled: opts?.enabled ?? true,
   })
 }
 

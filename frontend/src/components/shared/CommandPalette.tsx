@@ -30,7 +30,9 @@ export function CommandPalette() {
   )
 
   // Fetch all chats once (list is usually small), filter locally
-  const { data: allChats, isFetching: chatsFetching } = useChats()
+  const { data: allChats, isFetching: chatsFetching } = useChats(undefined, {
+    enabled: user?.roleName === 'student',
+  })
 
   const matchedChats = debouncedSearch
     ? (allChats ?? []).filter(c =>
@@ -156,10 +158,12 @@ export function CommandPalette() {
               <BookOpen className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
               <span className="text-foreground">Subjects</span>
             </CommandItem>
-            <CommandItem onSelect={() => go('/chats')} className="cursor-pointer">
-              <MessageSquare className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
-              <span className="text-foreground">My Chats</span>
-            </CommandItem>
+            {user?.roleName === 'student' && (
+              <CommandItem onSelect={() => go('/chats')} className="cursor-pointer">
+                <MessageSquare className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+                <span className="text-foreground">My Chats</span>
+              </CommandItem>
+            )}
           </CommandGroup>
         )}
 
