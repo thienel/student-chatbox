@@ -27,11 +27,12 @@ export class AuthRateLimitGuard implements CanActivate {
   }
 
   private policyFor(path: string): { limit: number; windowMs: number } {
-    if (path.includes('login')) return { limit: 10, windowMs: 15 * 60_000 };
+    // Relaxed limits for school project testing/demo to prevent blocking
+    if (path.includes('login')) return { limit: 100, windowMs: 15 * 60_000 };
     if (path.includes('resend-otp') || path.includes('forgot-password')) {
-      return { limit: 5, windowMs: 15 * 60_000 };
+      return { limit: 20, windowMs: 15 * 60_000 };
     }
-    return { limit: 5, windowMs: 15 * 60_000 };
+    return { limit: 100, windowMs: 15 * 60_000 };
   }
 
   private consume(key: string, limit: number, windowMs: number): void {

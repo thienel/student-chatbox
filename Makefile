@@ -27,7 +27,7 @@ logs:
 	docker compose logs -f
 
 logs-api:
-	docker compose logs -f api
+	docker compose logs -f backend
 
 # Dừng tất cả containers
 stop:

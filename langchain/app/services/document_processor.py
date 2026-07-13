@@ -77,14 +77,29 @@ async def _notify_nestjs(document_id: str, status: str, chunk_count: int = 0, er
         logger.error(f"Failed to notify NestJS for document {document_id}: {exc}")
 
 
+def _resolve_document_path(file_path: str) -> str:
+    if os.path.isabs(file_path):
+        return file_path
+
+    repo_root = Path(__file__).resolve().parents[3]
+    normalized = Path(file_path)
+    candidates = [
+        repo_root / normalized,
+        repo_root / "backend" / normalized,
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return str(candidate)
+    return str(candidates[0])
+
+
 async def process_document(
     document_id: str, file_path: str, subject_id: str, lecturer_id: str
 ) -> None:
     try:
-        # Resolve path since backend sends relative paths like 'uploads/...'
-        if not os.path.isabs(file_path):
-            project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
-            file_path = os.path.join(project_root, "backend", file_path)
+        # Resolve relative path from repo root for local dev while preserving
+        # absolute Docker-mounted paths in containerized deployments.
+        file_path = _resolve_document_path(file_path)
             
         logger.info(f"Processing document {document_id} at {file_path}")
 

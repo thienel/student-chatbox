@@ -138,12 +138,19 @@ export class AuthController {
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
     @ApiOperation({ summary: 'Refresh' })
-  async refresh(@Req() req: Request) {
+  async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const refreshToken = req.cookies?.refreshToken;
     if (!refreshToken) {
       throw new UnauthorizedException('No refresh token provided');
     }
-    return this.refreshTokenUseCase.execute(refreshToken);
+    const result = await this.refreshTokenUseCase.execute(refreshToken);
+    res.cookie('refreshToken', result.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+    return { accessToken: result.accessToken };
   }
 
   @Post('logout')

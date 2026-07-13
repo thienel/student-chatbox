@@ -1,21 +1,19 @@
 import { Injectable, Inject, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 import { IRefreshTokenRepository } from '../../../domain/user/repositories/refresh-token.repository.interface';
 import { IUserRepository } from '../../../domain/user/repositories/user.repository.interface';
 import { TOKENS } from '../../../shared/constants/tokens';
+import { TokenService } from '../services/token.service';
 
 @Injectable()
 export class RefreshTokenUseCase {
   constructor(
     @Inject(TOKENS.REFRESH_TOKEN_REPO) private readonly refreshTokenRepo: IRefreshTokenRepository,
     @Inject(TOKENS.USER_REPO) private readonly userRepo: IUserRepository,
-    private readonly jwtService: JwtService,
-    private readonly config: ConfigService,
+    private readonly tokenService: TokenService,
   ) {}
 
-  async execute(rawToken: string): Promise<{ accessToken: string }> {
+  async execute(rawToken: string): Promise<{ accessToken: string; refreshToken: string }> {
     const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
     const tokenRecord = await this.refreshTokenRepo.findByTokenHash(tokenHash);
 
@@ -31,15 +29,15 @@ export class RefreshTokenUseCase {
     const payload = {
       sub: user.id,
       email: user.email,
-      roleName: user.roleName,
+      roleName: user.roleName ?? '',
       permissions: user.permissions ?? [],
     };
 
-    const accessToken = this.jwtService.sign(payload, {
-      secret: this.config.get<string>('JWT_SECRET'),
-      expiresIn: this.config.get<string>('JWT_ACCESS_EXPIRES', '15m'),
-    });
+    // Rotate refresh token on every refresh to reduce replay window.
+    await this.refreshTokenRepo.revoke(tokenRecord.id);
+    const accessToken = this.tokenService.generateAccessToken(payload);
+    const refreshToken = await this.tokenService.generateAndSaveRefreshToken(user.id);
 
-    return { accessToken };
+    return { accessToken, refreshToken };
   }
 }
