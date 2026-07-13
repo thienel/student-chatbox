@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } fr
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { Bot, SendHorizonal, Plus, Trash2, MessageSquare, FileText } from 'lucide-react'
+import { ConfirmDeleteDialog } from '@/components/ui/confirm-delete-dialog'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { Button } from '@/components/ui/button'
@@ -175,21 +176,27 @@ export default function SubjectChatPage() {
               >
                 <MessageSquare className="h-3.5 w-3.5 shrink-0" />
                 <span className="text-xs truncate flex-1">{chat.title}</span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={e => {
-                    e.stopPropagation()
-                    deleteChat.mutate(chat.id, {
-                      onSuccess: () => {
-                        if (chatId === chat.id) navigate(`/subjects/${subjectId}/chat`)
-                      },
-                    })
-                  }}
-                  className="h-5 w-5 rounded shrink-0 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive hover:bg-transparent"
-                >
-                  <Trash2 className="h-3 w-3" />
-                </Button>
+                  <ConfirmDeleteDialog
+                    title="Delete Chat?"
+                    description="This will permanently delete this conversation."
+                    onConfirm={() => {
+                      deleteChat.mutate(chat.id, {
+                        onSuccess: () => {
+                          if (chatId === chat.id) navigate(`/subjects/${subjectId}/chat`)
+                        },
+                      })
+                    }}
+                    trigger={
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => e.stopPropagation()}
+                        className="h-5 w-5 rounded shrink-0 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive hover:bg-transparent"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    }
+                  />
               </div>
             ))
           )}

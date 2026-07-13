@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { MessageSquare, Trash2 } from 'lucide-react'
+import { ConfirmDeleteDialog } from '@/components/ui/confirm-delete-dialog'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { EmptyState } from '@/components/shared/EmptyState'
@@ -48,17 +49,21 @@ export default function ChatsPage() {
                   })}
                 </p>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={e => {
-                  e.stopPropagation()
-                  deleteChat.mutate(chat.id)
-                }}
-                className="h-7 w-7 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
+              <ConfirmDeleteDialog
+                title="Delete Chat?"
+                description="This will permanently delete this conversation."
+                onConfirm={() => deleteChat.mutate(chat.id)}
+                trigger={
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => e.stopPropagation()}
+                    className="h-7 w-7 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                }
+              />
             </div>
           ))}
         </div>

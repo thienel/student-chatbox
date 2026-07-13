@@ -1,14 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { BookOpen, Plus, Search, Loader2 } from 'lucide-react'
-import { z } from 'zod'
+import { BookOpen, Search, Loader2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { useSubjects } from '@/api/queries/subjects'
 import { useUnenroll } from '@/api/queries/classes'
@@ -31,7 +28,6 @@ const itemVariants = {
 
 export default function SubjectsPage() {
   const navigate = useNavigate()
-  const canCreate = usePermission('subject:create')
   const canEnroll = usePermission('subject:enroll')
   const [search, setSearch] = useState('')
   const { data, isLoading } = useSubjects({ search: search || undefined, limit: 50 })

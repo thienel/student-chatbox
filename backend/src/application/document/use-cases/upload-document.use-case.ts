@@ -6,7 +6,7 @@ import { Document } from '../../../domain/document/entities/document.entity';
 import { LocalFileService } from '../../../infrastructure/storage/local-file.service';
 import { AiServiceClient } from '../../../infrastructure/ai/ai-service.client';
 import { User } from '../../../domain/user/entities/user.entity';
-import { fromFile } from 'file-type';
+import { fileTypeFromFile } from 'file-type';
 
 @Injectable()
 export class UploadDocumentUseCase {
@@ -38,7 +38,7 @@ export class UploadDocumentUseCase {
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         'application/vnd.openxmlformats-officedocument.presentationml.presentation',
       ];
-      const detected = await fromFile(file.path);
+      const detected = await fileTypeFromFile(file.path);
       if (!detected || !allowed.includes(detected.mime)) {
         throw new BadRequestException('Only PDF, DOCX, and PPTX files with a valid file signature are allowed');
       }

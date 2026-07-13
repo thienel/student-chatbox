@@ -98,7 +98,22 @@ export class BoardTypeOrmRepository implements IBoardRepository {
   }
 
   async deleteQuestion(id: string): Promise<void> {
-    await this.questionRepo.delete(id);
+    await this.dataSource.transaction(async (m) => {
+      // 1. Delete upvotes for the question itself
+      await m.delete(BoardUpvoteOrmEntity, { targetType: 'question', targetId: id });
+      
+      // 2. Delete upvotes for all answers belonging to this question
+      const answers = await m.find(BoardAnswerOrmEntity, { where: { questionId: id } });
+      if (answers.length > 0) {
+        await m.query(
+          `DELETE FROM board_upvotes WHERE target_type = 'answer' AND target_id = ANY($1::uuid[])`,
+          [answers.map((a) => a.id)],
+        );
+      }
+      
+      // 3. Delete the question (answers will be cascade deleted)
+      await m.delete(BoardQuestionOrmEntity, { id });
+    });
   }
 
   async setQuestionStatus(id: string, status: BoardQuestionStatus): Promise<void> {
@@ -144,6 +159,10 @@ export class BoardTypeOrmRepository implements IBoardRepository {
     await this.dataSource.transaction(async (m) => {
       const answer = await m.findOne(BoardAnswerOrmEntity, { where: { id } });
       if (!answer) return;
+      
+      // Clean up orphaned upvotes before deleting the answer
+      await m.delete(BoardUpvoteOrmEntity, { targetType: 'answer', targetId: id });
+      
       await m.delete(BoardAnswerOrmEntity, { id });
       await m.decrement(BoardQuestionOrmEntity, { id: answer.questionId }, 'answerCount', 1);
     });

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
+import { ConfirmDeleteDialog } from '@/components/ui/confirm-delete-dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
@@ -190,8 +190,11 @@ export default function SubjectFlashcardsPage() {
                       </Button>
                     )}
                     {canDelete && (
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
+                      <ConfirmDeleteDialog
+                        title="Delete flashcard set?"
+                        description="This action cannot be undone."
+                        onConfirm={() => remove.mutate(set.id)}
+                        trigger={
                           <Button
                             variant="ghost"
                             size="icon"
@@ -199,23 +202,8 @@ export default function SubjectFlashcardsPage() {
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                           </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent className="bg-card border">
-                          <AlertDialogHeader>
-                            <AlertDialogTitle className="text-foreground">Delete flashcard set?</AlertDialogTitle>
-                            <AlertDialogDescription className="text-muted-foreground">This action cannot be undone.</AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel className="border bg-transparent text-foreground hover:bg-secondary">Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => remove.mutate(set.id)}
-                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            >
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                        }
+                      />
                     )}
                   </div>
                 ))}

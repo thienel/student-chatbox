@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Bookmark, FileText, Layers, ClipboardList, MessageSquare, Trash2, ChevronRight } from 'lucide-react'
+import { ConfirmDeleteDialog } from '@/components/ui/confirm-delete-dialog'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { EmptyState } from '@/components/shared/EmptyState'
@@ -108,14 +109,20 @@ export default function BookmarksPage() {
                   </div>
                   <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 group-hover:text-foreground transition-colors duration-150" />
                 </Link>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleDelete(bm.id)}
-                  className="h-7 w-7 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
+                <ConfirmDeleteDialog
+                  title="Remove Bookmark?"
+                  description="Are you sure you want to remove this bookmark?"
+                  onConfirm={() => handleDelete(bm.id)}
+                  trigger={
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  }
+                />
               </div>
             )
           })}

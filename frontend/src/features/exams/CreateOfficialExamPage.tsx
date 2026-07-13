@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { Plus, Trash2, Loader2, ArrowLeft, ClipboardCheck, Sparkles, AlertCircle } from 'lucide-react'
+import { ConfirmDeleteDialog } from '@/components/ui/confirm-delete-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -216,14 +217,20 @@ export default function CreateOfficialExamPage() {
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Question {qi + 1}</span>
               {questions.length > 1 && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setQuestions(qs => qs.filter((_, idx) => idx !== qi))}
-                  className="h-6 w-6 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
+                <ConfirmDeleteDialog
+                  title="Remove Question?"
+                  description="Are you sure you want to remove this question from the draft?"
+                  onConfirm={() => setQuestions(qs => qs.filter((_, idx) => idx !== qi))}
+                  trigger={
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  }
+                />
               )}
             </div>
             <Textarea

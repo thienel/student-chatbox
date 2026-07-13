@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ArrowLeft, ArrowBigUp, Pin, Trash2, Loader2, Send, CheckCircle2 } from 'lucide-react'
+import { ConfirmDeleteDialog } from '@/components/ui/confirm-delete-dialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
@@ -99,9 +100,16 @@ export function BoardQuestionDetail({ subjectId, classId, question, onBack }: Pr
                   Close
                 </Button>
               )}
-              <Button variant="ghost" size="icon" onClick={() => run(async () => { await deleteQuestion.mutateAsync(localQ.id); onBack() }, 'Failed to delete.')} className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md">
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
+              <ConfirmDeleteDialog
+                title="Delete Question?"
+                description="This will permanently delete this question and all its answers."
+                onConfirm={() => run(async () => { await deleteQuestion.mutateAsync(localQ.id); onBack() }, 'Failed to delete.')}
+                trigger={
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md">
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                }
+              />
             </div>
           )}
         </div>
@@ -138,9 +146,16 @@ export function BoardQuestionDetail({ subjectId, classId, question, onBack }: Pr
                   <Button variant="ghost" size="icon" onClick={() => run(() => pinAnswer.mutateAsync(a.id), 'Failed to pin.')} title={a.isPinned ? 'Unpin' : 'Pin'} className={cn('h-7 w-7 rounded-md hover:bg-secondary', a.isPinned ? 'text-primary' : 'text-muted-foreground hover:text-foreground')}>
                     <Pin className="h-3.5 w-3.5" />
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={() => run(() => deleteAnswer.mutateAsync(a.id), 'Failed to delete.')} className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md">
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
+                  <ConfirmDeleteDialog
+                    title="Delete Answer?"
+                    description="This will permanently delete this answer."
+                    onConfirm={() => run(() => deleteAnswer.mutateAsync(a.id), 'Failed to delete.')}
+                    trigger={
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    }
+                  />
                 </div>
               )}
             </div>

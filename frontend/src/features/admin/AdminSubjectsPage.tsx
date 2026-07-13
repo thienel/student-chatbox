@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Plus, Search, Trash2, Loader2, ExternalLink } from 'lucide-react'
+import { Plus, Search, Trash2, Loader2 } from 'lucide-react'
+import { ConfirmDeleteDialog } from '@/components/ui/confirm-delete-dialog'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -29,7 +29,6 @@ export default function AdminSubjectsPage() {
   const [createOpen, setCreateOpen] = useState(false)
   const [manageLecturersSubjectId, setManageLecturersSubjectId] = useState<string | null>(null)
 
-  const navigate = useNavigate()
   const { data, isLoading } = useSubjects({ search: search || undefined, limit: 50 })
   const createSubject = useCreateSubject()
   const deleteSubject = useDeleteSubject()
@@ -161,17 +160,21 @@ export default function AdminSubjectsPage() {
                       >
                         <UsersRound className="h-4 w-4" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          deleteSubject.mutate(s.id)
-                        }}
-                        className="h-9 w-9 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <ConfirmDeleteDialog
+                        title="Delete Subject?"
+                        description={`This will permanently delete ${s.code} and all its classes and resources.`}
+                        onConfirm={() => deleteSubject.mutate(s.id)}
+                        trigger={
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => e.stopPropagation()}
+                            className="h-9 w-9 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        }
+                      />
                     </div>
                   </td>
                 </tr>
