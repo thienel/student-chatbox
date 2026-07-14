@@ -6,7 +6,7 @@ import { Document } from '../../../domain/document/entities/document.entity';
 import { LocalFileService } from '../../../infrastructure/storage/local-file.service';
 import { AiServiceClient } from '../../../infrastructure/ai/ai-service.client';
 import { User } from '../../../domain/user/entities/user.entity';
-import { fileTypeFromFile } from 'file-type';
+import { fromFile as fileTypeFromFile } from 'file-type';
 
 @Injectable()
 export class UploadDocumentUseCase {
