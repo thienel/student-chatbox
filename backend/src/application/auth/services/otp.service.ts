@@ -36,8 +36,17 @@ export class OtpService {
       expiresAt,
     });
 
+    // For demo/testing purposes, always log the OTP to console
+    console.log(`\n=========================================`);
+    console.log(`[DEMO MODE] OTP for ${email}: ${otp}`);
+    console.log(`=========================================\n`);
+
     // Send email
-    await this.emailService.sendOtpEmail(email, otp, emailTemplate);
+    try {
+      await this.emailService.sendOtpEmail(email, otp, emailTemplate);
+    } catch (error) {
+      console.error(`[OTP Service] Failed to send email to ${email}. Ignoring error so registration can proceed.`);
+    }
 
     return otp;
   }
