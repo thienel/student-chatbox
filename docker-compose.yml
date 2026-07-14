@@ -79,7 +79,9 @@ services:
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?JWT_REFRESH_SECRET must be set}
       JWT_REFRESH_EXPIRES: 7d
       PORT: 3000
-      NODE_ENV: production
+      # development enables TypeORM synchronize (auto-migrate schema) and
+      # secure:false cookies so auth works over plain HTTP (IP deployment).
+      NODE_ENV: development
       UPLOAD_DIR: /app/uploads
       MAX_FILE_SIZE_MB: 50
       UPLOAD_TMP_DIR: /app/uploads/tmp
