@@ -84,8 +84,8 @@ export const useSetFlashcardVisibility = (subjectId: string) => {
     mutationFn: ({ setId, isPublic }: { setId: string; isPublic: boolean }) =>
       flashcardsApi.setVisibility(setId, isPublic),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.flashcards.list(subjectId) })
-      queryClient.invalidateQueries({ queryKey: queryKeys.flashcards.discover({}) })
+      queryClient.invalidateQueries({ queryKey: ['flashcards', 'list', { subjectId }] })
+      queryClient.invalidateQueries({ queryKey: ['flashcards', 'discover'] })
     },
   })
 }
