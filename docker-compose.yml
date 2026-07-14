@@ -86,6 +86,13 @@ services:
       MAX_FILE_SIZE_MB: 50
       UPLOAD_TMP_DIR: /app/uploads/tmp
       SEED_DEMO_DATA: ${SEED_DEMO_DATA:-false}
+      # Demo users created on startup when SEED_DEMO_DATA=true (idempotent).
+      DEMO_ADMIN_EMAIL: ${DEMO_ADMIN_EMAIL:-admin@educhat.local}
+      DEMO_ADMIN_PASSWORD: ${DEMO_ADMIN_PASSWORD:-}
+      DEMO_LECTURER_EMAIL: ${DEMO_LECTURER_EMAIL:-lecturer@educhat.local}
+      DEMO_LECTURER_PASSWORD: ${DEMO_LECTURER_PASSWORD:-}
+      DEMO_STUDENT_EMAIL: ${DEMO_STUDENT_EMAIL:-student@educhat.local}
+      DEMO_STUDENT_PASSWORD: ${DEMO_STUDENT_PASSWORD:-}
     volumes:
       - uploads_data:/app/uploads
     healthcheck:
